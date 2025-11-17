@@ -1,0 +1,10 @@
+apiVersion: v1
+data:
+  MINIO_BUCKET_NAME: "images"
+  MINIO_ENDPOINT: "minio-svc.catus-locatus.svc.cluster.local"
+  MINIO_PORT: "9000"
+  MINIO_USE_SSL: "false"
+kind: ConfigMap
+metadata:
+  name: minio-cm
+  namespace: catus-locatus

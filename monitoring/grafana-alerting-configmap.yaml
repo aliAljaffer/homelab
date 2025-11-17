@@ -1,0 +1,225 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-alerting
+  namespace: monitoring
+data:
+  # Contact points configuration
+  # There are two fields to change here: URL and email address
+  contactpoints.yaml: |
+    apiVersion: 1
+    contactPoints:
+      - orgId: 1
+        name: Discord Channel
+        receivers:
+          - uid: ff3iaps1ewgzkb
+            type: discord
+            settings:
+              message: '{{ template "discord.default.message" . }}'
+              url: "[REDACTED]"
+              use_discord_username: false
+            disableResolveMessage: false
+      - orgId: 1
+        name: email receiver
+        receivers:
+          - uid: email-receiver-uid
+            type: email
+            settings:
+              addresses: "<example@email.com>"
+            disableResolveMessage: false
+
+  # Notification policies
+  policies.yaml: |
+    apiVersion: 1
+    policies:
+      - orgId: 1
+        receiver: grafana-default-email
+        group_by:
+          - grafana_folder
+          - alertname
+
+  # Alert rules
+  alert-rules.yaml: |
+    apiVersion: 1
+    groups:
+      - orgId: 1
+        name: Eval-ROOM
+        folder: Eval-ROOM
+        interval: 1m
+        rules:
+          - uid: ff3iazdx48wsgc
+            title: CPU Usage
+            condition: C
+            data:
+              - refId: A
+                queryType: ""
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: PBFA97CFB590B2093
+                model:
+                  editorMode: code
+                  expr: '100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)'
+                  instant: true
+                  intervalMs: 1000
+                  legendFormat: __auto
+                  maxDataPoints: 43200
+                  range: false
+                  refId: A
+              - refId: C
+                queryType: ""
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator:
+                        params:
+                          - 90
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                          - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: __expr__
+                  expression: A
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: threshold
+            noDataState: NoData
+            execErrState: Error
+            for: 10m
+            annotations:
+              __dashboardUid__: ""
+              __panelId__: ""
+            labels: {}
+            isPaused: false
+            notification_settings:
+              receiver: Discord Channel
+
+          - uid: cf3ib3yooms5ca
+            title: High Temprature
+            condition: C
+            data:
+              - refId: A
+                queryType: ""
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: PBFA97CFB590B2093
+                model:
+                  editorMode: code
+                  expr: 'node_hwmon_temp_celsius{chip="platform_coretemp_0",sensor="temp1"}'
+                  instant: true
+                  intervalMs: 1000
+                  legendFormat: __auto
+                  maxDataPoints: 43200
+                  range: false
+                  refId: A
+              - refId: C
+                queryType: ""
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator:
+                        params:
+                          - 80
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                          - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: __expr__
+                  expression: A
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: threshold
+            noDataState: NoData
+            execErrState: Error
+            for: 10m
+            annotations:
+              __dashboardUid__: ""
+              __panelId__: ""
+            labels: {}
+            isPaused: false
+            notification_settings:
+              receiver: Discord Channel
+
+          - uid: ff3ib9gnzeubkc
+            title: High Memory Usage
+            condition: C
+            data:
+              - refId: A
+                queryType: ""
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: PBFA97CFB590B2093
+                model:
+                  editorMode: code
+                  expr: '100 * (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes))'
+                  instant: true
+                  intervalMs: 1000
+                  legendFormat: __auto
+                  maxDataPoints: 43200
+                  range: false
+                  refId: A
+              - refId: C
+                queryType: ""
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator:
+                        params:
+                          - 70
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                          - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: __expr__
+                  expression: A
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: threshold
+            noDataState: NoData
+            execErrState: Error
+            for: 10m
+            annotations:
+              __dashboardUid__: ""
+              __panelId__: ""
+            labels: {}
+            isPaused: false
+            notification_settings:
+              receiver: Discord Channel

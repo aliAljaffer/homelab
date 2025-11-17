@@ -1,0 +1,54 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: cl-fe
+  namespace: catus-locatus
+  labels:
+    app: cl-fe
+    tier: frontend
+    version: v1.0
+    name: cl-fe
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: cl-fe
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        app: cl-fe
+    spec:
+      containers:
+        - name: frontend-t4p3
+          image: docker.io/alialjaffer/c8s-loc8s-k8s-web:latest
+          env:
+            - name: "VITE_CATUS_LOCATUS_API_URL"
+              value: "/api/"
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "100Mi"
+              cpu: "100m"
+            limits:
+              memory: "100Mi"
+              cpu: "100m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5

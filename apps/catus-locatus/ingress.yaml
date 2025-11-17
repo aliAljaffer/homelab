@@ -1,0 +1,76 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: catus-locatus-ingress
+  namespace: catus-locatus
+  annotations:
+    # Redirect HTTP to HTTPS
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # cert-manager will automatically provision SSL certificates
+    cert-manager.io/cluster-issuer: "letsencrypt-prod-dns"
+
+    # Allow file uploads up to 100MB (actual limit controlled by backend FILE_SIZE_LIMIT_MB)
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+    nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
+  labels:
+    app: catus-locatus
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - team4.alialjaffer.com
+      secretName: team4-tls # cert-manager will create this secret
+  rules:
+    - host: team4.alialjaffer.com
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: catus-locatus-svc
+                port:
+                  number: 4001
+
+          # Frontend - catch-all for root path
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: cl-fe-svc
+                port:
+                  number: 80
+---
+# MinIO Ingress - separate subdomain for object store
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: minio-ingress
+  namespace: catus-locatus
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod-dns"
+
+    # MinIO specific settings
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m" # Allow larger file uploads
+    nginx.ingress.kubernetes.io/proxy-request-buffering: "off" # Better for large uploads
+  labels:
+    app: minio
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - minio.team4.alialjaffer.com
+      secretName: minio-tls # cert-manager will create this secret
+  rules:
+    - host: minio.team4.alialjaffer.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: minio-svc
+                port:
+                  number: 9000

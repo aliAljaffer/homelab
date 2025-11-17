@@ -1,0 +1,30 @@
+# GitHub Actions Runner Scale Set
+# Helm Chart: gha-runner-scale-set-0.13.0
+# App Version: 0.13.0
+# Repository: https://github.com/actions/actions-runner-controller
+
+# Installation:
+# 1. Create a GitHub PAT with repo permissions (Administrator: R+W, Metadata: R)
+# 2. Install the runner set:
+#
+# helm install arc-runner-set-personal-website \
+#   --namespace arc-runners \
+#   --create-namespace \
+#   --set githubConfigUrl="https://github.com/YOUR_USERNAME/YOUR_REPO" \
+#   --set githubConfigSecret.github_token="YOUR_GITHUB_PAT" \
+#   actions-runner-controller/gha-runner-scale-set \
+#   -f arc-runner-set-values.yaml
+
+githubConfigUrl: https://github.com/aliAljaffer/aliAljaffer.github.io # TODO: Update with YOUR repo URL
+
+# IMPORTANT: Store your GitHub PAT as a Kubernetes secret instead of in values
+# Create secret: kubectl create secret generic github-token --namespace arc-runners --from-literal=github_token=YOUR_TOKEN
+# Then reference it in the githubConfigSecret field
+githubConfigSecret:
+  github_token: "YOUR_GITHUB_PAT_HERE" # TODO: Replace with your GitHub Personal Access Token
+
+template:
+  spec:
+    containers:
+      - name: runner
+        image: alialjaffer/arc-runner-aws:latest # TODO: Update with your own custom runner image!!! :)

@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pihole
+  namespace: pihole
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pihole
+  template:
+    metadata:
+      labels:
+        app: pihole
+    spec:
+      containers:
+        - name: pihole
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          image: pihole/pihole:latest
+          ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
+            - containerPort: 53
+              name: dns-tcp
+              protocol: TCP
+            - containerPort: 53
+              name: dns-udp
+              protocol: UDP
+          env:
+            - name: TZ
+              value: Asia/Riyadh
+            - name: WEBPASSWORD
+              value: "CHANGE_ME" # TODO: Replace with your password
+            - name: ServerIP
+              value: "192.168.68.40" # TODO: Update with your LoadBalancer IP. im using metallb thats why this is my server ip
+            - name: PIHOLE_DNS_
+              value: "8.8.8.8;8.8.4.4"
+            - name: DNSMASQ_LISTENING
+              value: all
+            - name: INTERFACE
+              value: eth0
+            - name: DNSMASQ_USER
+              value: root
+            - name: REV_SERVER
+              value: "false"
+          volumeMounts:
+            - name: custom-dnsmasq
+              mountPath: /etc/dnsmasq.d/02-custom.conf
+              subPath: 02-custom.conf
+      volumes:
+        - name: custom-dnsmasq
+          configMap:
+            name: pihole-custom-dnsmasq

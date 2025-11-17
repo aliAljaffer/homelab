@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cl-be
+  namespace: catus-locatus
+  labels:
+    name: cl-be
+    app: cl-be
+    tier: frontend
+    version: v1.0
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: cl-be
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 20%
+  template:
+    metadata:
+      labels:
+        app: cl-be
+    spec:
+      containers:
+        - name: backend-t4p3
+          image: docker.io/alialjaffer/c8s-loc8s-k8s-api:latest
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 4001
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 4001
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 4001
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          envFrom:
+            - secretRef:
+                name: catus-locatus-secrets
+            - configMapRef:
+                name: minio-cm

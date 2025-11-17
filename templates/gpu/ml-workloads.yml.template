@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ml-training
+  namespace: ml-workloads
+spec:
+  replicas: 1 # Only 1 GPU, so only 1 replica
+  selector:
+    matchLabels:
+      app: ml-training
+  template:
+    metadata:
+      labels:
+        app: ml-training
+    spec:
+      # === CRITICAL: Node scheduling ===
+      nodeSelector:
+        gpu: nvidia
+      tolerations:
+        - key: gpu
+          operator: Equal
+          value: nvidia
+          effect: NoSchedule
+
+      # === CRITICAL: Runtime MAKE SURE IT'S CREATEDDDD ===
+      runtimeClassName: nvidia
+
+      # Restart policy for jobs
+      restartPolicy: Always
+
+      containers:
+        - name: training
+          image: pytorch/pytorch:2.0.1-cuda11.8-cudnn8-runtime
+
+          # === CRITICAL: GPU resource ===
+          resources:
+            limits:
+              nvidia.com/gpu: "1"
+              memory: "16Gi"
+              cpu: "8"
+            requests:
+              nvidia.com/gpu: "1"
+              memory: "8Gi"
+              cpu: "4"
+
+          # === CRITICAL: NVIDIA access ===
+          volumeMounts:
+            - name: nvidia-bins
+              mountPath: /usr/bin/nvidia-smi
+              readOnly: true
+            - name: nvidia-libs
+              mountPath: /usr/local/nvidia/lib64
+              readOnly: true
+            - name: ml-code
+              mountPath: /workspace
+            - name: datasets
+              mountPath: /data
+
+          # python training code
+          command: ["python"]
+          args: ["-u", "train.py"]
+
+          # Environment variables
+          env:
+            - name: CUDA_VISIBLE_DEVICES
+              value: "0"
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: "all"
+
+      volumes:
+        # === CRITICAL: NVIDIA volumes with libraries ===
+        - name: nvidia-bins
+          hostPath:
+            path: /usr/bin/nvidia-smi
+        - name: nvidia-libs
+          hostPath:
+            path: /opt/nvidia-libs
+
+        - name: ml-code
+          persistentVolumeClaim:
+            claimName: ml-code-pvc
+        - name: datasets
+          hostPath:
+            path: /mnt/mydrive/datasets # storage drive

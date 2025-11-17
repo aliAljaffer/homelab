@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgresql-db
+  namespace: catus-locatus
+spec:
+  selector:
+    matchLabels:
+      app: postgresql
+  serviceName: postgresql-svc
+  replicas: 1
+  minReadySeconds: 10 # by default is 0
+  template:
+    metadata:
+      labels:
+        app: postgresql
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: postgresql
+          image: docker.io/postgis/postgis:17-3.5-alpine
+          ports:
+            - containerPort: 5432
+              name: db
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          envFrom:
+            - secretRef:
+                name: postgresql-secret
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: postgresql-pvc
+            readOnly: false

@@ -1,0 +1,10 @@
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: default-pool
+  namespace: metallb-system
+spec:
+  addresses:
+    - 192.168.68.40-192.168.68.45 # This is the IP range that MetalLB will use. Make sure it's outside of DHCP range to avoid it stealing your IPs
+  autoAssign: true
+  avoidBuggyIPs: false

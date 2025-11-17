@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: catus-locatus-svc
+  namespace: catus-locatus
+  labels:
+    app: catus-locatus-svc
+spec:
+  type: ClusterIP
+  selector:
+    app: cl-be
+  ports:
+    - port: 4001
+      targetPort: 4001
+      protocol: TCP

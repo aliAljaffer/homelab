@@ -1,0 +1,12 @@
+# GitHub Actions Runner Controller (ARC)
+# Helm Chart: gha-runner-scale-set-controller-0.13.0
+# App Version: 0.13.0
+# Repository: https://github.com/actions/actions-runner-controller
+
+# Installation:
+# helm repo add actions-runner-controller https://actions.github.io/actions-runner-controller
+# helm repo update
+# helm install arc \
+#   --namespace arc-systems \
+#   --create-namespace \
+#   actions-runner-controller/gha-runner-scale-set-controller

@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: minio
+  namespace: catus-locatus
+spec:
+  selector:
+    matchLabels:
+      app: minio
+  serviceName: "nginx"
+  replicas: 1
+  minReadySeconds: 10 # by default is 0
+  template:
+    metadata:
+      labels:
+        app: minio
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: minio
+          image: quay.io/minio/minio:latest
+          command:
+            - /bin/sh
+            - -c
+          args:
+            - minio server /mnt/minio/data --console-address ":9001"
+          ports:
+            - containerPort: 9000
+              name: minio-port
+            - containerPort: 9001
+              name: console
+          volumeMounts:
+            - name: data
+              mountPath: /mnt/minio/data
+          livenessProbe:
+            httpGet:
+              path: /minio/health/live
+              port: minio-port
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          envFrom:
+            - secretRef:
+                name: minio-secret
+            - secretRef:
+                name: catus-locatus-secrets
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: minio-pvc
+            readOnly: false
