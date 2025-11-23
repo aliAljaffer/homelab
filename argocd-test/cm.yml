@@ -1,0 +1,7 @@
+apiVersion: v1
+data:
+  COLOR: red
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: my-cm
