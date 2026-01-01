@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: stremio
+spec: {}
+status: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: stremio
+  name: stremio
+  namespace: stremio
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: stremio
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: stremio
+    spec:
+      volumes:
+      - name: stremio-data
+        hostPath:
+          path: "/etc/stremio-data"
+          type: DirectoryOrCreate
+      containers:
+      - image: tsaridas/stremio-docker:latest
+        name: stremio-docker
+        env:
+        - name: NO_CORS
+          value: "1"
+        - name: AUTO_SERVER_URL
+          value: "1"
+        - name: IPADDRESS
+          value: 192.168.8.200
+        volumeMounts:
+        - name: stremio-data
+          mountPath: /root/.stremio-server
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        resources:
+          requests:
+            cpu: 250m
+            memory: 128Mi
+          limits:
+            cpu: "2"
+            memory: 2Gi
+status: {}
