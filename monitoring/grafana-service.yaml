@@ -8,7 +8,7 @@ spec:
   selector:
     app: grafana
   ports:
-    - port: 3000
-      targetPort: http-grafana
-      protocol: TCP
+  - port: 443
+    targetPort: http-grafana
+    protocol: TCP
   sessionAffinity: None

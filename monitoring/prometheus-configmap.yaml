@@ -13,11 +13,9 @@ data:
       - job_name: 'prometheus'
         static_configs:
           - targets: ['localhost:9090']
-
       - job_name: 'control-plane'
         static_configs:
-          - targets: ['192.168.68.67:9100']
-        metrics_path: /metrics
+          - targets: ['192.168.8.14:9100']
       - job_name: 'backend-metrics'
         static_configs:
           - targets: ['catus-locatus-svc.catus-locatus.svc.cluster.local:4001']

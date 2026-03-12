@@ -107,7 +107,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
@@ -163,7 +163,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "100 * (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes))",
               "refId": "A"
@@ -175,7 +175,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
@@ -231,7 +231,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "100 - ((node_filesystem_avail_bytes{mountpoint=\"/\",fstype!=\"rootfs\"} * 100) / node_filesystem_size_bytes{mountpoint=\"/\",fstype!=\"rootfs\"})",
               "refId": "A"
@@ -243,7 +243,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
@@ -299,7 +299,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "100 - (avg by(instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
               "refId": "A"
@@ -311,7 +311,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
@@ -391,7 +391,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "node_hwmon_temp_celsius{chip=\"platform_coretemp_0\",sensor=\"temp1\"}",
               "legendFormat": "Package",
@@ -400,7 +400,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "node_hwmon_temp_celsius{chip=\"platform_coretemp_0\",sensor=\"temp2\"}",
               "legendFormat": "Core 0",
@@ -409,7 +409,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "node_hwmon_temp_celsius{chip=\"platform_coretemp_0\",sensor=\"temp3\"}",
               "legendFormat": "Core 1",
@@ -422,7 +422,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
@@ -506,7 +506,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes",
               "legendFormat": "Used",
@@ -515,7 +515,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "node_memory_Cached_bytes",
               "legendFormat": "Cached",
@@ -524,7 +524,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "node_memory_Buffers_bytes",
               "legendFormat": "Buffers",
@@ -533,7 +533,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "node_memory_MemFree_bytes",
               "legendFormat": "Free",
@@ -546,7 +546,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
@@ -630,7 +630,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "100 - (avg by(instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
               "legendFormat": "CPU Usage",
@@ -639,7 +639,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "avg by(instance) (rate(node_cpu_seconds_total{mode=\"system\"}[5m])) * 100",
               "legendFormat": "System",
@@ -648,7 +648,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "avg by(instance) (rate(node_cpu_seconds_total{mode=\"user\"}[5m])) * 100",
               "legendFormat": "User",
@@ -657,7 +657,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "avg by(instance) (rate(node_cpu_seconds_total{mode=\"iowait\"}[5m])) * 100",
               "legendFormat": "I/O Wait",
@@ -670,7 +670,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
@@ -754,7 +754,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "rate(node_disk_reads_completed_total{device=\"sda\"}[5m])",
               "legendFormat": "Reads - {{device}}",
@@ -763,7 +763,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "rate(node_disk_writes_completed_total{device=\"sda\"}[5m])",
               "legendFormat": "Writes - {{device}}",
@@ -776,7 +776,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
@@ -860,7 +860,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "rate(node_network_receive_bytes_total{device=\"wlp2s0\"}[5m])",
               "legendFormat": "RX - {{device}}",
@@ -869,7 +869,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "rate(node_network_transmit_bytes_total{device=\"wlp2s0\"}[5m])",
               "legendFormat": "TX - {{device}}",
@@ -882,7 +882,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
@@ -932,7 +932,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "time() - node_boot_time_seconds",
               "refId": "A"
@@ -944,7 +944,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
@@ -1009,7 +1009,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "smartmon_device_smart_healthy{disk=\"/dev/sda\"}",
               "refId": "A"
@@ -1021,7 +1021,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
@@ -1071,7 +1071,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "smartmon_temperature_celsius_raw_value{disk=\"/dev/sda\"}",
               "refId": "A"
@@ -1083,7 +1083,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
@@ -1162,7 +1162,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "node_systemd_unit_state{name=~\"docker.service|containerd.service|k3s.service|ssh.service|prometheus-node-exporter.service\", state=\"active\"}",
               "format": "table",
@@ -1197,7 +1197,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
@@ -1246,7 +1246,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "node_load1",
               "refId": "A"
@@ -1258,7 +1258,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
@@ -1307,7 +1307,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "node_load5",
               "refId": "A"
@@ -1319,7 +1319,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
@@ -1368,7 +1368,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "node_load15",
               "refId": "A"
@@ -1380,7 +1380,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
@@ -1434,7 +1434,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "node_systemd_units{state=\"active\"}",
               "legendFormat": "Active",
@@ -1443,7 +1443,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "node_systemd_units{state=\"inactive\"}",
               "legendFormat": "Inactive",
@@ -1452,7 +1452,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "node_systemd_units{state=\"failed\"}",
               "legendFormat": "Failed",
@@ -1465,7 +1465,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
@@ -1549,7 +1549,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "rate(node_disk_read_bytes_total{device=\"sda\"}[5m])",
               "legendFormat": "Read - {{device}}",
@@ -1558,7 +1558,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "rate(node_disk_written_bytes_total{device=\"sda\"}[5m])",
               "legendFormat": "Write - {{device}}",
@@ -1698,7 +1698,7 @@ data:
             "textMode": "auto"
           },
           "targets": [
-            { "expr": "sum by (route) (cl_http_requests_active{route!="/api/health"})", "legendFormat": "{{route}}", "refId": "A" }
+            { "expr": "sum by (route) (cl_http_requests_active{route!=\"/api/health\"})", "legendFormat": "{{route}}", "refId": "A" }
           ],
           "title": "Active HTTP Requests",
           "type": "stat"

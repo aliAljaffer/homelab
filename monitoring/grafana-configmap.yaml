@@ -10,6 +10,7 @@ data:
       - name: Prometheus
         type: prometheus
         access: proxy
+        uid: PBFA97CFB590B2093
         url: http://prometheus-service:9090
         isDefault: true
         jsonData:

@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-app-ingress
+  namespace: my-app
+  annotations:
+    # cert-manager: auto-issue certificate
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    # ExternalDNS: auto-create DNS record
+    external-dns.alpha.kubernetes.io/hostname: "app.yourdomain.com"
+spec:
+  ingressClassName: nginx # or your ingress class
+  tls:
+  - hosts:
+    - app.yourdomain.com
+    secretName: my-app-tls # cert-manager stores cert here
+  rules:
+  - host: app.yourdomain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: my-app-service
+            port:
+              number: 80

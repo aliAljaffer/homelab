@@ -7,3 +7,5 @@
 !**/**/*.template*
 letsencrypt-clusterissuer.yaml
 gateway*
+!route53-*
+!externaldns-*
