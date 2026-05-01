@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: refresh-db
+  namespace: tuwaiq-tracker
+spec:
+  jobTemplate:
+    metadata:
+      name: refresh-db
+    spec:
+      template:
+        spec:
+          containers:
+          - image: curlimages/curl:8.20.0
+            name: refresh-db
+            command:
+            - sh
+            args:
+            - -c
+            - 'curl -sS -H "Authorization: Bearer ${CRON_SECRET}" https://tuwaiqtracker.com/api/cron'
+            resources:
+              requests:
+                cpu: 128m
+                memory: 64Mi
+              limits:
+                cpu: 512m
+                memory: 128Mi
+            env:
+            - name: CRON_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: tuwaiq-tracker-secrets
+                  key: CRON_SECRET
+          restartPolicy: OnFailure
+  schedule: 0 */12 * * *
+status: {}
