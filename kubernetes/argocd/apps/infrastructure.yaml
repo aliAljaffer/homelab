@@ -1,0 +1,25 @@
+---
+# Root App-of-Apps: manages all infrastructure Applications.
+# Apply once during bootstrap: kubectl apply -f kubernetes/argocd/apps/infrastructure.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: infrastructure
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infrastructure
+  source:
+    repoURL: https://github.com/aliAljaffer/homelab.git
+    targetRevision: main
+    path: kubernetes/argocd/apps/infrastructure
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

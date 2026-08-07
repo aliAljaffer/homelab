@@ -1,0 +1,216 @@
+---
+# kube-prometheus-stack values
+# Long-term metrics: Prometheus keeps 2 days locally, Thanos sidecar uploads to MinIO (forever)
+# Grafana data survives pod restarts on a Longhorn PVC
+
+fullnameOverride: kube-prometheus
+
+# --- Prometheus ---
+prometheus:
+  prometheusSpec:
+    # Short local retention — historical data lives in Thanos/MinIO
+    retention: 2d
+    retentionSize: 15GB
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: longhorn
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 20Gi
+
+    # Thanos sidecar — uploads TSDB blocks to MinIO continuously
+    thanos:
+      image: quay.io/thanos/thanos:v0.37.2
+      objectStorageConfig:
+        existingSecret:
+          name: thanos-objstore-secret   # SealedSecret: see bootstrap/README.md Step 6
+          key: objstore.yml
+
+    # Scrape all pods with prometheus.io/scrape=true
+    additionalScrapeConfigs:
+      - job_name: "catus-locatus-backend"
+        static_configs:
+          - targets:
+              - "catus-locatus-svc.catus-locatus.svc.cluster.local:4001"
+        metrics_path: /api/metrics
+        scrape_interval: 10s
+
+# --- Grafana ---
+grafana:
+  enabled: true
+  defaultDashboardsEnabled: true
+  defaultDashboardsTimezone: Asia/Riyadh
+
+  persistence:
+    enabled: true
+    storageClassName: longhorn
+    size: 5Gi
+
+  grafana.ini:
+    server:
+      root_url: https://grafana.alialjaffer.com
+    database:
+      wal: true  # required for SQLite on networked (Longhorn) storage
+
+  # Point Grafana at Thanos Query for long-term metrics
+  additionalDataSources:
+    - name: Thanos
+      type: prometheus
+      url: http://thanos-query.monitoring.svc.cluster.local:9090
+      access: proxy
+      isDefault: true
+      jsonData:
+        httpMethod: POST
+        timeInterval: 15s
+    - name: Loki
+      type: loki
+      url: http://loki-gateway.monitoring.svc.cluster.local
+      access: proxy
+
+  # Alerting provisioning (migrated from grafana-alerting-configmap.yaml)
+  alerting:
+    contactpoints.yaml:
+      apiVersion: 1
+      contactPoints:
+        - orgId: 1
+          name: Discord Channel
+          receivers:
+            - uid: ff3iaps1ewgzkb
+              type: discord
+              settings:
+                message: '{{ template "discord.default.message" . }}'
+                url: "${DISCORD_WEBHOOK_URL}"  # Set via grafana.envFromSecret
+                use_discord_username: false
+              disableResolveMessage: false
+    policies.yaml:
+      apiVersion: 1
+      policies:
+        - orgId: 1
+          receiver: Discord Channel
+          group_by:
+            - grafana_folder
+            - alertname
+    alert-rules.yaml:
+      apiVersion: 1
+      groups:
+        - orgId: 1
+          name: Homelab
+          folder: Homelab
+          interval: 1m
+          rules:
+            - uid: ff3iazdx48wsgc
+              title: CPU Usage > 90%
+              condition: C
+              data:
+                - refId: A
+                  relativeTimeRange:
+                    from: 600
+                    to: 0
+                  datasourceUid: Thanos
+                  model:
+                    expr: '100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)'
+                    instant: true
+                    refId: A
+                - refId: C
+                  datasourceUid: __expr__
+                  model:
+                    conditions:
+                      - evaluator:
+                          params: [90]
+                          type: gt
+                        query:
+                          params: [C]
+                        reducer:
+                          type: last
+                    expression: A
+                    type: threshold
+                    refId: C
+              noDataState: NoData
+              execErrState: Error
+              for: 10m
+              notification_settings:
+                receiver: Discord Channel
+
+            - uid: cf3ib3yooms5ca
+              title: High Temperature > 80°C
+              condition: C
+              data:
+                - refId: A
+                  relativeTimeRange:
+                    from: 600
+                    to: 0
+                  datasourceUid: Thanos
+                  model:
+                    expr: 'node_hwmon_temp_celsius{chip="platform_coretemp_0",sensor="temp1"}'
+                    instant: true
+                    refId: A
+                - refId: C
+                  datasourceUid: __expr__
+                  model:
+                    conditions:
+                      - evaluator:
+                          params: [80]
+                          type: gt
+                        query:
+                          params: [C]
+                        reducer:
+                          type: last
+                    expression: A
+                    type: threshold
+                    refId: C
+              noDataState: NoData
+              execErrState: Error
+              for: 10m
+              notification_settings:
+                receiver: Discord Channel
+
+            - uid: ff3ib9gnzeubkc
+              title: High Memory Usage > 70%
+              condition: C
+              data:
+                - refId: A
+                  relativeTimeRange:
+                    from: 600
+                    to: 0
+                  datasourceUid: Thanos
+                  model:
+                    expr: '100 * (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes))'
+                    instant: true
+                    refId: A
+                - refId: C
+                  datasourceUid: __expr__
+                  model:
+                    conditions:
+                      - evaluator:
+                          params: [70]
+                          type: gt
+                        query:
+                          params: [C]
+                        reducer:
+                          type: last
+                    expression: A
+                    type: threshold
+                    refId: C
+              noDataState: NoData
+              execErrState: Error
+              for: 10m
+              notification_settings:
+                receiver: Discord Channel
+
+# --- AlertManager ---
+alertmanager:
+  enabled: true
+
+# --- Node Exporter ---
+nodeExporter:
+  enabled: true
+
+# --- kube-state-metrics ---
+kubeStateMetrics:
+  enabled: true
+
+# --- Prometheus Operator ---
+prometheusOperator:
+  enabled: true

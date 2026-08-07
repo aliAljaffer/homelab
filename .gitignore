@@ -1,11 +1,25 @@
-**/**/*secret*.yaml
-**/**/*secret*.yaml
-**/**/*secret*.yml
-**/**/*credentials*.yaml
-**/**/*credentials*.yml
-**/**/*creds*.yml
-!**/**/*.template*
-letsencrypt-clusterissuer.yaml
-gateway*
-!route53-*
-!externaldns-*
+# Secrets - never commit raw secrets
+**/*secret*.yaml
+**/*secret*.yml
+**/*credentials*.yaml
+**/*credentials*.yml
+**/*creds*.yml
+
+# Allow sealed secrets (safe to commit)
+!**/*.sealed.yaml
+
+# Allow templates
+!**/*.template*
+
+# Allow specific named files that aren't sensitive
+!**/route53-*
+!**/externaldns-*
+
+# SOPS / age private keys - NEVER commit
+*.age
+*.key
+
+# Talos generated configs (plaintext) - commit only the .sops encrypted versions
+talos/clusterconfig/*.yaml
+!talos/clusterconfig/*.sops
+!talos/clusterconfig/.gitkeep

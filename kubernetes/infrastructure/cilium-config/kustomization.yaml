@@ -1,0 +1,8 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - gateway.yaml
+  - httproute-hubble.yaml
+  - httproute-longhorn.yaml
+  - httproute-argocd.yaml

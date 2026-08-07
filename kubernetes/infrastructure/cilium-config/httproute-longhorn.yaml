@@ -1,0 +1,18 @@
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: longhorn-ui
+  namespace: kube-system
+spec:
+  parentRefs:
+    - name: homelab-gateway
+      namespace: kube-system
+      sectionName: https
+  hostnames:
+    - longhorn.alialjaffer.com
+  rules:
+    - backendRefs:
+        - name: longhorn-frontend
+          namespace: longhorn-system
+          port: 80

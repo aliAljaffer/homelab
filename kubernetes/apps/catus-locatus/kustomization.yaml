@@ -1,0 +1,24 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - postgresql-pvc.yaml
+  - postgresql-statefulset.yaml
+  - postgresql-svc.yaml
+  - minio-cm.yaml
+  - minio-pvc.yaml
+  - minio-statefulset.yaml
+  - minio-svc.yaml
+  - backend-deployment.yaml
+  - cip-backend.yaml
+  - hpa-backend.yaml
+  - deploy-frontend.yaml
+  - cip-frontend.yaml
+  - hpa-frontend.yaml
+  - cloudflared/deployment.yaml
+  - httproutes.yaml
+  # Uncomment after sealing:
+  # - secrets.sealed.yaml
+  # - cloudflared/tunnel-credentials.sealed.yaml
+  # - cloudflared/config.sealed.yaml

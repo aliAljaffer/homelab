@@ -1,0 +1,24 @@
+---
+# Wave -2: IPAddressPool + L2Advertisement (needs MetalLB CRDs from wave -3)
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: metallb-config
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infrastructure
+  source:
+    repoURL: https://github.com/aliAljaffer/homelab.git
+    targetRevision: main
+    path: kubernetes/infrastructure/metallb/config
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: metallb-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

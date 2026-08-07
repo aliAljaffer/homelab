@@ -1,0 +1,91 @@
+---
+# Wave 1: Grafana Alloy (log collector DaemonSet, replaces Promtail)
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: alloy
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infrastructure
+  source:
+    repoURL: https://grafana.github.io/helm-charts
+    chart: alloy
+    targetRevision: 0.12.5
+    helm:
+      valuesObject:
+        controller:
+          type: daemonset
+        alloy:
+          configMap:
+            create: true
+            content: |
+              // Discover all pods in the cluster
+              discovery.kubernetes "pods" {
+                role = "pod"
+              }
+
+              // Relabel pod metadata to Loki labels
+              discovery.relabel "pod_logs" {
+                targets = discovery.kubernetes.pods.targets
+                rule {
+                  source_labels = ["__meta_kubernetes_namespace"]
+                  target_label  = "namespace"
+                }
+                rule {
+                  source_labels = ["__meta_kubernetes_pod_name"]
+                  target_label  = "pod"
+                }
+                rule {
+                  source_labels = ["__meta_kubernetes_container_name"]
+                  target_label  = "container"
+                }
+                rule {
+                  source_labels = ["__meta_kubernetes_pod_label_app"]
+                  target_label  = "app"
+                }
+                // Drop debug/noise containers
+                rule {
+                  source_labels = ["__meta_kubernetes_namespace"]
+                  regex         = "kube-system"
+                  action        = "drop"
+                }
+              }
+
+              // Collect logs from discovered pods
+              loki.source.kubernetes "pod_logs" {
+                targets    = discovery.relabel.pod_logs.output
+                forward_to = [loki.write.default.receiver]
+              }
+
+              // Also collect Talos node logs via journald
+              loki.source.journal "talos_journal" {
+                forward_to = [loki.write.default.receiver]
+                labels = {
+                  job  = "talos",
+                  node = env("HOSTNAME"),
+                }
+              }
+
+              loki.write "default" {
+                endpoint {
+                  url = "http://loki-gateway.monitoring.svc.cluster.local/loki/api/v1/push"
+                }
+              }
+        tolerations:
+          - effect: NoSchedule
+            operator: Exists
+          - effect: NoExecute
+            operator: Exists
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

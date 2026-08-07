@@ -1,0 +1,36 @@
+---
+# Wave 0: kube-prometheus-stack (Prometheus + Grafana + AlertManager + Thanos sidecar)
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: monitoring
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infrastructure
+  sources:
+    - repoURL: https://prometheus-community.github.io/helm-charts
+      chart: kube-prometheus-stack
+      targetRevision: 69.8.0
+      helm:
+        valueFiles:
+          - $values/kubernetes/infrastructure/monitoring/values.yaml
+    - repoURL: https://github.com/aliAljaffer/homelab.git
+      targetRevision: main
+      ref: values
+    - repoURL: https://github.com/aliAljaffer/homelab.git
+      targetRevision: main
+      path: kubernetes/infrastructure/monitoring
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

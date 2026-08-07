@@ -1,0 +1,28 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: arc
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: workloads
+  sources:
+    # ARC controller
+    - repoURL: https://actions.github.io/actions-runner-controller
+      chart: gha-runner-scale-set-controller
+      targetRevision: 0.13.0
+    # ARC runner set + namespace config
+    - repoURL: https://github.com/aliAljaffer/homelab.git
+      targetRevision: main
+      path: kubernetes/apps/arc
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: arc-systems
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

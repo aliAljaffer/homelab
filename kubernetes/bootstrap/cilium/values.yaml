@@ -1,0 +1,55 @@
+---
+# Cilium bootstrap values for Talos Linux
+# Install with:
+#   helm install cilium cilium/cilium --version 1.17.3 \
+#     --namespace kube-system \
+#     --values kubernetes/bootstrap/cilium/values.yaml
+
+# Replace kube-proxy entirely
+kubeProxyReplacement: true
+k8sServiceHost: 192.168.8.100
+k8sServicePort: 6443
+
+ipam:
+  mode: kubernetes
+
+# Enable Gateway API support (requires Gateway API CRDs installed first)
+gatewayAPI:
+  enabled: true
+
+# Hubble observability
+hubble:
+  enabled: true
+  relay:
+    enabled: true
+  ui:
+    enabled: true
+
+operator:
+  replicas: 1
+
+# Required for Talos Linux: cgroup auto-mount is handled by Talos
+cgroup:
+  autoMount:
+    enabled: false
+  hostRoot: /sys/fs/cgroup
+
+# Required capabilities for Talos
+securityContext:
+  capabilities:
+    ciliumAgent:
+      - CHOWN
+      - KILL
+      - NET_ADMIN
+      - NET_RAW
+      - IPC_LOCK
+      - SYS_ADMIN
+      - SYS_RESOURCE
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+    cleanCiliumState:
+      - NET_ADMIN
+      - SYS_ADMIN
+      - SYS_RESOURCE

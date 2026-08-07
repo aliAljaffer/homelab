@@ -1,0 +1,29 @@
+provider:
+  name: aws
+
+env:
+- name: AWS_ACCESS_KEY_ID
+  valueFrom:
+    secretKeyRef:
+      name: externaldns-route53-credentials
+      key: account-access-key
+- name: AWS_DEFAULT_REGION
+  value: "us-east-1"
+- name: AWS_SECRET_ACCESS_KEY
+  valueFrom:
+    secretKeyRef:
+      name: externaldns-route53-credentials
+      key: secret-access-key
+
+txtOwnerId: "homelab-cluster" # unique ID to track DNS records
+domainFilters:
+- "alialjaffer.com" # restrict to my domain
+
+policy: upsert-only
+
+# Watch Gateway API HTTPRoutes instead of legacy Ingress
+sources:
+  - service
+  - gateway-httproute
+
+txtOwnerId: "homelab-talos"

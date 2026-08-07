@@ -1,0 +1,33 @@
+---
+# ArgoCD bootstrap values
+# Install with:
+#   helm repo add argo https://argoproj.github.io/argo-helm
+#   helm install argocd argo/argo-cd --version 7.9.0 \
+#     --namespace argocd --create-namespace \
+#     --values kubernetes/bootstrap/argocd/values.yaml
+
+global:
+  domain: argocd.alialjaffer.com
+
+server:
+  # TLS terminated at the Gateway
+  extraArgs:
+    - --insecure
+
+configs:
+  params:
+    server.insecure: "true"
+  cm:
+    # Allow resources managed outside ArgoCD (e.g. Talos bootstrapped namespaces)
+    resource.exclusions: |
+      - apiGroups:
+          - cilium.io
+        kinds:
+          - CiliumIdentity
+        clusters:
+          - "*"
+  repositories:
+    homelab:
+      url: https://github.com/aliAljaffer/homelab.git
+      name: homelab
+      type: git

@@ -1,0 +1,43 @@
+---
+# Wave -3: Longhorn distributed storage (needs iscsi-tools on workers — see bootstrap Step 1)
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: longhorn
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-3"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infrastructure
+  source:
+    repoURL: https://charts.longhorn.io
+    chart: longhorn
+    targetRevision: 1.8.1
+    helm:
+      valuesObject:
+        defaultSettings:
+          defaultReplicaCount: 2
+          defaultDataLocality: best-effort
+          storageReservedPercentageForDefaultDisk: 15
+          # Backup to MinIO (configure after MinIO is running)
+          # backupTarget: s3://velero@us-east-1/
+          # backupTargetCredentialSecret: longhorn-backup-secret
+        persistence:
+          defaultClass: true
+          defaultClassReplicaCount: 2
+          defaultFsType: ext4
+        ingress:
+          enabled: false  # Exposed via Gateway API (HTTPRoute in cilium-config)
+        longhornUI:
+          replicas: 1
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: longhorn-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

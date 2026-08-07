@@ -1,0 +1,90 @@
+---
+clusterName: k8s-homelab
+talosVersion: v1.13.7
+kubernetesVersion: v1.36.2
+endpoint: https://192.168.8.100:6443
+allowSchedulingOnControlPlanes: false
+
+cniConfig:
+  name: none  # Cilium installed via bootstrap, not Talos default (Flannel)
+
+clusterPodNets:
+  - 10.244.0.0/16
+clusterSvcNets:
+  - 10.96.0.0/12
+
+nodes:
+  - hostname: cp0
+    ipAddress: 192.168.8.100
+    installDisk: /dev/nvme0n1
+    controlPlane: true
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "*"
+        dhcp: true
+
+  - hostname: wrk0
+    ipAddress: 192.168.8.101
+    installDisk: /dev/nvme0n1
+    controlPlane: false
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "*"
+        dhcp: true
+
+  - hostname: wrk1
+    ipAddress: 192.168.8.102
+    installDisk: /dev/nvme0n1
+    controlPlane: false
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "*"
+        dhcp: true
+
+  - hostname: wrk2
+    ipAddress: 192.168.8.103
+    installDisk: /dev/nvme0n1
+    controlPlane: false
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "*"
+        dhcp: true
+
+# Control plane also gets intel-ucode (same M920q hardware)
+controlPlane:
+  extensions:
+    - image: ghcr.io/siderolabs/intel-ucode:20250211
+  patches:
+    - |-
+      cluster:
+        network:
+          cni:
+            name: none
+        proxy:
+          disabled: true
+      machine:
+        kubelet:
+          extraArgs:
+            rotate-server-certificates: "true"
+
+# Patches applied to all worker nodes
+worker:
+  patches:
+    - |-
+      cluster:
+        proxy:
+          disabled: true
+      machine:
+        kubelet:
+          extraArgs:
+            rotate-server-certificates: "true"
+  # Pin extension versions at: https://github.com/siderolabs/extensions/releases
+  extensions:
+    # Longhorn storage dependencies
+    - image: ghcr.io/siderolabs/iscsi-tools:v0.1.6
+    - image: ghcr.io/siderolabs/util-linux-tools:v2.40.2
+    # Intel M920q Tiny: CPU microcode (required for security/stability on bare metal)
+    - image: ghcr.io/siderolabs/intel-ucode:20250211
+    # Intel M920q Tiny: UHD 630 iGPU driver (enables Quick Sync transcoding via VA-API)
+    # Remove if you don't need iGPU access from containers
+    - image: ghcr.io/siderolabs/i915:20250609

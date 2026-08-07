@@ -1,0 +1,27 @@
+---
+# Wave -5: Gateway API CRDs must exist before Cilium's Gateway controller starts
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gateway-api
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infrastructure
+  source:
+    repoURL: https://github.com/aliAljaffer/homelab.git
+    targetRevision: main
+    path: kubernetes/infrastructure/gateway-api
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
+      - Replace=true

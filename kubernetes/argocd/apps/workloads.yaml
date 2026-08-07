@@ -1,0 +1,25 @@
+---
+# Root App-of-Apps: manages all workload Applications.
+# Apply once during bootstrap: kubectl apply -f kubernetes/argocd/apps/workloads.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: workloads
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: workloads
+  source:
+    repoURL: https://github.com/aliAljaffer/homelab.git
+    targetRevision: main
+    path: kubernetes/argocd/apps/workloads
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
