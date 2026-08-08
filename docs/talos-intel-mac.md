@@ -119,31 +119,19 @@ Rebuild the Talos kernel with `LLVM: 1` removed from the build config and ThinLT
 
 ---
 
-## Step 3 — Rebuild any required extensions
+## Step 3 — Extensions
 
-Extensions that ship kernel modules must be rebuilt against the patched kernel. Extensions that do not ship kernel modules can use the standard images from `ghcr.io/siderolabs` without rebuilding.
+Only extensions that ship `.ko` kernel module files need rebuilding against the patched kernel. Examples include `i915`, `zfs`, and `nvidia`. Extensions that provide userspace binaries only (no kernel modules) work with the standard images from `ghcr.io/siderolabs` regardless of how the kernel was compiled.
 
-For Intel Mac hardware, rebuild `iscsi-tools` and `util-linux-tools` (both required for Longhorn). Do not try to build `i915` — it requires `linux-firmware` as a dependency, which is a separate large build. The 2012 MacBook Pro GPU is not supported by Kubernetes GPU drivers anyway.
+For Intel Mac hardware, all three required extensions are userspace-only. No rebuilding is needed.
 
-```bash
-cd ..
-git clone https://github.com/siderolabs/extensions.git
-cd extensions
-git checkout v1.13.0
-for ext in iscsi-tools util-linux-tools; do
-  sudo -E make $ext \
-    TAG=v1.13.0 \
-    REGISTRY=127.0.0.1:5005/talos \
-    USERNAME=extensions \
-    PUSH=true \
-    PLATFORM=linux/amd64 \
-    PKGS=v1.13.0-dirty \
-    PKGS_PREFIX=127.0.0.1:5005/talos/pkgs
-done
-cd ..
-```
+| Extension | Contains kernel modules? | Source |
+|---|---|---|
+| `iscsi-tools` | No — provides `iscsiadm` binary | Use `ghcr.io/siderolabs/iscsi-tools` |
+| `util-linux-tools` | No — provides `lsblk` and friends | Use `ghcr.io/siderolabs/util-linux-tools` |
+| `intel-ucode` | No — provides firmware blobs | Use `ghcr.io/siderolabs/intel-ucode` |
 
-Use the standard `ghcr.io/siderolabs/intel-ucode` image directly in the profile — no rebuild needed.
+Use the standard images directly in the profile in Step 5. You do not need to clone the extensions repository or run any build commands for this hardware.
 
 ---
 
@@ -217,9 +205,9 @@ Use the standard `ghcr.io/siderolabs/intel-ucode` image directly in the profile 
      baseInstaller:
        imageRef: 127.0.0.1:5005/talos/imager/installer-base:v1.13.8
      systemExtensions:
-       - imageRef: 127.0.0.1:5005/talos/extensions/iscsi-tools:v1.13.0
-       - imageRef: 127.0.0.1:5005/talos/extensions/util-linux-tools:v1.13.0
-       - imageRef: ghcr.io/siderolabs/intel-ucode:20250211   # no kernel modules, use standard image
+       - imageRef: ghcr.io/siderolabs/iscsi-tools:v0.1.6
+       - imageRef: ghcr.io/siderolabs/util-linux-tools:v2.40.2
+       - imageRef: ghcr.io/siderolabs/intel-ucode:20250211
    output:
      kind: iso
      outFormat: raw
