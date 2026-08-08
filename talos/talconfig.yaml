@@ -108,8 +108,8 @@ worker:
           rotate-server-certificates: "true"
   extensions:
   # Longhorn storage dependencies
-  - image: ghcr.io/siderolabs/iscsi-tools:v0.1.6
-  - image: ghcr.io/siderolabs/util-linux-tools:v2.40.2
+  - image: ghcr.io/siderolabs/iscsi-tools:v0.2.0
+  - image: ghcr.io/siderolabs/util-linux-tools:2.41.4
   # Intel M920q Tiny: CPU microcode (required for security/stability on bare metal)
   - image: ghcr.io/siderolabs/intel-ucode:20250211
   # Intel M920q Tiny: UHD 630 iGPU driver (enables Quick Sync transcoding via VA-API)
