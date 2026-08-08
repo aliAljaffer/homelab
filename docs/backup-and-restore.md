@@ -108,7 +108,7 @@
 
    ```bash
    velero backup create homelab-$(date +%Y%m%d) \
-     --include-namespaces catus-locatus,obsidian-sync \
+     --include-namespaces catus-locatus \
      --wait
    ```
 
@@ -200,54 +200,55 @@
 
 ---
 
-### 2.2 Restore SOPS-Encrypted Talos Machine Configs
+### 2.2 Decrypt and Apply SOPS-Encrypted Talos Machine Configs
 
-**When to do this procedure:** When you need to rebuild or re-apply Talos machine configurations and the plaintext configs are not available.
+**When to do this procedure:** When you need to re-apply a Talos machine configuration after a node rebuild or config change.
 
 **Time required:** 5 minutes
 
-**Before you start:** Make sure `homelab.age` is on your local machine. Make sure `sops` is installed.
+**Before you start:** Make sure `homelab.age` is on your local machine. Make sure `sops` and `talosctl` are installed.
+
+> **Note:** Each node has its own file in `talos/clusterconfig/`. Only the secret values (CA keys, tokens, encryption secret) are encrypted. The cluster structure is readable without decryption.
+
+**Files:**
+
+| File | Node |
+|---|---|
+| `talos/clusterconfig/k8s-homelab-cp0.sops.yaml` | cp0 — 192.168.8.100 |
+| `talos/clusterconfig/k8s-homelab-wrk0.sops.yaml` | wrk0 — 192.168.8.101 |
+| `talos/clusterconfig/k8s-homelab-wrk1.sops.yaml` | wrk1 — 192.168.8.102 |
 
 **Procedure:**
 
-1. Go to the `talos/clusterconfig/` directory.
+1. Set the age key path.
 
    ```bash
-   cd talos/clusterconfig/
+   export SOPS_AGE_KEY_FILE=~/homelab.age
    ```
 
-2. Decrypt the control plane config.
+2. Apply the config for each node. The command decrypts inline without writing a plaintext file to disk.
 
    ```bash
-   SOPS_AGE_KEY_FILE=~/homelab.age \
-     sops --decrypt k8s-homelab-controlplane.sops \
-     > k8s-homelab-controlplane.yaml
+   sops --decrypt talos/clusterconfig/k8s-homelab-cp0.sops.yaml \
+     | talosctl apply-config -n 192.168.8.100 --file /dev/stdin
+
+   sops --decrypt talos/clusterconfig/k8s-homelab-wrk0.sops.yaml \
+     | talosctl apply-config -n 192.168.8.101 --file /dev/stdin
+
+   sops --decrypt talos/clusterconfig/k8s-homelab-wrk1.sops.yaml \
+     | talosctl apply-config -n 192.168.8.102 --file /dev/stdin
    ```
 
-3. Decrypt the worker config.
+3. If you need the plaintext config on disk for inspection, decrypt it and delete it when done.
 
    ```bash
-   SOPS_AGE_KEY_FILE=~/homelab.age \
-     sops --decrypt k8s-homelab-worker.sops \
-     > k8s-homelab-worker.yaml
+   sops --decrypt talos/clusterconfig/k8s-homelab-cp0.sops.yaml \
+     > /tmp/cp0-config.yaml
+   # inspect, then:
+   rm /tmp/cp0-config.yaml
    ```
 
-4. Apply the configs to the cluster nodes. Replace the IP addresses with your node addresses.
-
-   ```bash
-   talosctl apply-config -n 192.168.8.100 -f k8s-homelab-controlplane.yaml
-   talosctl apply-config -n 192.168.8.101 -f k8s-homelab-worker.yaml
-   talosctl apply-config -n 192.168.8.102 -f k8s-homelab-worker.yaml
-   talosctl apply-config -n 192.168.8.103 -f k8s-homelab-worker.yaml
-   ```
-
-5. Delete the plaintext files.
-
-   ```bash
-   rm k8s-homelab-controlplane.yaml k8s-homelab-worker.yaml
-   ```
-
-**Result:** The Talos machine configurations are applied to all nodes. The plaintext files are removed from disk.
+**Result:** The Talos machine configurations are applied to the nodes. No plaintext config is written to disk.
 
 ---
 
