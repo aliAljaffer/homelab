@@ -6,5 +6,4 @@ resources:
   - couchdb-pvc.yaml
   - couchdb-statefulset.yaml
   - couchdb-svc.yaml
-  # Uncomment after sealing:
-  # - couchdb-secret.sealed.yaml
+  - couchdb-secret.sealed.yaml

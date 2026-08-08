@@ -8,5 +8,4 @@ resources:
   - pihole-service-dns.yaml
   - pihole-service-web.yaml
   - httproute-pihole.yaml
-  # Uncomment after sealing:
-  # - pihole-secret.sealed.yaml
+  - pihole-secret.sealed.yaml

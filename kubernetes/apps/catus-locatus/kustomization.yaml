@@ -17,8 +17,9 @@ resources:
   - cip-frontend.yaml
   - hpa-frontend.yaml
   - cloudflared/deployment.yaml
+  - cloudflared/config.yaml
   - httproutes.yaml
-  # Uncomment after sealing:
-  # - secrets.sealed.yaml
-  # - cloudflared/tunnel-credentials.sealed.yaml
-  # - cloudflared/config.sealed.yaml
+  - secrets.sealed.yaml
+  - postgresql-secret.sealed.yaml
+  - minio-secret.sealed.yaml
+  - cloudflared/tunnel-credentials.sealed.yaml

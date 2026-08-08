@@ -1,0 +1,18 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  annotations:
+    sealedsecrets.bitnami.com/namespace-wide: "true"
+  name: loki-minio-secret
+  namespace: monitoring
+spec:
+  encryptedData:
+    AWS_ACCESS_KEY_ID: AgBrUcfpomsobdeIMy3+QXQ8l0cZ9w+6nhKWW427e8HtjLu8pjkRkmxuDv8/k0zjXx+Ll38q3Ao9bHLyY2HmYBFSfgiKmbNfHAyg27xMWzVbX04NtIAjgIezA6sXnfmavkIeSN8t6kjDDVfB9+TK/5HIegT7KMC4vo7VI6rT+f/1Zp6aeT3OYsPXUy8TijK+cnYF1chH9VjxcghsjDpAV7hKkkl5I6GmK0+cfaZ5AUb7vPI4LETO6q4XP9qafFqsGepoQOzbw4ZLqaSGmb2fuRsrPhVOxOiC8p/m3HCTp8TG2jo1hET/0+Te2aW8e95ideazubdfB2pvtLxCke9ziQPxKTwZu/nZHShXzmd8D5g0EQa3OSt7uWG4nnwxpvgE/R1pHQ6ctMk3AmUhe0+UgAFBHuPgSokZszmNAPcDlwRgz2rOJQWRLw4yYkmyrXKaY8Zp5Ba/LPRcmJjoTCVxUkzAeZfljObqOWrkM6+8RFnJstIjxt4cP/fgrOJuCSzX/p67COp2zNBZ2PTBxWzvNB4924Y/RLuKVKMxxmDlzoFd6mz4vqDh6unTYl4eh/y7QxM6p0Jx6dmmeExVlfndVXpRPTHDzcGOvBRIBDFges14OEse4biZy2KMHmN6/Aq2WMjO7zszPtEReyV+LVExW3pCpnAdnnU5sXf72X4NRzpWIuqUL1/qRoQqgAYY4HAbiA6tDNIqHcvBVU07zQ==
+    AWS_SECRET_ACCESS_KEY: AgBJI5ehQklZqU3USmvg6RDPPVWSjAPsifognXFkIFhnb13jluTLQ5F8oiMzkcs9ofHeVlStUz/6chA9Z8rzamvI6wkING8z2vaMahFKvcMaGebBlRYts/B3UPBJ/oYw+879N+0+Ds/qnc/244+GJYASSoCJ590Umtvee6v/MBwt1o2nQco9y5kCZkUekLeuMTEH40VeJcFxglt+YKdVjQPCPdkw/Q9LemkXRbvp1DG0GjJA/hIY1Dh6Eus+iuKXifCvJqPz3y9sn3z697G2TLC3L0h238IlSuJzRoy7jkI9NknFgniypYkfkttPRlJylVyi/lBBE+OnP+LEF7IeKnJFi4P/nw2mUtc36giGbV8IfXJRAZUdYkeERDsH+jc4rCvt0ZN1g1mUD6GUw3/ZQIWTby6HcwWcc/Ylhmfv/QAMrbkv8eeEvJFfybpLvyy+jF0EX7exjUOUrKPVRRE6/KV+yrvBBdyepPVec0/vDXCNIxTR/uZ345aLB1vPTv6zCwlOfj2ManiRd5qL1QFmFXpoQzcbJ7WIFZDI5rTW6kwYCYtMAiKfQuE8iKYk0bbvz5h7BkPTVA0lnE3GhpSqirCYzk8AbWLaNv1YZc0jnP1F+7ncdI1Up/HrYBDGov26hM1+9tiOkhSiOXKHnpp9G57rgjbpJiPFM94cTlJIJbBEKGn0kXSSEzZ8ItU+4mbOp21U08sRuharvZ7G81IR1Pd3
+  template:
+    metadata:
+      annotations:
+        sealedsecrets.bitnami.com/namespace-wide: "true"
+      name: loki-minio-secret
+      namespace: monitoring

@@ -4,5 +4,4 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - refresh-db-cj.yaml
-  # Uncomment after sealing:
-  # - tuwaiq-tracker-secrets.sealed.yaml
+  - tuwaiq-tracker-secrets.sealed.yaml
