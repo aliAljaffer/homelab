@@ -36,7 +36,8 @@ spec:
     server: https://kubernetes.default.svc
     namespace: longhorn-system
   syncPolicy:
-    # Automated sync temporarily disabled — installed manually via helm --no-hooks.
-    # Re-enable after first install is healthy.
+    automated:
+      prune: true
+      selfHeal: true
     syncOptions:
       - CreateNamespace=true
