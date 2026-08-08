@@ -17,10 +17,10 @@ spec:
     helm:
       valueFiles:
       - $values/kubernetes/infrastructure/velero/values.yaml
-  - repoURL: https://github.com/aliAljaffer/homelab.git
+  - repoURL: git@github.com:aliAljaffer/homelab.git
     targetRevision: main
     ref: values
-  - repoURL: https://github.com/aliAljaffer/homelab.git
+  - repoURL: git@github.com:aliAljaffer/homelab.git
     targetRevision: main
     path: kubernetes/infrastructure/velero
   destination:
