@@ -169,6 +169,15 @@ Use the standard `ghcr.io/siderolabs/intel-ucode` image directly in the profile 
 
    Use that tag in `PKG_KERNEL` and `PKGS`:
 
+   First, look up the exact tag that was pushed for your kernel build:
+
+   ```bash
+   curl -s http://127.0.0.1:5005/v2/talos/pkgs/kernel/tags/list
+   # example: {"name":"talos/pkgs/kernel","tags":["v1.13.0-55-gf677246-dirty"]}
+   ```
+
+   Then run the build. Only `PKG_KERNEL` points to the local registry. All other packages come from the official `ghcr.io/siderolabs/pkgs` images. Do not set `PKGS` or `PKGS_PREFIX` — doing so would redirect every package lookup to the local registry, and only the kernel is there.
+
    ```bash
    KERNEL_TAG=$(curl -s http://127.0.0.1:5005/v2/talos/pkgs/kernel/tags/list | python3 -c "import json,sys; print(json.load(sys.stdin)['tags'][0])")
 
@@ -179,12 +188,10 @@ Use the standard `ghcr.io/siderolabs/intel-ucode` image directly in the profile 
      TAG=v1.13.8 \
      PKG_KERNEL=127.0.0.1:5005/talos/pkgs/kernel:${KERNEL_TAG} \
      PLATFORM=linux/amd64 \
-     INSTALLER_ARCH=amd64 \
-     PKGS=${KERNEL_TAG} \
-     PKGS_PREFIX=127.0.0.1:5005/talos/pkgs
+     INSTALLER_ARCH=amd64
    ```
 
-   > **Note:** The installer tag (`TAG`) is the Talos release version. The kernel tag (`PKG_KERNEL`, `PKGS`) is the stamped git-describe output from the pkgs build, which always includes a commit hash.
+   > **Note:** `TAG` is the Talos release version for the output images. `PKG_KERNEL` is the stamped git-describe tag from the pkgs build, which always includes a commit hash.
 
 ---
 
