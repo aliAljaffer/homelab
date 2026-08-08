@@ -1,6 +1,6 @@
 ---
 # kube-prometheus-stack values
-# Long-term metrics: Prometheus keeps 2 days locally, Thanos sidecar uploads to MinIO (forever)
+# Long-term metrics: Prometheus keeps 2 days locally, Thanos sidecar uploads to GCS (forever)
 # Grafana data survives pod restarts on a Longhorn PVC
 
 fullnameOverride: kube-prometheus
@@ -198,6 +198,14 @@ grafana:
               for: 10m
               notification_settings:
                 receiver: Discord Channel
+
+# --- Apiserver scrape: drop high-cardinality histograms with no homelab value ---
+kubeApiServer:
+  serviceMonitor:
+    metricRelabelings:
+      - sourceLabels: [__name__]
+        regex: 'apiserver_request_body_size_bytes_bucket|apiserver_response_sizes_bucket|apiserver_watch_cache_read_wait_seconds_bucket|apiserver_watch_events_sizes_bucket'
+        action: drop
 
 # --- AlertManager ---
 alertmanager:
