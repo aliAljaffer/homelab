@@ -10,12 +10,7 @@ spec:
       name: letsencrypt-prod-key
     solvers:
       - dns01:
-          route53:
-            region: us-east-1  # Route53 is global — always use us-east-1 for API access
-            hostedZoneID: Z07558533PYKIZCWU31R6
-            accessKeyIDSecretRef:
-              name: route53-credentials
-              key: account-access-key
-            secretAccessKeySecretRef:
-              name: route53-credentials
-              key: secret-access-key
+          cloudflare:
+            apiTokenSecretRef:
+              name: cloudflare-token
+              key: api-key
