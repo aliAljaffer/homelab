@@ -205,8 +205,8 @@ Use the standard images directly in the profile in Step 5. You do not need to cl
      baseInstaller:
        imageRef: 127.0.0.1:5005/talos/imager/installer-base:v1.13.8
      systemExtensions:
-       - imageRef: ghcr.io/siderolabs/iscsi-tools:v0.1.6
-       - imageRef: ghcr.io/siderolabs/util-linux-tools:v2.40.2
+       - imageRef: ghcr.io/siderolabs/iscsi-tools:v0.2.0
+       - imageRef: ghcr.io/siderolabs/util-linux-tools:2.41.4
        - imageRef: ghcr.io/siderolabs/intel-ucode:20250211
    output:
      kind: iso
