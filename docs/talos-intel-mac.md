@@ -12,6 +12,8 @@ Talos 1.13.0 and later do not boot on Intel Macs. The boot process stops at the 
 
 **Source:** siderolabs/talos issue [#13231](https://github.com/siderolabs/talos/issues/13231). Full credit to GitHub user [`virtualm2000`](https://github.com/virtualm2000) who identified the LLD regression, narrowed it to the alpha1/alpha2 boundary, and worked out the complete rebuild procedure. This document is a cleaned-up version of their findings.
 
+> **Important caveat:** the kernel rebuild in Step 2 is confirmed working (by the upstream issue reporters) only on Mac Mini and iMac hardware. On at least one 13" Mid-2012 MacBook Pro, the kernel fix alone was **not** sufficient — the machine still hung at the boot logo afterward. The actual mechanism there turned out to be unrelated to the kernel: `systemd-boot`/the UKI EFI path itself hangs on that machine's firmware, regardless of how the kernel was compiled. See [Step 7](#step-7--if-it-still-hangs-after-the-kernel-fix-macbook-pro) if you hit this.
+
 ---
 
 ## Practical alternative: use Talos 1.12.7
@@ -273,3 +275,162 @@ Use the standard images directly in the profile in Step 5. You do not need to cl
    ```
 
    Refer to the [official Talos installation docs](https://www.talos.dev/latest/talos-guides/install/bare-metal-platforms/iso/) for full details on machine config generation and cluster bootstrapping.
+
+---
+
+## Step 7 — If it still hangs after the kernel fix (MacBook Pro)
+
+Confirmed on a 13" Mid-2012 MacBook Pro (integrated graphics only, `MacBookPro9,2`). After completing Steps 1–6 with a verified-correct kernel (GCC + GNU ld, matching the known-working toolchain byte-for-byte), the machine still froze at the exact same screen — `systemd-stub`'s own status line, "Talos Linux, Built by Sidero".
+
+### Diagnosing it
+
+Add these to `extraKernelArgs` and regenerate the ISO to rule the kernel in or out:
+
+```yaml
+customization:
+  extraKernelArgs:
+    - net.ifnames=0
+    - earlyprintk=efi,keep
+    - console=tty0
+    - loglevel=7
+    - ignore_loglevel
+```
+
+If the screen is **identical with or without** these — no extra text, nothing — the freeze is happening before the kernel ever executes a single instruction. `earlyprintk`/`loglevel` are kernel parameters; they can only have an effect once Linux itself starts running. Since `systemd-stub` printed its own status line successfully (proving the firmware loaded and executed the EFI binary fine — this is not a "malformed PE binary rejected by firmware" problem), the hang is inside `systemd-stub`/`systemd-boot` itself, before handoff to the kernel.
+
+`efi=novamap` (a legitimate kernel parameter — "do not call `SetVirtualAddressMap()`", a standard workaround for firmware that hangs around `ExitBootServices`) is worth trying too, but did not help in this case, consistent with the hang being pre-kernel.
+
+**A useful cross-check if the Mac dual-boots Linux already:** if another distro (e.g. Ubuntu) boots fine on the same hardware via its own GRUB, that proves the firmware can run non-Apple EFI binaries in general — it isolates the problem to Talos's specific `systemd-boot` + UKI implementation, not "old Mac firmware can't run Linux."
+
+### The fix: use GRUB instead of systemd-boot
+
+Talos supports GRUB as an alternate bootloader (confirmed in `pkg/machinery/imager/imageropts`: bootloader kinds are `none`, `dual-boot`, `sd-boot`, `grub`), and Talos's GRUB does install in real UEFI mode (`x86_64-efi` platform, not just legacy BIOS) — this is a different code path from `systemd-boot` entirely and worked immediately.
+
+**Important limitation:** this can *only* be set via the **imager's disk-image mode**, not via machine config or any `talosctl apply-config` flag. Talos's real installer (triggered by `apply-config` doing a fresh install) hardcodes the bootloader choice in `bootloader.NewAuto()`:
+
+```go
+func NewAuto() Bootloader {
+    if sdboot.IsUEFIBoot() {
+        return sdboot.New()
+    }
+    return grub.NewConfig()
+}
+```
+
+On UEFI hardware this always picks `sd-boot` — there is no override. `dual-boot` mode exists but explicitly errors ("installation is not implemented") outside of image mode. So GRUB has to be baked into a pre-built disk image and `dd`'d onto the disk directly; you cannot get there through a normal `apply-config`-triggered install.
+
+1. Build a **disk image** (not an ISO) with `bootloader: grub`:
+
+   ```yaml
+   # profile-grub-image.yaml
+   arch: amd64
+   platform: metal
+   secureboot: false
+   version: v1.13.8
+   input:
+     kernel:
+       path: /usr/install/amd64/vmlinuz
+     initramfs:
+       path: /usr/install/amd64/initramfs.xz
+     baseInstaller:
+       imageRef: 127.0.0.1:5005/talos/imager/installer-base:v1.13.8
+     systemExtensions:
+       - imageRef: ghcr.io/siderolabs/iscsi-tools:v0.2.0
+       - imageRef: ghcr.io/siderolabs/util-linux-tools:2.41.4
+       - imageRef: ghcr.io/siderolabs/intel-ucode:20250211
+   output:
+     kind: image
+     outFormat: raw
+     imageOptions:
+       diskSize: 1306525696
+       diskFormat: raw
+       bootloader: grub
+   customization:
+     extraKernelArgs:
+       - net.ifnames=0
+   ```
+
+   Note `sdStub`/`sdBoot` are dropped from `input` — not needed for the `grub` bootloader kind.
+
+   ```bash
+   mkdir -p _out
+   cat profile-grub-image.yaml | docker run --rm -i --network=host \
+     -v $PWD/_out:/out \
+     127.0.0.1:5005/talos/imager/imager:v1.13.8 -
+   ```
+
+   This produces `_out/metal-amd64.raw` (a few GB — Talos grows the partitions to fill the real disk on first boot, so the exact `diskSize` here doesn't need to match the target disk).
+
+2. **Write it to the disk from external media, not from the OS running on that disk.** Boot a plain Linux rescue/live USB (a second USB stick, separate from the Talos installer one — an Ubuntu Desktop live image works fine), then:
+
+   ```bash
+   # verify the checksum matches before writing — a corrupted/truncated
+   # transfer here produces a garbage partition table that LOOKS like it
+   # wrote successfully but silently corrupts the FAT/xfs filesystems
+   sha256sum metal-amd64.raw   # compare against the source before dd
+
+   sudo dd if=metal-amd64.raw of=/dev/sda bs=4M status=progress oflag=sync
+   sync
+   ```
+
+   Reboot, remove the USB, hold Option, select the internal disk.
+
+### A second pitfall: GRUB hardcodes `hd0`
+
+Talos's GRUB build (`internal/app/machined/pkg/runtime/v1alpha1/bootloader/grub/install.go`) invokes `grub-mkimage` with a **hardcoded** prefix:
+
+```go
+const grubPrefix = "(hd0,gpt3)/grub" // EFI, BIOS, BOOT
+```
+
+This assumes the boot disk is always BIOS/EFI disk number 0. On hardware where firmware enumerates the internal disk as `hd1` (as on this MacBook Pro, once the USB sticks were removed), GRUB cannot find its own `grub.cfg` and drops to an interactive `grub>` rescue prompt on every cold boot — it only proceeds if someone is physically present to type:
+
+```
+ls (hd1,gpt3)/
+set root=(hd1,gpt3)
+configfile /grub/grub.cfg
+```
+
+That's fine for a one-off recovery, but unacceptable for a node that needs to survive an unattended reboot (Talos upgrade, power blip, etc).
+
+**The fix:** rebuild just the GRUB EFI binary (`BOOTX64.EFI`) with an embedded early config that searches for the boot partition by filesystem UUID instead of assuming a fixed disk number — the same technique a normal `grub-install` uses, which is why Ubuntu's own GRUB isn't affected by this. Use Talos's **own** `installer-base` image to do this (not the host distro's `grub-install` — its `grub-probe`/`xfs.mod` may be too old to recognize the newer XFS on-disk features Talos's `mkfs.xfs` uses, e.g. `bigtime`/`nrext64`, and will fail with `error: unknown filesystem`):
+
+1. Get the boot partition's UUID (from the rescue live session, with the target disk unmounted from Talos but attached):
+
+   ```bash
+   sudo blkid /dev/sda3   # the BOOT partition (xfs, label "BOOT")
+   ```
+
+2. Build a corrected image using Talos's own `grub-mkimage`, reusing its exact module list (from `install.go`) but with an embedded config performing a UUID search instead of a static prefix:
+
+   ```bash
+   mkdir -p grubfix
+   cat > grubfix/early.cfg <<'EOF'
+   search --no-floppy --fs-uuid --set=root <BOOT-PARTITION-UUID>
+   set prefix=($root)/grub
+   EOF
+
+   docker run --rm \
+     -v "$PWD/grubfix:/out" \
+     --entrypoint grub-mkimage \
+     127.0.0.1:5005/talos/imager/installer-base:v1.13.8 \
+     --format x86_64-efi \
+     --output /out/BOOTX64.efi \
+     --prefix '(hd0,gpt3)/grub' \
+     --config /out/early.cfg \
+     --compression xz \
+     part_gpt ext2 fat xfs normal configfile linux boot search search_fs_uuid search_fs_file ls cat echo test help reboot halt all_video
+   ```
+
+   The `--prefix` here is just a build-time fallback default; the embedded `--config` script runs first at boot and overrides it dynamically via the UUID search, so it works regardless of what disk number the firmware assigns.
+
+3. From the rescue live session, drop the fixed binary in place (this only replaces the boot loader binary — Talos's own generated `grub.cfg` menu is untouched):
+
+   ```bash
+   sudo mount /dev/sda1 /mnt/efi
+   sudo cp BOOTX64.efi /mnt/efi/EFI/boot/BOOTX64.EFI
+   sudo umount /mnt/efi
+   sync
+   ```
+
+4. Reboot, remove all USB media, hold Option, select the internal disk. It should now boot straight to the Talos GRUB menu with no manual intervention, and survive unattended reboots normally.
