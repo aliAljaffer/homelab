@@ -25,6 +25,9 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/lib/postgresql/data
+          env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata  # subdirectory avoids lost+found conflict on Longhorn volumes
           envFrom:
             - secretRef:
                 name: postgresql-secret
