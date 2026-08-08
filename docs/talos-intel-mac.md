@@ -1,20 +1,20 @@
-# Talos on Intel Mac (mid-2012 MacBook Pro)
+# Talos on Intel Mac
 
 ## The problem
 
 Talos 1.13.0 and later do not boot on Intel Macs. The boot process stops at the Talos logo with no kernel output. The regression was introduced in 1.13.0-alpha2 when the kernel build switched from GNU ld to Clang+LLD (LLVM ThinLTO). Apple's EFI firmware rejects the PE binary produced by LLD.
 
-**Affected hardware:** Any Intel Mac with Apple EFI firmware — Mac Mini 2012/2014, MacBook Pro 2012, and others.
+**Affected hardware:** Any Intel Mac with Apple EFI firmware — Mac Mini 2012/2014, MacBook Pro 2012, MacBook Air, and others.
 
 **Not affected:** Standard x86 machines (Dell, Lenovo, etc.) which accept the LLD-compiled kernel without issue.
 
-**Source:** siderolabs/talos issue #13231. Full credit to GitHub user [`virtualm2000`](https://github.com/virtualm2000) who identified the LLD regression, narrowed it to the alpha1/alpha2 boundary, and worked out the complete rebuild procedure. This document is a cleaned-up version of their findings.
+**Source:** siderolabs/talos issue [#13231](https://github.com/siderolabs/talos/issues/13231). Full credit to GitHub user [`virtualm2000`](https://github.com/virtualm2000) who identified the LLD regression, narrowed it to the alpha1/alpha2 boundary, and worked out the complete rebuild procedure. This document is a cleaned-up version of their findings.
 
 ---
 
 ## The fix
 
-Rebuild the Talos kernel with `LLVM: 1` removed from the build config and LTO disabled. The resulting kernel is compiled by Clang with GNU ld instead of LLD, which Apple's EFI accepts.
+Rebuild the Talos kernel with `LLVM: 1` removed from the build config and ThinLTO disabled. The resulting kernel is compiled by Clang with GNU ld instead of LLD, which Apple's EFI accepts.
 
 **Time required:** 1 to 2 hours (mostly waiting for compilation).
 
@@ -77,34 +77,40 @@ Rebuild the Talos kernel with `LLVM: 1` removed from the build config and LTO di
      PLATFORM=linux/amd64
    ```
 
-   > **Note:** If you need the `i915` extension (for Intel iGPU on other nodes), rebuild it against this kernel. The 2012 MacBook Pro GT 650M does not need it.
+---
 
-   ```bash
-   cd ..
-   git clone https://github.com/siderolabs/extensions.git
-   cd extensions
-   git checkout v1.13.0
-   sudo -E make iscsi-tools util-linux-tools intel-ucode \
-     TAG=v1.13.0 \
-     REGISTRY=127.0.0.1:5005/talos \
-     USERNAME=extensions \
-     PUSH=true \
-     PLATFORM=linux/amd64 \
-     PKGS=v1.13.0-dirty \
-     PKGS_PREFIX=127.0.0.1:5005/talos/pkgs
-   cd ..
-   ```
+## Step 3 — Rebuild any required extensions
+
+Any extension that ships kernel modules must be rebuilt against the patched kernel. Common ones for Intel Mac hardware:
+
+```bash
+cd ..
+git clone https://github.com/siderolabs/extensions.git
+cd extensions
+git checkout v1.13.0
+sudo -E make <extension-name> \
+  TAG=v1.13.0 \
+  REGISTRY=127.0.0.1:5005/talos \
+  USERNAME=extensions \
+  PUSH=true \
+  PLATFORM=linux/amd64 \
+  PKGS=v1.13.0-dirty \
+  PKGS_PREFIX=127.0.0.1:5005/talos/pkgs
+cd ..
+```
+
+Replace `<extension-name>` with each extension you need (for example, `iscsi-tools`, `i915`, `intel-ucode`). Extensions that do not ship kernel modules (such as `intel-ucode`) can use the standard image from `ghcr.io/siderolabs` without rebuilding.
 
 ---
 
-## Step 3 — Build the Talos installer and imager
+## Step 4 — Build the Talos installer and imager
 
-1. Clone the Talos repository and check out v1.13.7.
+1. Clone the Talos repository and check out the version you are targeting.
 
    ```bash
    git clone https://github.com/siderolabs/talos.git
    cd talos
-   git checkout v1.13.7
+   git checkout v1.13.7   # replace with your target version
    ```
 
 2. Build the kernel artifacts, initramfs, imager, and installer base.
@@ -122,20 +128,19 @@ Rebuild the Talos kernel with `LLVM: 1` removed from the build config and LTO di
      PKGS_PREFIX=127.0.0.1:5005/talos/pkgs
    ```
 
-   > **Note:** The kernel tag uses `v1.13.0-dirty` because the Makefile stamps non-official builds. The installer tag is `v1.13.7` matching the actual Talos version.
+   > **Note:** The kernel tag carries the suffix `-dirty` because the Makefile stamps non-release builds. The installer tag should match the Talos version you checked out.
 
 ---
 
-## Step 4 — Generate the ISO
+## Step 5 — Generate the ISO
 
-1. Write the imager profile. These are the extensions for the MacBook (no i915 — the GT 650M is not supported by modern nvidia or i915 drivers in Kubernetes).
+1. Write an imager profile for your hardware. Add the extensions you need. Below is an example for a 2012 MacBook Pro (Ivy Bridge, no supported discrete GPU driver):
 
-   ```bash
-   cat > profile.yaml << 'EOF'
+   ```yaml
+   # profile.yaml
    arch: amd64
    platform: metal
    secureboot: false
-   name: talos-macbook-pro-2012
    version: v1.13.7
    input:
      kernel:
@@ -151,14 +156,13 @@ Rebuild the Talos kernel with `LLVM: 1` removed from the build config and LTO di
      systemExtensions:
        - imageRef: 127.0.0.1:5005/talos/extensions/iscsi-tools:v1.13.0
        - imageRef: 127.0.0.1:5005/talos/extensions/util-linux-tools:v1.13.0
-       - imageRef: 127.0.0.1:5005/talos/extensions/intel-ucode:v1.13.0
+       - imageRef: ghcr.io/siderolabs/intel-ucode:20250211   # no kernel modules, use standard image
    output:
      kind: iso
      outFormat: raw
    customization:
      extraKernelArgs:
        - net.ifnames=0
-   EOF
    ```
 
 2. Generate the ISO.
@@ -170,36 +174,29 @@ Rebuild the Talos kernel with `LLVM: 1` removed from the build config and LTO di
      127.0.0.1:5005/talos/imager/imager:v1.13.7 -
    ```
 
-   The ISO is written to `./_out/talos-macbook-pro-2012.iso`.
-
 3. Write the ISO to a USB drive. Replace `/dev/sdX` with your USB device.
 
    ```bash
-   sudo dd if=_out/talos-macbook-pro-2012.iso of=/dev/sdX bs=4M status=progress oflag=sync
+   sudo dd if=_out/metal-amd64.iso of=/dev/sdX bs=4M status=progress oflag=sync
    ```
 
 ---
 
-## Step 5 — Boot and install
+## Step 6 — Boot and install
 
-1. Insert the USB drive into the MacBook Pro.
+1. Insert the USB drive into the Mac.
 
-2. Power on the MacBook and hold **Option (Alt)** to enter the boot picker.
+2. Power on and hold **Option (Alt)** to open the boot picker.
 
 3. Select the EFI boot entry for the USB drive.
 
-4. Talos boots to a minimal shell. Install to the internal SSD.
+4. Once Talos is running from USB, generate a machine config and apply it.
 
    ```bash
-   talosctl apply-config --insecure -n <macbook-ip> --file /path/to/macbook-config.yaml
+   talosctl gen config <cluster-name> https://<control-plane-ip>:6443
+   talosctl apply-config --insecure -n <mac-ip> --file controlplane.yaml
+   # or for a worker:
+   talosctl apply-config --insecure -n <mac-ip> --file worker.yaml
    ```
 
-   Generate the config first using `talosctl gen config` or by decrypting and adapting `talos/clusterconfig/k8s-homelab-wrk0.sops.yaml`.
-
----
-
-## Joining the cluster
-
-Once Talos is installed on the MacBook, add it to the cluster following the procedure in `kubernetes/bootstrap/README.md`. If adding it as a control plane node, generate a controlplane config (not a worker config) and ensure the machine config includes `controlPlane: true`.
-
-Update `talos/talconfig.yaml` to add the new node entry and encrypt a new `.sops.yaml` for it.
+   Refer to the [official Talos installation docs](https://www.talos.dev/latest/talos-guides/install/bare-metal-platforms/iso/) for full details on machine config generation and cluster bootstrapping.
