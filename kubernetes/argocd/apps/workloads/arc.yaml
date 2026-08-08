@@ -1,58 +1,34 @@
 ---
-# ARC controller + namespace resources
-# ArgoCD OCI format: repoURL = registry/namespace, chart = chart-name
+# ARC: ArgoCD manages namespaces and the github-token SealedSecret.
+# The Helm releases (arc-controller, arc-runner-set) are installed via Helm CLI
+# because ArgoCD 2.14 does not support OCI Helm registries (ghcr.io).
+#
+# To upgrade ARC in the future:
+#   helm upgrade arc-controller \
+#     oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller \
+#     --version <new-version> --namespace arc-systems
+#   helm upgrade arc-runner-set \
+#     oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set \
+#     --version <new-version> --namespace arc-runners
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: arc-controller
+  name: arc
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: workloads
-  sources:
-    - repoURL: oci://ghcr.io/actions/actions-runner-controller-charts
-      chart: gha-runner-scale-set-controller
-      targetRevision: 0.14.2
-    - repoURL: https://github.com/aliAljaffer/homelab.git
-      targetRevision: main
-      path: kubernetes/apps/arc
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: arc-systems
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
----
-# ARC runner scale set
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: arc-runner-set
-  namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
-spec:
-  project: workloads
-  sources:
-    - repoURL: oci://ghcr.io/actions/actions-runner-controller-charts
-      chart: gha-runner-scale-set
-      targetRevision: 0.14.2
-      helm:
-        valueFiles:
-          - $values/kubernetes/apps/arc/arc-runner-set-values.yaml
-    - repoURL: https://github.com/aliAljaffer/homelab.git
-      targetRevision: main
-      ref: values
+  source:
+    repoURL: https://github.com/aliAljaffer/homelab.git
+    targetRevision: main
+    path: kubernetes/apps/arc
   destination:
     server: https://kubernetes.default.svc
     namespace: arc-runners
   syncPolicy:
     automated:
-      prune: true
+      prune: false
       selfHeal: true
     syncOptions:
       - CreateNamespace=true

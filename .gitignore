@@ -19,6 +19,10 @@
 *.age
 *.key
 
+# Credential files (Velero and other tool credentials)
+credentials-*
+*-credentials
+
 # Talos generated configs (plaintext) - commit only the .sops encrypted versions
 talos/clusterconfig/*.yaml
 !talos/clusterconfig/*.sops
