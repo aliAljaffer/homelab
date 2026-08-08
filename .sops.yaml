@@ -1,10 +1,13 @@
 creation_rules:
-  # Talos machine configs
-  - path_regex: talos/clusterconfig/.*\.sops$
+  # Talos machine configs: only encrypt secret values (keys, tokens, secrets).
+  # Matches both the plaintext source (.yaml) and the encrypted output (.sops.yaml).
+  # Structure (IPs, K8s version, extensions) stays readable in git.
+  - path_regex: talos/clusterconfig/.*\.yaml$
+    encrypted_regex: "^(key|token|secret|secretboxEncryptionSecret)$"
     age: >-
       age13jd0rndp589yqxpxw36fkrn8jkgazqrlvj22txp4gfh8e0qskusq97zta9
 
-  # Any other files you want to encrypt with SOPS
+  # Any other files encrypted with SOPS
   - path_regex: .*\.sops\.yaml$
     age: >-
       age13jd0rndp589yqxpxw36fkrn8jkgazqrlvj22txp4gfh8e0qskusq97zta9

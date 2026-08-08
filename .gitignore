@@ -23,7 +23,10 @@
 credentials-*
 *-credentials
 
-# Talos generated configs (plaintext) - commit only the .sops encrypted versions
+# Private architecture diagrams (use Excalidraw externally)
+docs/cluster-overview.md
+
+# Talos generated configs: block plaintext, allow partially-encrypted .sops.yaml
 talos/clusterconfig/*.yaml
-!talos/clusterconfig/*.sops
+!talos/clusterconfig/*.sops.yaml
 !talos/clusterconfig/.gitkeep
