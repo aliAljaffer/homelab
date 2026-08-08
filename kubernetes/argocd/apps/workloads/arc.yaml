@@ -10,9 +10,9 @@ metadata:
 spec:
   project: workloads
   sources:
-    - repoURL: https://actions.github.io/actions-runner-controller
+    - repoURL: oci://ghcr.io/actions/actions-runner-controller-charts
       chart: gha-runner-scale-set-controller
-      targetRevision: 0.13.0
+      targetRevision: 0.14.2
     - repoURL: https://github.com/aliAljaffer/homelab.git
       targetRevision: main
       path: kubernetes/apps/arc
@@ -26,7 +26,7 @@ spec:
     syncOptions:
       - CreateNamespace=true
 ---
-# ARC runner scale set (references github-token SealedSecret in arc namespace)
+# ARC runner scale set — uses github-token SealedSecret for PAT
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -37,14 +37,12 @@ metadata:
 spec:
   project: workloads
   sources:
-    - repoURL: https://actions.github.io/actions-runner-controller
+    - repoURL: oci://ghcr.io/actions/actions-runner-controller-charts
       chart: gha-runner-scale-set
-      targetRevision: 0.13.0
+      targetRevision: 0.14.2
       helm:
         valueFiles:
           - $values/kubernetes/apps/arc/arc-runner-set-values.yaml
-        valuesObject:
-          githubConfigSecret: github-token  # SealedSecret: see bootstrap README
     - repoURL: https://github.com/aliAljaffer/homelab.git
       targetRevision: main
       ref: values
