@@ -1,0 +1,12 @@
+---
+# node_exporter requires hostNetwork/hostPID/hostPath/hostPort, which the
+# cluster-wide PodSecurity default (baseline) does not allow. Namespace-level
+# labels override the cluster default.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/audit: privileged
+    pod-security.kubernetes.io/warn: privileged

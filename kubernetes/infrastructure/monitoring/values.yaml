@@ -43,6 +43,13 @@ grafana:
   defaultDashboardsEnabled: true
   defaultDashboardsTimezone: Asia/Riyadh
 
+  # The chart auto-provisions a Prometheus datasource marked isDefault by
+  # default, which conflicts with the Thanos datasource below (also
+  # isDefault: true). Only one datasource per org may be default.
+  sidecar:
+    datasources:
+      isDefaultDatasource: false
+
   persistence:
     enabled: true
     storageClassName: longhorn
