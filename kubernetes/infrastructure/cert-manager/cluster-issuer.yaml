@@ -11,7 +11,7 @@ spec:
     solvers:
       - dns01:
           route53:
-            region: me-south-1
+            region: us-east-1  # Route53 is global — always use us-east-1 for API access
             hostedZoneID: Z07558533PYKIZCWU31R6
             accessKeyIDSecretRef:
               name: route53-credentials
