@@ -43,6 +43,8 @@ Rebuild the Talos kernel with `LLVM: 1` removed from the build config and ThinLT
    docker run -d -p 5005:5000 --restart=always --name registry registry:2
    ```
 
+   This registry runs on `127.0.0.1:5005` (loopback only). It has no authentication. If `docker login` asks for a username and password, enter any value. The registry ignores credentials entirely.
+
 2. Create a BuildKit builder with insecure permissions (required for Talos kernel builds).
 
    ```bash
