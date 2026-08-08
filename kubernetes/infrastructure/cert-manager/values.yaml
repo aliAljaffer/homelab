@@ -1,0 +1,5 @@
+---
+crds:
+  enabled: true
+# Required for cert-manager to provision TLS via Gateway API listeners
+featureGates: "ExperimentalGatewayAPISupport=true"

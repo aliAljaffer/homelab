@@ -11,16 +11,16 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: infrastructure
-  source:
-    repoURL: https://charts.jetstack.io
-    chart: cert-manager
-    targetRevision: v1.17.2
-    helm:
-      valuesObject:
-        crds:
-          enabled: true
-        # Required for Gateway API integration
-        featureGates: "ExperimentalGatewayAPISupport=true"
+  sources:
+    - repoURL: https://charts.jetstack.io
+      chart: cert-manager
+      targetRevision: v1.17.2
+      helm:
+        valueFiles:
+          - $values/kubernetes/infrastructure/cert-manager/values.yaml
+    - repoURL: https://github.com/aliAljaffer/homelab.git
+      targetRevision: main
+      ref: values
   destination:
     server: https://kubernetes.default.svc
     namespace: cert-manager

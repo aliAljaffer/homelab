@@ -1,0 +1,66 @@
+---
+controller:
+  type: daemonset
+
+alloy:
+  configMap:
+    create: true
+    content: |
+      // Discover all pods in the cluster
+      discovery.kubernetes "pods" {
+        role = "pod"
+      }
+
+      // Relabel pod metadata to Loki labels
+      discovery.relabel "pod_logs" {
+        targets = discovery.kubernetes.pods.targets
+        rule {
+          source_labels = ["__meta_kubernetes_namespace"]
+          target_label  = "namespace"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_name"]
+          target_label  = "pod"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_container_name"]
+          target_label  = "container"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_label_app"]
+          target_label  = "app"
+        }
+        // Drop kube-system noise
+        rule {
+          source_labels = ["__meta_kubernetes_namespace"]
+          regex         = "kube-system"
+          action        = "drop"
+        }
+      }
+
+      // Collect logs from discovered pods
+      loki.source.kubernetes "pod_logs" {
+        targets    = discovery.relabel.pod_logs.output
+        forward_to = [loki.write.default.receiver]
+      }
+
+      // Collect Talos node logs via journald
+      loki.source.journal "talos_journal" {
+        forward_to = [loki.write.default.receiver]
+        labels = {
+          job  = "talos",
+          node = env("HOSTNAME"),
+        }
+      }
+
+      loki.write "default" {
+        endpoint {
+          url = "http://loki-gateway.monitoring.svc.cluster.local/loki/api/v1/push"
+        }
+      }
+
+tolerations:
+  - effect: NoSchedule
+    operator: Exists
+  - effect: NoExecute
+    operator: Exists

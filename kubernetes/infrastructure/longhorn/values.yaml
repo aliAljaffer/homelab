@@ -1,0 +1,20 @@
+---
+defaultSettings:
+  defaultReplicaCount: 2
+  defaultDataLocality: best-effort
+  storageReservedPercentageForDefaultDisk: 15
+  # Uncomment after MinIO is running to enable volume backups:
+  # backupTarget: "s3://velero@us-east-1/?endpoint=minio.catus-locatus.svc.cluster.local:9000&forcePathStyle=true"
+  # backupTargetCredentialSecret: longhorn-backup-secret
+
+persistence:
+  defaultClass: true
+  defaultClassReplicaCount: 2
+  defaultFsType: ext4
+
+# Exposed via Gateway API HTTPRoute (see cilium-config/httproute-longhorn.yaml)
+ingress:
+  enabled: false
+
+longhornUI:
+  replicas: 1

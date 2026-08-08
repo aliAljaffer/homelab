@@ -1,0 +1,35 @@
+---
+existingObjstoreSecret: thanos-objstore-secret  # SealedSecret: see bootstrap/README.md
+
+query:
+  enabled: true
+  replicaLabel: prometheus_replica
+  stores:
+    - prometheus-operated.monitoring.svc.cluster.local:10901
+  dnsDiscovery:
+    enabled: true
+    sidecarsService: kube-prometheus-kube-prome-thanos-discovery
+    sidecarsNamespace: monitoring
+
+storegateway:
+  enabled: true
+  persistence:
+    enabled: true
+    storageClass: longhorn
+    size: 10Gi
+
+compactor:
+  enabled: true
+  retentionResolutionRaw: 0s   # keep raw metrics forever
+  retentionResolution5m: 0s    # keep 5m downsampled forever
+  retentionResolution1h: 0s    # keep 1h downsampled forever
+  persistence:
+    enabled: true
+    storageClass: longhorn
+    size: 10Gi
+
+ruler:
+  enabled: false
+
+receive:
+  enabled: false

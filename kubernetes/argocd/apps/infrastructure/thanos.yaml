@@ -1,6 +1,6 @@
 ---
-# Wave 1: Thanos store-gateway + compactor + querier (long-term metrics)
-# Thanos sidecar runs inside Prometheus (configured in monitoring values.yaml)
+# Wave 1: Thanos store-gateway + compactor + querier (long-term metrics, indefinite retention)
+# Thanos sidecar runs inside Prometheus (configured in monitoring/values.yaml)
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -12,46 +12,16 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: infrastructure
-  source:
-    repoURL: https://charts.bitnami.com/bitnami
-    chart: thanos
-    targetRevision: 15.10.1
-    helm:
-      valuesObject:
-        existingObjstoreSecret: thanos-objstore-secret
-
-        query:
-          enabled: true
-          replicaLabel: prometheus_replica
-          stores:
-            - prometheus-operated.monitoring.svc.cluster.local:10901
-          dnsDiscovery:
-            enabled: true
-            sidecarsService: kube-prometheus-kube-prome-thanos-discovery
-            sidecarsNamespace: monitoring
-
-        storegateway:
-          enabled: true
-          persistence:
-            enabled: true
-            storageClass: longhorn
-            size: 10Gi
-
-        compactor:
-          enabled: true
-          retentionResolutionRaw: 0s   # keep raw forever
-          retentionResolution5m: 0s    # keep 5m downsampled forever
-          retentionResolution1h: 0s    # keep 1h downsampled forever
-          persistence:
-            enabled: true
-            storageClass: longhorn
-            size: 10Gi
-
-        ruler:
-          enabled: false
-
-        receive:
-          enabled: false
+  sources:
+    - repoURL: https://charts.bitnami.com/bitnami
+      chart: thanos
+      targetRevision: 15.10.1
+      helm:
+        valueFiles:
+          - $values/kubernetes/infrastructure/thanos/values.yaml
+    - repoURL: https://github.com/aliAljaffer/homelab.git
+      targetRevision: main
+      ref: values
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
