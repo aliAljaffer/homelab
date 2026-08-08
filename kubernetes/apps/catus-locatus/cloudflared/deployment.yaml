@@ -24,7 +24,6 @@ spec:
         - /etc/cloudflared/config/config.yaml
         - run
 
-        # Liveness probe - checks if tunnel is healthy
         livenessProbe:
           httpGet:
             path: /ready
@@ -33,7 +32,6 @@ spec:
           initialDelaySeconds: 10
           periodSeconds: 10
 
-        # Resource limits
         resources:
           requests:
             memory: "64Mi"
@@ -51,7 +49,6 @@ spec:
           readOnly: true
 
       volumes:
-      # ConfigMap with tunnel configuration
       - name: config
         configMap:
           name: cloudflared-config
@@ -59,15 +56,11 @@ spec:
           - key: config.yaml
             path: config.yaml
 
-      # Secret with tunnel credentials
       - name: creds
         secret:
           secretName: cloudflare-tunnel-credentials
 
-      # Restart policy
       restartPolicy: Always
-
-      # Security context - run as non-root
       securityContext:
         runAsNonRoot: true
         runAsUser: 65532  # cloudflared user
