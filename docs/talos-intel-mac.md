@@ -14,7 +14,19 @@ Talos 1.13.0 and later do not boot on Intel Macs. The boot process stops at the 
 
 ---
 
-## The fix
+## Practical alternative: use Talos 1.12.7
+
+If you only need this machine as a **worker node**, use the last working release (v1.12.7) from the standard Image Factory. No custom build required.
+
+Talos 1.12.7 bundles Kubernetes 1.35.x. A 1.35.x kubelet is one minor version behind a 1.36.x apiserver, which is within the supported Kubernetes skew policy. The node joins and works normally.
+
+This is not an option for control plane nodes — all control plane nodes must run the same Kubernetes version.
+
+Generate the 1.12.7 image at `https://factory.talos.dev/` with your required extensions, write it with Rufus, and proceed directly to joining the cluster.
+
+---
+
+## The fix (for control plane nodes or 1.13.x requirement)
 
 Rebuild the Talos kernel with `LLVM: 1` removed from the build config and ThinLTO disabled. The resulting kernel is compiled by Clang with GNU ld instead of LLD, which Apple's EFI accepts.
 
