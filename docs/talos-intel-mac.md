@@ -74,13 +74,13 @@ Rebuild the Talos kernel with `LLVM: 1` removed from the build config and ThinLT
    sed -i '/^\s*LLVM: 1/d' kernel/build/pkg.yaml
    ```
 
-3. Update the kernel config to disable ThinLTO.
+3. Regenerate the kernel config. This applies the changes from step 2 and sets all options to their defaults without prompting.
 
    ```bash
    sudo -E make kernel-olddefconfig PLATFORM=linux/amd64
    ```
 
-   When the config editor opens, find `CONFIG_LTO_CLANG_THIN` and disable it. Set `CONFIG_LTO_NONE=y`.
+   No editor opens. Removing `LLVM: 1` in step 2 is enough — the build system automatically sets `CONFIG_LTO_NONE=y` as a result.
 
 4. Build the kernel and push it to your local registry.
 
