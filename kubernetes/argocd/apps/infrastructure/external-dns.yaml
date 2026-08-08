@@ -21,6 +21,9 @@ spec:
     - repoURL: https://github.com/aliAljaffer/homelab.git
       targetRevision: main
       ref: values
+    - repoURL: https://github.com/aliAljaffer/homelab.git
+      targetRevision: main
+      path: kubernetes/infrastructure/external-dns
   destination:
     server: https://kubernetes.default.svc
     namespace: external-dns
