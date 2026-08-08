@@ -54,6 +54,10 @@ grafana:
     database:
       wal: true  # required for SQLite on networked (Longhorn) storage
 
+  sidecar:
+    datasources:
+      defaultDatasourceEnabled: false  # prevent conflict with Thanos as default
+
   # Point Grafana at Thanos Query for long-term metrics
   additionalDataSources:
     - name: Thanos
