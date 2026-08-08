@@ -8,19 +8,19 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-4"
   finalizers:
-    - resources-finalizer.argocd.argoproj.io
+  - resources-finalizer.argocd.argoproj.io
 spec:
   project: infrastructure
   sources:
-    - repoURL: https://charts.jetstack.io
-      chart: cert-manager
-      targetRevision: v1.17.2
-      helm:
-        valueFiles:
-          - $values/kubernetes/infrastructure/cert-manager/values.yaml
-    - repoURL: https://github.com/aliAljaffer/homelab.git
-      targetRevision: main
-      ref: values
+  - repoURL: https://charts.jetstack.io
+    chart: cert-manager
+    targetRevision: v1.17.2
+    helm:
+      valueFiles:
+      - $values/kubernetes/infrastructure/cert-manager/values.yaml
+  - repoURL: git@github.com:aliAljaffer/homelab.git
+    targetRevision: main
+    ref: values
   destination:
     server: https://kubernetes.default.svc
     namespace: cert-manager
@@ -29,5 +29,5 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true
-      - ServerSideApply=true
+    - CreateNamespace=true
+    - ServerSideApply=true

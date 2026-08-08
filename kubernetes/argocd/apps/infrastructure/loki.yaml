@@ -8,22 +8,22 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "0"
   finalizers:
-    - resources-finalizer.argocd.argoproj.io
+  - resources-finalizer.argocd.argoproj.io
 spec:
   project: infrastructure
   sources:
-    - repoURL: https://grafana.github.io/helm-charts
-      chart: loki
-      targetRevision: 6.29.0
-      helm:
-        valueFiles:
-          - $values/kubernetes/infrastructure/loki/values.yaml
-    - repoURL: https://github.com/aliAljaffer/homelab.git
-      targetRevision: main
-      ref: values
-    - repoURL: https://github.com/aliAljaffer/homelab.git
-      targetRevision: main
-      path: kubernetes/infrastructure/loki
+  - repoURL: https://grafana.github.io/helm-charts
+    chart: loki
+    targetRevision: 6.29.0
+    helm:
+      valueFiles:
+      - $values/kubernetes/infrastructure/loki/values.yaml
+  - repoURL: git@github.com:aliAljaffer/homelab.git
+    targetRevision: main
+    ref: values
+  - repoURL: git@github.com:aliAljaffer/homelab.git
+    targetRevision: main
+    path: kubernetes/infrastructure/loki
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
@@ -32,4 +32,4 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true
+    - CreateNamespace=true

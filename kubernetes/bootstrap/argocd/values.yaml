@@ -12,7 +12,7 @@ global:
 server:
   # TLS terminated at the Gateway
   extraArgs:
-    - --insecure
+  - --insecure
 
 configs:
   params:
@@ -28,6 +28,6 @@ configs:
           - "*"
   repositories:
     homelab:
-      url: https://github.com/aliAljaffer/homelab.git
+      url: git@github.com:aliAljaffer/homelab.git
       name: homelab
       type: git

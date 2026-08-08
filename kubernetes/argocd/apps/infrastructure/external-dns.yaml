@@ -8,22 +8,22 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-2"
   finalizers:
-    - resources-finalizer.argocd.argoproj.io
+  - resources-finalizer.argocd.argoproj.io
 spec:
   project: infrastructure
   sources:
-    - repoURL: https://kubernetes-sigs.github.io/external-dns/
-      chart: external-dns
-      targetRevision: 1.20.0
-      helm:
-        valueFiles:
-          - $values/kubernetes/infrastructure/external-dns/values.yaml
-    - repoURL: https://github.com/aliAljaffer/homelab.git
-      targetRevision: main
-      ref: values
-    - repoURL: https://github.com/aliAljaffer/homelab.git
-      targetRevision: main
-      path: kubernetes/infrastructure/external-dns
+  - repoURL: https://kubernetes-sigs.github.io/external-dns/
+    chart: external-dns
+    targetRevision: 1.20.0
+    helm:
+      valueFiles:
+      - $values/kubernetes/infrastructure/external-dns/values.yaml
+  - repoURL: git@github.com:aliAljaffer/homelab.git
+    targetRevision: main
+    ref: values
+  - repoURL: git@github.com:aliAljaffer/homelab.git
+    targetRevision: main
+    path: kubernetes/infrastructure/external-dns
   destination:
     server: https://kubernetes.default.svc
     namespace: external-dns
@@ -32,4 +32,4 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true
+    - CreateNamespace=true

@@ -9,11 +9,11 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-4"
   finalizers:
-    - resources-finalizer.argocd.argoproj.io
+  - resources-finalizer.argocd.argoproj.io
 spec:
   project: infrastructure
   source:
-    repoURL: https://github.com/aliAljaffer/homelab.git
+    repoURL: git@github.com:aliAljaffer/homelab.git
     targetRevision: main
     path: kubernetes/infrastructure/longhorn-prereqs
   destination:
@@ -21,7 +21,7 @@ spec:
     namespace: longhorn-system
   syncPolicy:
     automated:
-      prune: false  # don't delete the SA — Longhorn needs it
+      prune: false # don't delete the SA — Longhorn needs it
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true
+    - CreateNamespace=true

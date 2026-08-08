@@ -10,19 +10,19 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-3"
   finalizers:
-    - resources-finalizer.argocd.argoproj.io
+  - resources-finalizer.argocd.argoproj.io
 spec:
   project: infrastructure
   sources:
-    - repoURL: https://charts.longhorn.io
-      chart: longhorn
-      targetRevision: 1.8.1
-      helm:
-        valueFiles:
-          - $values/kubernetes/infrastructure/longhorn/values.yaml
-    - repoURL: https://github.com/aliAljaffer/homelab.git
-      targetRevision: main
-      ref: values
+  - repoURL: https://charts.longhorn.io
+    chart: longhorn
+    targetRevision: 1.8.1
+    helm:
+      valueFiles:
+      - $values/kubernetes/infrastructure/longhorn/values.yaml
+  - repoURL: git@github.com:aliAljaffer/homelab.git
+    targetRevision: main
+    ref: values
   destination:
     server: https://kubernetes.default.svc
     namespace: longhorn-system
@@ -31,4 +31,4 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true
+    - CreateNamespace=true

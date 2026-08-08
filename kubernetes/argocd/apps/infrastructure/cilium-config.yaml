@@ -8,20 +8,30 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-1"
   finalizers:
-    - resources-finalizer.argocd.argoproj.io
+  - resources-finalizer.argocd.argoproj.io
 spec:
   project: infrastructure
   source:
-    repoURL: https://github.com/aliAljaffer/homelab.git
+    repoURL: git@github.com:aliAljaffer/homelab.git
     targetRevision: main
     path: kubernetes/infrastructure/cilium-config
   destination:
     server: https://kubernetes.default.svc
     namespace: kube-system
+  ignoreDifferences:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      jsonPointers:
+        - /status
+        - /metadata/finalizers
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      jsonPointers:
+        - /status
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true
-      - ServerSideApply=true
+    - CreateNamespace=true
+    - ServerSideApply=true

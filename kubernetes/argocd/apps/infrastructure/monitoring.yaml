@@ -8,22 +8,22 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "0"
   finalizers:
-    - resources-finalizer.argocd.argoproj.io
+  - resources-finalizer.argocd.argoproj.io
 spec:
   project: infrastructure
   sources:
-    - repoURL: https://prometheus-community.github.io/helm-charts
-      chart: kube-prometheus-stack
-      targetRevision: 69.8.0
-      helm:
-        valueFiles:
-          - $values/kubernetes/infrastructure/monitoring/values.yaml
-    - repoURL: https://github.com/aliAljaffer/homelab.git
-      targetRevision: main
-      ref: values
-    - repoURL: https://github.com/aliAljaffer/homelab.git
-      targetRevision: main
-      path: kubernetes/infrastructure/monitoring
+  - repoURL: https://prometheus-community.github.io/helm-charts
+    chart: kube-prometheus-stack
+    targetRevision: 69.8.0
+    helm:
+      valueFiles:
+      - $values/kubernetes/infrastructure/monitoring/values.yaml
+  - repoURL: git@github.com:aliAljaffer/homelab.git
+    targetRevision: main
+    ref: values
+  - repoURL: git@github.com:aliAljaffer/homelab.git
+    targetRevision: main
+    path: kubernetes/infrastructure/monitoring
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
@@ -32,5 +32,5 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true
-      - ServerSideApply=true
+    - CreateNamespace=true
+    - ServerSideApply=true

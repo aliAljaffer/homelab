@@ -7,11 +7,11 @@ metadata:
   name: infrastructure
   namespace: argocd
   finalizers:
-    - resources-finalizer.argocd.argoproj.io
+  - resources-finalizer.argocd.argoproj.io
 spec:
   project: infrastructure
   source:
-    repoURL: https://github.com/aliAljaffer/homelab.git
+    repoURL: git@github.com:aliAljaffer/homelab.git
     targetRevision: main
     path: kubernetes/argocd/apps/infrastructure
   destination:
@@ -22,4 +22,4 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true
+    - CreateNamespace=true

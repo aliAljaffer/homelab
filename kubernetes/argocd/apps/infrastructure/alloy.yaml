@@ -8,19 +8,19 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "1"
   finalizers:
-    - resources-finalizer.argocd.argoproj.io
+  - resources-finalizer.argocd.argoproj.io
 spec:
   project: infrastructure
   sources:
-    - repoURL: https://grafana.github.io/helm-charts
-      chart: alloy
-      targetRevision: 0.12.5
-      helm:
-        valueFiles:
-          - $values/kubernetes/infrastructure/alloy/values.yaml
-    - repoURL: https://github.com/aliAljaffer/homelab.git
-      targetRevision: main
-      ref: values
+  - repoURL: https://grafana.github.io/helm-charts
+    chart: alloy
+    targetRevision: 0.12.5
+    helm:
+      valueFiles:
+      - $values/kubernetes/infrastructure/alloy/values.yaml
+  - repoURL: git@github.com:aliAljaffer/homelab.git
+    targetRevision: main
+    ref: values
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
@@ -29,4 +29,4 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true
+    - CreateNamespace=true
