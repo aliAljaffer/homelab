@@ -7,7 +7,7 @@
 
 # Replace kube-proxy entirely
 kubeProxyReplacement: true
-k8sServiceHost: 192.168.8.100
+k8sServiceHost: 192.168.8.99
 k8sServicePort: 6443
 
 ipam:
