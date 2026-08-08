@@ -1,7 +1,7 @@
 ---
 initContainers:
-  - name: velero-plugin-for-aws
-    image: velero/velero-plugin-for-aws:v1.11.0
+  - name: velero-plugin-for-gcp
+    image: velero/velero-plugin-for-gcp:v1.13.0
     imagePullPolicy: IfNotPresent
     volumeMounts:
       - mountPath: /target
@@ -14,21 +14,15 @@ credentials:
 configuration:
   backupStorageLocation:
     - name: default
-      provider: aws
-      bucket: velero
-      config:
-        region: us-east-1
-        s3ForcePathStyle: "true"
-        s3Url: http://minio-svc.catus-locatus.svc.cluster.local:9000
+      provider: gcp
+      bucket: alialjaffer-homelab
       credential:
         name: cloud-credentials
         key: cloud
 
   volumeSnapshotLocation:
     - name: default
-      provider: aws
-      config:
-        region: us-east-1
+      provider: gcp
       credential:
         name: cloud-credentials
         key: cloud
