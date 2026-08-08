@@ -10,6 +10,7 @@ spec:
   description: Cluster infrastructure (CNI, ingress, storage, monitoring)
   sourceRepos:
   - git@github.com:aliAljaffer/homelab.git
+  - https://github.com/aliAljaffer/homelab.git
   - https://helm.cilium.io/
   - https://charts.jetstack.io
   - https://metallb.github.io/metallb
