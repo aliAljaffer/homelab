@@ -1,5 +1,7 @@
 # Talos on Intel Mac
 
+> **Tested on WSL2 successfully.** Talos 1.13.8 with custom GNU ld kernel built and installed on a MacBook Pro Mid-2012 (Ivy Bridge, 13"). Node joined a Talos cluster as control plane.
+
 ## The problem
 
 Talos 1.13.0 and later do not boot on Intel Macs. The boot process stops at the Talos logo with no kernel output. The regression was introduced in 1.13.0-alpha2 when the kernel build switched from GNU ld to Clang+LLD (LLVM ThinLTO). Apple's EFI firmware rejects the PE binary produced by LLD.
