@@ -16,13 +16,13 @@ data:
       # --- Remote cluster access (protected by Cloudflare Access ZT) ---
       # kubectl: cloudflared access tcp --hostname kubectl.alialjaffer.com --url localhost:6443
       - hostname: kubectl.alialjaffer.com
-        service: tcp://192.168.8.100:6443
+        service: tcp://192.168.8.99:6443
         originRequest:
           noTLSVerify: true
 
       # talosctl: cloudflared access tcp --hostname talos.alialjaffer.com --url localhost:50000
       - hostname: talos.alialjaffer.com
-        service: tcp://192.168.8.100:50000
+        service: tcp://192.168.8.99:50000
         originRequest:
           noTLSVerify: true
 
