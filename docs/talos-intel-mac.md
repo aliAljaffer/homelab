@@ -98,25 +98,29 @@ Rebuild the Talos kernel with `LLVM: 1` removed from the build config and ThinLT
 
 ## Step 3 — Rebuild any required extensions
 
-Any extension that ships kernel modules must be rebuilt against the patched kernel. Common ones for Intel Mac hardware:
+Extensions that ship kernel modules must be rebuilt against the patched kernel. Extensions that do not ship kernel modules can use the standard images from `ghcr.io/siderolabs` without rebuilding.
+
+For Intel Mac hardware, rebuild `iscsi-tools` and `util-linux-tools` (both required for Longhorn). Do not try to build `i915` — it requires `linux-firmware` as a dependency, which is a separate large build. The 2012 MacBook Pro GPU is not supported by Kubernetes GPU drivers anyway.
 
 ```bash
 cd ..
 git clone https://github.com/siderolabs/extensions.git
 cd extensions
 git checkout v1.13.0
-sudo -E make <extension-name> \
-  TAG=v1.13.0 \
-  REGISTRY=127.0.0.1:5005/talos \
-  USERNAME=extensions \
-  PUSH=true \
-  PLATFORM=linux/amd64 \
-  PKGS=v1.13.0-dirty \
-  PKGS_PREFIX=127.0.0.1:5005/talos/pkgs
+for ext in iscsi-tools util-linux-tools; do
+  sudo -E make $ext \
+    TAG=v1.13.0 \
+    REGISTRY=127.0.0.1:5005/talos \
+    USERNAME=extensions \
+    PUSH=true \
+    PLATFORM=linux/amd64 \
+    PKGS=v1.13.0-dirty \
+    PKGS_PREFIX=127.0.0.1:5005/talos/pkgs
+done
 cd ..
 ```
 
-Replace `<extension-name>` with each extension you need (for example, `iscsi-tools`, `i915`, `intel-ucode`). Extensions that do not ship kernel modules (such as `intel-ucode`) can use the standard image from `ghcr.io/siderolabs` without rebuilding.
+Use the standard `ghcr.io/siderolabs/intel-ucode` image directly in the profile — no rebuild needed.
 
 ---
 
