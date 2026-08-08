@@ -20,6 +20,19 @@ Rebuild the Talos kernel with `LLVM: 1` removed from the build config and ThinLT
 
 **Before you start:** Make sure you have Docker installed with BuildKit support, at least 20 GB of free disk space, and a stable internet connection.
 
+> **WSL2 note:** If you are building on WSL2 with Docker Desktop, you may see the error `error getting credentials: docker-credential-desktop.exe: executable file not found in $PATH`. This happens because Docker's config inside WSL2 points to a Windows credential helper. Fix it before starting:
+>
+> ```bash
+> cat ~/.docker/config.json | python3 -c "
+> import json, sys
+> c = json.load(sys.stdin)
+> c.pop('credsStore', None)
+> print(json.dumps(c, indent=2))
+> " > /tmp/docker-config.json && mv /tmp/docker-config.json ~/.docker/config.json
+> ```
+>
+> Then run `docker login 127.0.0.1:5005` before proceeding.
+
 ---
 
 ## Step 1 — Prepare the build environment
