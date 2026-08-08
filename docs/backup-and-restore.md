@@ -1,20 +1,14 @@
-# Backup and Restore Procedures
+# Backup and Restore
 
-**Document type:** Maintenance procedures  
-**Cluster:** k8s-homelab (Talos Linux)  
-**Applies to:** All cluster operators
+Honestly, if there's one thing you do for this cluster, make it these backups. Lose the Sealed Secrets key and every `.sealed.yaml` file in this repo is gone forever. Same with the SOPS age key - no key, no Talos machine configs.
 
----
+**WARNING:** Loss of the Sealed Secrets key makes all `.sealed.yaml` files in this repository unreadable.
 
-## Warning
-
-> **WARNING:** Loss of the Sealed Secrets key makes all `.sealed.yaml` files in this repository unreadable. You must back up this key before you decommission or rebuild the cluster.
-
-> **WARNING:** Loss of the SOPS age key makes all encrypted Talos machine configs unreadable. You cannot rebuild the cluster without this key.
+**WARNING:** Loss of the SOPS age key makes all encrypted Talos machine configs unreadable. You cannot rebuild the cluster without it.
 
 ---
 
-## Terminology
+## Quick reference
 
 | Term | Meaning |
 |---|---|
@@ -25,19 +19,13 @@
 
 ---
 
-## 1. Backup Procedures
+## Backups
 
-### 1.1 Back Up the Sealed Secrets Key
+### Sealed Secrets key
 
-**When to do this procedure:** After you install the cluster for the first time. Do this procedure again after each cluster rebuild.
+Do this right after you first install the cluster, and again after every rebuild. You need `kubectl` access and somewhere secure to store the key - 1Password works great here.
 
-**Time required:** 5 minutes
-
-**Before you start:** Make sure you have `kubectl` access to the cluster and a secure storage location (for example, 1Password or an encrypted external drive).
-
-**Procedure:**
-
-1. Set the kubeconfig to the Talos cluster.
+1. Set the kubeconfig.
 
    ```bash
    export KUBECONFIG=~/.kube/homelab-talos
@@ -52,59 +40,47 @@
      -o yaml > sealed-secrets-master-key.yaml
    ```
 
-3. Open the output file `sealed-secrets-master-key.yaml` and confirm it is not empty.
+3. Open `sealed-secrets-master-key.yaml` and confirm it is not empty.
 
-4. Copy `sealed-secrets-master-key.yaml` to your secure storage location.
+4. Copy `sealed-secrets-master-key.yaml` to your secure storage.
 
-5. Delete the local copy of the file.
+5. Delete the local copy.
 
    ```bash
    rm sealed-secrets-master-key.yaml
    ```
 
-**Result:** The Sealed Secrets private key is stored in your secure location. The file no longer exists on disk.
+Done. The key is safely stored and gone from disk.
 
 ---
 
-### 1.2 Back Up the SOPS Age Key
+### SOPS age key
 
-**When to do this procedure:** After you generate the age key. Do this procedure only once unless you rotate the key.
+One-time thing unless you rotate the key. The file you're looking for is `~/homelab.age`. If it doesn't exist, run `age-keygen -o ~/homelab.age` first and update `.sops.yaml` with the public key.
 
-**Time required:** 2 minutes
+1. Open `~/homelab.age` and confirm it has a line starting with `AGE-SECRET-KEY-`.
 
-**Before you start:** Make sure the file `homelab.age` exists on your local machine. If it does not exist, run `age-keygen -o ~/homelab.age` first. Update `.sops.yaml` in the repository with the public key from `homelab.age`.
+2. Copy `~/homelab.age` to the same secure place as the Sealed Secrets key.
 
-**Procedure:**
+3. Don't delete `~/homelab.age` from your local machine - you still need it for SOPS operations.
 
-1. Open `~/homelab.age` and confirm it contains a private key line that starts with `AGE-SECRET-KEY-`.
-
-2. Copy `~/homelab.age` to your secure storage location. Store it next to the Sealed Secrets key from procedure 1.1.
-
-3. Do not delete `~/homelab.age` from your local machine. You need it for future SOPS operations.
-
-**Result:** The SOPS age key is stored in your secure location and remains available on your local machine.
+That's it!
 
 ---
 
-### 1.3 Back Up Application Data (Velero)
+### Application data (Velero)
 
-**When to do this procedure:** On a scheduled basis (recommended: daily). Also do this before you upgrade a stateful application.
+Run this daily, or at minimum before upgrading any stateful app. Velero covers `catus-locatus` and `obsidian-sync`. The `monitoring` namespace is excluded because Thanos already stores metrics permanently in MinIO.
 
-**Time required:** 5–30 minutes, depending on data volume.
+Make sure Velero is installed and the `velero` MinIO bucket exists before you start.
 
-**Before you start:** Make sure Velero is installed in the cluster and the `velero` MinIO bucket exists.
-
-> **Note:** Velero backs up Longhorn volumes for these namespaces: `catus-locatus`, `obsidian-sync`. It does not back up `monitoring` because Thanos stores metrics in MinIO permanently.
-
-**Procedure:**
-
-1. Set the kubeconfig to the Talos cluster.
+1. Set the kubeconfig.
 
    ```bash
    export KUBECONFIG=~/.kube/homelab-talos
    ```
 
-2. Start a backup of all stateful namespaces.
+2. Start a backup.
 
    ```bash
    velero backup create homelab-$(date +%Y%m%d) \
@@ -112,113 +88,87 @@
      --wait
    ```
 
-3. Confirm the backup status is `Completed`.
+3. Confirm the status is `Completed`.
 
    ```bash
    velero backup get
    ```
 
-4. If the status is `PartiallyFailed` or `Failed`, run the following command to see the reason.
+4. If it shows `PartiallyFailed` or `Failed`, check why.
 
    ```bash
    velero backup describe homelab-$(date +%Y%m%d) --details
    ```
 
-**Result:** A backup of all persistent volume data exists in the `velero` MinIO bucket.
+The backup lands in the `velero` MinIO bucket.
 
 ---
 
-### 1.4 Back Up Longhorn Volume Snapshots
+### Longhorn snapshots
 
-**When to do this procedure:** Before you perform Longhorn or node upgrades.
-
-**Time required:** 2 minutes to start. Snapshot creation runs in the background.
-
-**Procedure:**
-
-1. Open the Longhorn UI at `https://longhorn.alialjaffer.com`.
-
-2. Go to **Volume**.
-
-3. For each volume in the list, select the volume and click **Create Snapshot**.
-
-4. Confirm each snapshot appears in the **Snapshot** section of the volume detail page.
-
-**Result:** Point-in-time snapshots exist for all Longhorn volumes.
+Do this before Longhorn or node upgrades. Open the Longhorn UI at `https://longhorn.alialjaffer.com`, go to **Volume**, and for each volume click **Create Snapshot**. Takes 2 minutes.
 
 ---
 
-## 2. Restore Procedures
+## Restore
 
-### 2.1 Restore the Sealed Secrets Key to a New Cluster
+### Sealed Secrets key on a new cluster
 
-**When to do this procedure:** After you rebuild the cluster from scratch. Do this procedure before you apply any ArgoCD applications.
+**Do this before ArgoCD syncs anything.** If ArgoCD syncs first, all SealedSecrets will fail to unseal and you will have to re-sync them manually after. Not fun.
 
-> **CAUTION:** You must do this procedure before ArgoCD syncs. If ArgoCD syncs first, all SealedSecrets will fail to unseal and you must re-sync them manually afterward.
+Make sure the Sealed Secrets controller is running and you have `sealed-secrets-master-key.yaml` from your secure storage.
 
-**Time required:** 3 minutes
+1. Copy `sealed-secrets-master-key.yaml` from your secure storage to your local machine.
 
-**Before you start:** Make sure the Sealed Secrets controller is running. Make sure you have the backup file `sealed-secrets-master-key.yaml` from procedure 1.1.
-
-**Procedure:**
-
-1. Copy `sealed-secrets-master-key.yaml` from your secure storage location to your local machine.
-
-2. Apply the key to the cluster.
+2. Apply the key.
 
    ```bash
    kubectl apply -f sealed-secrets-master-key.yaml
    ```
 
-3. Restart the Sealed Secrets controller so it loads the restored key.
+3. Restart the controller so it picks up the restored key.
 
    ```bash
    kubectl rollout restart deployment/sealed-secrets-controller -n kube-system
    ```
 
-4. Wait for the controller to become ready.
+4. Wait for it to be ready.
 
    ```bash
    kubectl rollout status deployment/sealed-secrets-controller -n kube-system
    ```
 
-5. Delete the local copy of `sealed-secrets-master-key.yaml`.
+5. Delete the local copy.
 
    ```bash
    rm sealed-secrets-master-key.yaml
    ```
 
-6. Verify that at least one SealedSecret is readable by checking its status.
+6. Check that SealedSecrets are readable.
 
    ```bash
    kubectl get sealedsecret -A
    ```
 
-   The `AGE` column must show a value. A blank value means the controller did not unseal the secret.
+   The `AGE` column must show a value. A blank means the controller did not unseal the secret.
 
-**Result:** All SealedSecrets in the cluster are readable. ArgoCD can now sync applications.
+All SealedSecrets are now readable. ArgoCD can sync.
 
 ---
 
-### 2.2 Decrypt and Apply SOPS-Encrypted Talos Machine Configs
+### Decrypt and apply SOPS-encrypted Talos machine configs
 
-**When to do this procedure:** When you need to re-apply a Talos machine configuration after a node rebuild or config change.
+Use this when you need to re-apply a machine config after a node rebuild or config change.
 
-**Time required:** 5 minutes
+You need `homelab.age` on your local machine, and both `sops` and `talosctl` installed.
 
-**Before you start:** Make sure `homelab.age` is on your local machine. Make sure `sops` and `talosctl` are installed.
-
-> **Note:** Each node has its own file in `talos/clusterconfig/`. Only the secret values (CA keys, tokens, encryption secret) are encrypted. The cluster structure is readable without decryption.
-
-**Files:**
+**Note:** Each node has its own file in `talos/clusterconfig/`. Only the secret values are encrypted - the cluster structure is readable without decryption.
 
 | File | Node |
 |---|---|
-| `talos/clusterconfig/k8s-homelab-cp0.sops.yaml` | cp0 — 192.168.8.100 |
-| `talos/clusterconfig/k8s-homelab-wrk0.sops.yaml` | wrk0 — 192.168.8.101 |
-| `talos/clusterconfig/k8s-homelab-wrk1.sops.yaml` | wrk1 — 192.168.8.102 |
-
-**Procedure:**
+| `talos/clusterconfig/k8s-homelab-cp0.sops.yaml` | cp0 - 192.168.8.100 |
+| `talos/clusterconfig/k8s-homelab-wrk0.sops.yaml` | wrk0 - 192.168.8.101 |
+| `talos/clusterconfig/k8s-homelab-wrk1.sops.yaml` | wrk1 - 192.168.8.102 |
 
 1. Set the age key path.
 
@@ -226,7 +176,7 @@
    export SOPS_AGE_KEY_FILE=~/homelab.age
    ```
 
-2. Apply the config for each node. The command decrypts inline without writing a plaintext file to disk.
+2. Apply the config for each node. This decrypts inline without writing plaintext to disk.
 
    ```bash
    sops --decrypt talos/clusterconfig/k8s-homelab-cp0.sops.yaml \
@@ -239,7 +189,7 @@
      | talosctl apply-config -n 192.168.8.102 --file /dev/stdin
    ```
 
-3. If you need the plaintext config on disk for inspection, decrypt it and delete it when done.
+3. If you need the plaintext on disk for inspection, decrypt it and delete it when done.
 
    ```bash
    sops --decrypt talos/clusterconfig/k8s-homelab-cp0.sops.yaml \
@@ -248,23 +198,19 @@
    rm /tmp/cp0-config.yaml
    ```
 
-**Result:** The Talos machine configurations are applied to the nodes. No plaintext config is written to disk.
+Machine configs applied. No plaintext written to disk.
 
 ---
 
-### 2.3 Restore Application Data from Velero
+### Restore application data from Velero
 
-**When to do this procedure:** When a namespace loses data and you need to restore from a Velero backup.
+Use this when a namespace loses data and you need to restore from backup.
 
-**Time required:** 5–30 minutes, depending on data volume.
+**CAUTION:** Restoring into an existing namespace overwrites current data. Scale down the application deployments first.
 
-**Before you start:** Make sure the target namespace exists. Make sure the Longhorn storage class is available.
+Make sure the target namespace exists and the Longhorn storage class is available.
 
-> **CAUTION:** Restoring into an existing namespace overwrites current data. Scale down the application deployments before you restore.
-
-**Procedure:**
-
-1. Scale down all deployments in the affected namespace. Replace `<namespace>` with the actual namespace name.
+1. Scale down all deployments in the affected namespace.
 
    ```bash
    kubectl scale deploy --all -n <namespace> --replicas=0
@@ -277,7 +223,7 @@
    velero backup get
    ```
 
-3. Start the restore from the backup you want. Replace `<backup-name>` with the name from step 2.
+3. Start the restore from the backup you want.
 
    ```bash
    velero restore create \
@@ -286,62 +232,56 @@
      --wait
    ```
 
-4. Confirm the restore status is `Completed`.
+4. Confirm the status is `Completed`.
 
    ```bash
    velero restore get
    ```
 
-5. Scale the deployments back up.
+5. Scale deployments back up.
 
    ```bash
    kubectl scale deploy --all -n <namespace> --replicas=1
    kubectl scale statefulset --all -n <namespace> --replicas=1
    ```
 
-6. Verify the application is running.
+6. Verify the app is running.
 
    ```bash
    kubectl get pods -n <namespace>
    ```
 
-**Result:** Application data is restored to the state at the time of the backup.
+Data restored to the state at the time of backup.
 
 ---
 
-### 2.4 Full Cluster Recovery from Scratch
+### Full cluster recovery from scratch
 
-**When to do this procedure:** When all cluster nodes are lost and you must rebuild the entire cluster.
+This is the nuclear option - all nodes lost, rebuilding everything. Budget 1 to 3 hours depending on how fast everything syncs.
 
-**Time required:** 1–3 hours
-
-**Before you start:** You must have all of the following items before you start:
-- The Sealed Secrets private key (`sealed-secrets-master-key.yaml`) from your secure storage
-- The SOPS age key (`homelab.age`) on your local machine
-- Access to this Git repository
+Before you start, you need all of these:
+- `sealed-secrets-master-key.yaml` from your secure storage
+- `homelab.age` on your local machine
+- Access to this Git repo
 - Physical access to the M920q Tiny nodes
 
-**Procedure:**
+1. Reinstall Talos Linux on all nodes (follow the official Talos docs).
 
-1. Reinstall Talos Linux on all nodes following the official Talos documentation.
+2. Bootstrap the Talos cluster following `kubernetes/bootstrap/README.md`. Stop at Step 4. Do not apply the App-of-Apps yet.
 
-2. Bootstrap the Talos cluster following the procedure in `kubernetes/bootstrap/README.md`.
+3. Restore the Sealed Secrets key using the procedure above.
 
-   > **Note:** Stop at Step 4 (ArgoCD). Do not apply the App-of-Apps yet.
+4. Continue from Step 7 in `kubernetes/bootstrap/README.md`.
 
-3. Restore the Sealed Secrets key using procedure 2.1 of this document.
-
-4. Continue the bootstrap from Step 7 onward in `kubernetes/bootstrap/README.md`.
-
-5. Wait for all ArgoCD applications to reach `Synced / Healthy` status.
+5. Wait for all ArgoCD applications to hit `Synced / Healthy`.
 
    ```bash
    kubectl get applications -n argocd -w
    ```
 
-6. Restore application data from Velero using procedure 2.3 of this document.
+6. Restore application data from Velero using the procedure above.
 
-7. Confirm all services are accessible at their expected URLs.
+7. Confirm all services are accessible.
 
    | Service | URL |
    |---|---|
@@ -350,4 +290,4 @@
    | Longhorn | `https://longhorn.alialjaffer.com` |
    | Pihole | `https://pihole.alialjaffer.com` |
 
-**Result:** The cluster is fully operational. All applications are running. All data is restored.
+Cluster is fully back up. Everything running.

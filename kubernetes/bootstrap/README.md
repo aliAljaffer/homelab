@@ -1,11 +1,10 @@
 # Bootstrap Runbook
 
-One-time imperative steps to bring up a fresh Talos cluster. After bootstrap,
-ArgoCD manages everything declaratively from Git.
+One-time imperative steps to bring up a fresh Talos cluster. After bootstrap, ArgoCD manages everything declaratively from Git.
 
 ## Helm values tracking
 
-All Helm chart values are committed to Git alongside their ArgoCD Applications:
+All Helm chart values are committed to Git alongside their ArgoCD Applications. Nothing is managed outside of the repo.
 
 | Component | Values file |
 |-----------|-------------|
@@ -21,13 +20,11 @@ All Helm chart values are committed to Git alongside their ArgoCD Applications:
 | Thanos | `kubernetes/infrastructure/thanos/values.yaml` |
 | Grafana Alloy | `kubernetes/infrastructure/alloy/values.yaml` |
 
-Bootstrap-installed components (Cilium, ArgoCD) are not managed by ArgoCD for their
-Helm release — they are installed imperatively once, and the values are tracked in
-`kubernetes/bootstrap/`. All other components are fully ArgoCD-managed.
+Cilium and ArgoCD are bootstrap-installed imperatively (their Helm releases are not managed by ArgoCD). Values are tracked in `kubernetes/bootstrap/`. Everything else is fully ArgoCD-managed.
 
 ---
 
-## Prerequisites
+## Before you start
 
 ```bash
 export KUBECONFIG=~/.kube/homelab-talos
@@ -35,12 +32,11 @@ export KUBECONFIG=~/.kube/homelab-talos
 
 ---
 
-## Step 1 — Talos extensions + CNI switch
+## Step 1 - Talos extensions + CNI switch
 
 ### 1a. Generate installer image with extensions (Talos Image Factory)
 
-Worker nodes need iscsi-tools (Longhorn), util-linux-tools (Longhorn),
-intel-ucode (M920q), and i915 (Intel iGPU / Quick Sync):
+Worker nodes need `iscsi-tools` (Longhorn), `util-linux-tools` (Longhorn), `intel-ucode` (M920q), and `i915` (Intel iGPU / Quick Sync):
 
 ```bash
 # Worker schematic (iscsi + util-linux + intel-ucode + i915)
@@ -99,17 +95,17 @@ done
 talosctl upgrade -n 192.168.8.100 --image "factory.talos.dev/installer/${CP_ID}:v1.13.7"
 ```
 
-Nodes will reboot into NotReady state — expected until Cilium is deployed.
+Nodes will reboot into NotReady state. That's expected until Cilium is deployed.
 
-## Step 2 — Install Gateway API CRDs
+## Step 2 - Install Gateway API CRDs
 
-Must happen before Cilium starts its Gateway controller.
+This has to happen before Cilium starts its Gateway controller.
 
 ```bash
 kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.1/experimental-install.yaml
 ```
 
-## Step 3 — Install Cilium
+## Step 3 - Install Cilium
 
 ```bash
 helm repo add cilium https://helm.cilium.io/
@@ -118,12 +114,12 @@ helm install cilium cilium/cilium --version 1.17.3 \
   --values kubernetes/bootstrap/cilium/values.yaml
 ```
 
-Wait for nodes Ready:
+Wait for nodes to come Ready:
 ```bash
 kubectl wait --for=condition=Ready nodes --all --timeout=300s
 ```
 
-## Step 4 — Install ArgoCD
+## Step 4 - Install ArgoCD
 
 ```bash
 helm repo add argo https://argoproj.github.io/argo-helm
@@ -132,7 +128,7 @@ helm install argocd argo/argo-cd --version 7.9.0 \
   --values kubernetes/bootstrap/argocd/values.yaml
 ```
 
-## Step 5 — Install Sealed Secrets Controller
+## Step 5 - Install Sealed Secrets Controller
 
 ```bash
 kubectl apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.38.4/controller.yaml
@@ -146,7 +142,7 @@ kubeseal --fetch-cert \
   > pub-sealed-secrets.pem
 ```
 
-## Step 6 — Seal All Secrets and Commit
+## Step 6 - Seal all secrets and commit
 
 For each secret template in `templates/`, fill in real values and seal:
 
@@ -185,7 +181,7 @@ kubectl create secret generic route53-credentials \
   > kubernetes/infrastructure/cert-manager/route53-credentials.sealed.yaml
 ```
 
-## Step 7 — Bootstrap App-of-Apps
+## Step 7 - Bootstrap App-of-Apps
 
 ```bash
 # Create the longhorn namespace with privileged PodSecurity label (needed for Longhorn)
@@ -214,9 +210,9 @@ ArgoCD syncs everything from Git. Watch progress:
 kubectl -n argocd get applications -w
 ```
 
-## Step 8 — Create MinIO Buckets
+## Step 8 - Create MinIO buckets
 
-After MinIO is running in catus-locatus, create the observability buckets:
+After MinIO is running in `catus-locatus`, create the observability buckets:
 
 ```bash
 kubectl run mc --image=minio/mc --rm -it --restart=Never -- \
@@ -228,7 +224,7 @@ kubectl run mc --image=minio/mc --rm -it --restart=Never -- \
   "
 ```
 
-## Step 9 — Talos Config Encryption (optional but recommended)
+## Step 9 - Talos config encryption (optional but recommended)
 
 ```bash
 # Generate age key
