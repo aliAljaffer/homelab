@@ -7,7 +7,7 @@ metadata:
 spec:
   schedule: "0 2 * * *"
   template:
-    ttl: 72h0m0s
+    ttl: 720h0m0s
     defaultVolumesToFsBackup: true
     excludedNamespaces:
       - kube-system
@@ -18,7 +18,6 @@ spec:
       - metallb-system
       - cert-manager
       - external-dns
-      - cilium-secrets
-      - kubelet-serving-cert-approver
       - arc-systems
       - arc-runners
+      - kubelet-serving-cert-approver
