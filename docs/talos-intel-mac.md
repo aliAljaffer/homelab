@@ -94,6 +94,29 @@ Rebuild the Talos kernel with `LLVM: 1` removed from the build config and ThinLT
      PLATFORM=linux/amd64
    ```
 
+   > **WSL2 pitfall — silent push failure:** On WSL2, the buildx builder is created per user. If `sudo -E make kernel` runs as root but the builder was created as your regular user, the push silently succeeds in the build log but nothing lands in the registry. After the build finishes, confirm the image is there before continuing:
+   >
+   > ```bash
+   > curl -s http://127.0.0.1:5005/v2/_catalog
+   > # expected: {"repositories":["talos/pkgs/kernel"]}
+   > ```
+   >
+   > If the catalog is empty, recreate the buildx builder as root and re-run:
+   >
+   > ```bash
+   > sudo docker buildx create \
+   >   --driver docker-container \
+   >   --driver-opt network=host \
+   >   --name local \
+   >   --buildkitd-flags '--allow-insecure-entitlement security.insecure' \
+   >   --use
+   > sudo -E make kernel \
+   >   REGISTRY=127.0.0.1:5005/talos \
+   >   USERNAME=pkgs \
+   >   PUSH=true \
+   >   PLATFORM=linux/amd64
+   > ```
+
 ---
 
 ## Step 3 — Rebuild any required extensions
