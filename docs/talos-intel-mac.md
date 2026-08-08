@@ -160,19 +160,31 @@ Use the standard `ghcr.io/siderolabs/intel-ucode` image directly in the profile 
 2. Build the kernel artifacts, initramfs, imager, and installer base.
 
    ```bash
+   First, look up the exact tag that was pushed for your kernel build — the Makefile appends a commit hash, so it is never just `-dirty`:
+
+   ```bash
+   curl -s http://127.0.0.1:5005/v2/talos/pkgs/kernel/tags/list
+   # example output: {"name":"talos/pkgs/kernel","tags":["v1.13.0-55-gf677246-dirty"]}
+   ```
+
+   Use that tag in `PKG_KERNEL` and `PKGS`:
+
+   ```bash
+   KERNEL_TAG=$(curl -s http://127.0.0.1:5005/v2/talos/pkgs/kernel/tags/list | python3 -c "import json,sys; print(json.load(sys.stdin)['tags'][0])")
+
    sudo -E make kernel initramfs imager installer-base \
      REGISTRY=127.0.0.1:5005/talos \
      USERNAME=imager \
      PUSH=true \
      TAG=v1.13.8 \
-     PKG_KERNEL=127.0.0.1:5005/talos/pkgs/kernel:v1.13.0-dirty \
+     PKG_KERNEL=127.0.0.1:5005/talos/pkgs/kernel:${KERNEL_TAG} \
      PLATFORM=linux/amd64 \
      INSTALLER_ARCH=amd64 \
-     PKGS=v1.13.0-dirty \
+     PKGS=${KERNEL_TAG} \
      PKGS_PREFIX=127.0.0.1:5005/talos/pkgs
    ```
 
-   > **Note:** The kernel tag carries the suffix `-dirty` because the Makefile stamps non-release builds. The installer tag should match the Talos version you checked out.
+   > **Note:** The installer tag (`TAG`) is the Talos release version. The kernel tag (`PKG_KERNEL`, `PKGS`) is the stamped git-describe output from the pkgs build, which always includes a commit hash.
 
 ---
 
