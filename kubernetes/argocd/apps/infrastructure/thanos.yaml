@@ -15,7 +15,7 @@ spec:
   sources:
   - repoURL: https://charts.bitnami.com/bitnami
     chart: thanos
-    targetRevision: 15.10.1
+    targetRevision: 17.3.1
     helm:
       valueFiles:
       - $values/kubernetes/infrastructure/thanos/values.yaml

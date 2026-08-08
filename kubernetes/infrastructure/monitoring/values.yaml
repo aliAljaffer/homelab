@@ -80,7 +80,7 @@ grafana:
             - uid: ff3iaps1ewgzkb
               type: discord
               settings:
-                message: '{{ template "discord.default.message" . }}'
+                message: '{{ "{{" }} template "discord.default.message" . {{ "}}" }}'
                 url: "${DISCORD_WEBHOOK_URL}"  # Set via grafana.envFromSecret
                 use_discord_username: false
               disableResolveMessage: false

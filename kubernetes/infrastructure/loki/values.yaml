@@ -8,18 +8,16 @@ loki:
   commonConfig:
     replication_factor: 1
 
-  # Use MinIO as the S3-compatible object store
   storage:
-    type: s3
-    s3:
-      endpoint: minio.catus-locatus.svc.cluster.local:9000
-      bucketnames: loki
-      region: us-east-1  # required by Loki even for MinIO
-      s3ForcePathStyle: true
-      insecure: true
-    # Credentials come from the loki-minio-secret (SealedSecret)
-    # Set via loki.storage_config.aws.access_key_id / secret_access_key
-    secretName: loki-minio-secret
+    type: gcs
+    gcs:
+      bucket_name: alialjaffer-homelab
+    bucketNames:
+      chunks: alialjaffer-homelab
+      ruler: alialjaffer-homelab
+      admin: alialjaffer-homelab
+    # Credentials from loki-gcs-credentials SealedSecret (key: service_account.json)
+    secretName: loki-gcs-credentials
 
   schemaConfig:
     configs:
@@ -41,7 +39,7 @@ loki:
 
   compactor:
     retention_enabled: true
-    delete_request_store: s3
+    delete_request_store: gcs
     working_directory: /var/loki/retention
 
   query_range:
