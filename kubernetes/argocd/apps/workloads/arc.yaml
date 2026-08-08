@@ -1,25 +1,56 @@
 ---
+# ARC controller + namespace resources
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: arc
+  name: arc-controller
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: workloads
   sources:
-    # ARC controller
     - repoURL: https://actions.github.io/actions-runner-controller
       chart: gha-runner-scale-set-controller
       targetRevision: 0.13.0
-    # ARC runner set + namespace config
     - repoURL: https://github.com/aliAljaffer/homelab.git
       targetRevision: main
       path: kubernetes/apps/arc
   destination:
     server: https://kubernetes.default.svc
     namespace: arc-systems
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+# ARC runner scale set (references github-token SealedSecret in arc namespace)
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: arc-runner-set
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: workloads
+  sources:
+    - repoURL: https://actions.github.io/actions-runner-controller
+      chart: gha-runner-scale-set
+      targetRevision: 0.13.0
+      helm:
+        valueFiles:
+          - $values/kubernetes/apps/arc/arc-runner-set-values.yaml
+        valuesObject:
+          githubConfigSecret: github-token  # SealedSecret: see bootstrap README
+    - repoURL: https://github.com/aliAljaffer/homelab.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: arc-runners
   syncPolicy:
     automated:
       prune: true

@@ -11,12 +11,16 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: infrastructure
-  source:
-    repoURL: https://grafana.github.io/helm-charts
-    chart: loki
-    targetRevision: 6.29.0
-    helm:
-      valuesFile: values.yaml
+  sources:
+    - repoURL: https://grafana.github.io/helm-charts
+      chart: loki
+      targetRevision: 6.29.0
+      helm:
+        valueFiles:
+          - $values/kubernetes/infrastructure/loki/values.yaml
+    - repoURL: https://github.com/aliAljaffer/homelab.git
+      targetRevision: main
+      ref: values
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
