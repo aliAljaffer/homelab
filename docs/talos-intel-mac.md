@@ -8,6 +8,8 @@ Talos 1.13.0 and later do not boot on Intel Macs. The boot process stops at the 
 
 **Not affected:** Standard x86 machines (Dell, Lenovo, etc.) which accept the LLD-compiled kernel without issue.
 
+**Confirmed unresolved in:** v1.13.0 through v1.13.8 (standard factory images do not boot on affected hardware).
+
 **Source:** siderolabs/talos issue [#13231](https://github.com/siderolabs/talos/issues/13231). Full credit to GitHub user [`virtualm2000`](https://github.com/virtualm2000) who identified the LLD regression, narrowed it to the alpha1/alpha2 boundary, and worked out the complete rebuild procedure. This document is a cleaned-up version of their findings.
 
 ---
@@ -125,7 +127,7 @@ Replace `<extension-name>` with each extension you need (for example, `iscsi-too
    ```bash
    git clone https://github.com/siderolabs/talos.git
    cd talos
-   git checkout v1.13.7   # replace with your target version
+   git checkout v1.13.8
    ```
 
 2. Build the kernel artifacts, initramfs, imager, and installer base.
@@ -135,7 +137,7 @@ Replace `<extension-name>` with each extension you need (for example, `iscsi-too
      REGISTRY=127.0.0.1:5005/talos \
      USERNAME=imager \
      PUSH=true \
-     TAG=v1.13.7 \
+     TAG=v1.13.8 \
      PKG_KERNEL=127.0.0.1:5005/talos/pkgs/kernel:v1.13.0-dirty \
      PLATFORM=linux/amd64 \
      INSTALLER_ARCH=amd64 \
@@ -156,7 +158,7 @@ Replace `<extension-name>` with each extension you need (for example, `iscsi-too
    arch: amd64
    platform: metal
    secureboot: false
-   version: v1.13.7
+   version: v1.13.8
    input:
      kernel:
        path: /usr/install/amd64/vmlinuz
@@ -167,7 +169,7 @@ Replace `<extension-name>` with each extension you need (for example, `iscsi-too
      sdBoot:
        path: /usr/install/amd64/systemd-boot.efi
      baseInstaller:
-       imageRef: 127.0.0.1:5005/talos/imager/installer-base:v1.13.7
+       imageRef: 127.0.0.1:5005/talos/imager/installer-base:v1.13.8
      systemExtensions:
        - imageRef: 127.0.0.1:5005/talos/extensions/iscsi-tools:v1.13.0
        - imageRef: 127.0.0.1:5005/talos/extensions/util-linux-tools:v1.13.0
@@ -186,7 +188,7 @@ Replace `<extension-name>` with each extension you need (for example, `iscsi-too
    mkdir -p _out
    cat profile.yaml | sudo -E docker run --rm -i --network=host \
      -v $PWD/_out:/out \
-     127.0.0.1:5005/talos/imager/imager:v1.13.7 -
+     127.0.0.1:5005/talos/imager/imager:v1.13.8 -
    ```
 
 3. Write the ISO to a USB drive. Replace `/dev/sdX` with your USB device.
