@@ -5,26 +5,27 @@ metadata:
   name: infrastructure
   namespace: argocd
   finalizers:
-    - resources-finalizer.argocd.argoproj.io
+  - resources-finalizer.argocd.argoproj.io
 spec:
   description: Cluster infrastructure (CNI, ingress, storage, monitoring)
   sourceRepos:
-    - https://github.com/aliAljaffer/homelab.git
-    - https://helm.cilium.io/
-    - https://charts.jetstack.io
-    - https://metallb.github.io/metallb
-    - https://charts.longhorn.io
-    - https://kubernetes-sigs.github.io/external-dns/
-    - https://prometheus-community.github.io/helm-charts
-    - https://grafana.github.io/helm-charts
-    - https://bitnami-labs.github.io/sealed-secrets
-    - https://charts.bitnami.com/bitnami
+  - git@github.com:aliAljaffer/homelab.git
+  - https://helm.cilium.io/
+  - https://charts.jetstack.io
+  - https://metallb.github.io/metallb
+  - https://charts.longhorn.io
+  - https://kubernetes-sigs.github.io/external-dns/
+  - https://prometheus-community.github.io/helm-charts
+  - https://grafana.github.io/helm-charts
+  - https://bitnami-labs.github.io/sealed-secrets
+  - https://charts.bitnami.com/bitnami
+  - https://vmware-tanzu.github.io/helm-charts
   destinations:
-    - server: https://kubernetes.default.svc
-      namespace: "*"
+  - server: https://kubernetes.default.svc
+    namespace: "*"
   clusterResourceWhitelist:
-    - group: "*"
-      kind: "*"
+  - group: "*"
+    kind: "*"
   namespaceResourceWhitelist:
-    - group: "*"
-      kind: "*"
+  - group: "*"
+    kind: "*"
