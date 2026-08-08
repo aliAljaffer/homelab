@@ -36,9 +36,7 @@ spec:
     server: https://kubernetes.default.svc
     namespace: longhorn-system
   syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
+    # Automated sync temporarily disabled — installed manually via helm --no-hooks.
+    # Re-enable after first install is healthy.
     syncOptions:
       - CreateNamespace=true
-      - SkipHooks=true  # pre-upgrade hook requires service account that doesn't exist on fresh install
