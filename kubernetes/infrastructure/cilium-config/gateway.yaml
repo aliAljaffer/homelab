@@ -42,7 +42,6 @@ spec:
     name: letsencrypt-prod
     kind: ClusterIssuer
   dnsNames:
-    - "alialjaffer.com"
     - "*.alialjaffer.com"
 ---
 # Redirect HTTP → HTTPS
