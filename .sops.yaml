@@ -2,9 +2,9 @@ creation_rules:
   # Talos machine configs
   - path_regex: talos/clusterconfig/.*\.sops$
     age: >-
-      age1REPLACE_WITH_YOUR_AGE_PUBLIC_KEY
+      age13jd0rndp589yqxpxw36fkrn8jkgazqrlvj22txp4gfh8e0qskusq97zta9
 
   # Any other files you want to encrypt with SOPS
   - path_regex: .*\.sops\.yaml$
     age: >-
-      age1REPLACE_WITH_YOUR_AGE_PUBLIC_KEY
+      age13jd0rndp589yqxpxw36fkrn8jkgazqrlvj22txp4gfh8e0qskusq97zta9
