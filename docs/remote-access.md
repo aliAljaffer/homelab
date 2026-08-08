@@ -6,11 +6,11 @@ This replaces the old `ssh.alialjaffer.com` MacBook bastion. Instead of SSH-ing 
 
 ---
 
-## Before you start
+## What you need
 
-You need these on your remote machine:
+On your remote machine:
 
-- `cloudflared` CLI — [install](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/)
+- `cloudflared` CLI  -  [install](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/)
 - `kubectl` with a working kubeconfig for the cluster
 - `talosctl` with `~/.talos/config` or `~/.kube/talosconfig`
 - Access to your Cloudflare Zero Trust account (to authenticate the first time)
@@ -30,7 +30,7 @@ Both are protected by a Cloudflare Access policy. You authenticate once via your
 
 ---
 
-## Step 1 — Set up Cloudflare Access policies
+## Step 1  -  Set up Cloudflare Access policies
 
 Do this once in the Cloudflare dashboard.
 
@@ -45,7 +45,7 @@ Do this once in the Cloudflare dashboard.
 
 ---
 
-## Step 2 — Open the tunnel on your remote machine
+## Step 2  -  Open the tunnel on your remote machine
 
 Run these two commands in the background before using `kubectl` or `talosctl`.
 
@@ -65,7 +65,7 @@ The first time you run either command, a browser window opens for Cloudflare Acc
 
 ---
 
-## Step 3 — Use kubectl over the tunnel
+## Step 3  -  Use kubectl over the tunnel
 
 The API server certificate is issued for the cluster's internal hostname, not `localhost`. Pass `--insecure-skip-tls-verify` or create a dedicated remote kubeconfig context.
 
@@ -92,7 +92,7 @@ kubectl config use-context homelab-talos-remote
 
 ---
 
-## Step 4 — Use talosctl over the tunnel
+## Step 4  -  Use talosctl over the tunnel
 
 ```bash
 talosctl --endpoints localhost:50000 \

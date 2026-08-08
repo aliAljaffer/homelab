@@ -1,5 +1,5 @@
 ---
-# Wave -2: ExternalDNS — watches HTTPRoutes and updates Route53
+# Wave -2: ExternalDNS  -  watches HTTPRoutes and updates Route53
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

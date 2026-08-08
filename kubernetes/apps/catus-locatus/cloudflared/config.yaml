@@ -24,8 +24,5 @@ data:
       - service: http_status:404  # catch-all
 kind: ConfigMap
 metadata:
-  annotations:
-    kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"v1","data":{"config.yaml":"# Cloudflare Tunnel Configuration\n# Serves traffic for tuwaiqtracker.com and portfolio website\n\ntunnel: fffe45f4-79d4-4538-a9d6-ae4ed2af455d\ncredentials-file: /etc/cloudflared/creds/credentials.json\n\n# Metrics endpoint for monitoring\nmetrics: 0.0.0.0:2000\n\n# Disable auto-update in containers\nno-autoupdate: true\n\n# Ingress rules - order matters!\n# Rules are evaluated top to bottom, first match wins\ningress:\n  # Portfolio website - adjust hostname as needed\n  # Option 1: If using alialjaffer.com domain\n  - hostname: alialjaffer.com\n    service: http://portfolio-website-svc.portfolio-website.svc.cluster.local:80\n\n  # Backend API routes - match /api and /api/* paths\n  - hostname: team4.tuwaiqtracker.com\n    path: ^/api(/.*)?$\n    service: http://catus-locatus-svc.catus-locatus.svc.cluster.local:4001\n\n  # MinIO object storage - separate subdomain\n  - hostname: minio.tuwaiqtracker.com\n    service: http://minio-svc.catus-locatus.svc.cluster.local:9000\n\n  # Frontend - catch-all for team4.tuwaiqtracker.com\n  - hostname: team4.tuwaiqtracker.com\n    service: http://cl-fe-svc.catus-locatus.svc.cluster.local:80\n\n  # Default service - returns 404 for unmatched routes\n  - service: http_status:404\n"},"kind":"ConfigMap","metadata":{"annotations":{},"name":"cloudflared-config","namespace":"catus-locatus"}}
   name: cloudflared-config
   namespace: catus-locatus

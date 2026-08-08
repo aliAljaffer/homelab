@@ -24,7 +24,7 @@ Cilium and ArgoCD are bootstrap-installed imperatively (their Helm releases are 
 
 ---
 
-## Before you start
+## Setup
 
 ```bash
 export KUBECONFIG=~/.kube/homelab-talos
