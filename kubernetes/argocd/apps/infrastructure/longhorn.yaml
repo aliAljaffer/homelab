@@ -41,3 +41,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - SkipHooks=true  # pre-upgrade hook requires service account that doesn't exist on fresh install
