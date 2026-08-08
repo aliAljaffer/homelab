@@ -1,5 +1,6 @@
 ---
 # ARC controller + namespace resources
+# ArgoCD OCI format: repoURL = registry/namespace, chart = chart-name
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -10,8 +11,8 @@ metadata:
 spec:
   project: workloads
   sources:
-    # Full OCI path is required for ArgoCD 2.x OCI Helm support (no separate chart field)
-    - repoURL: oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller
+    - repoURL: oci://ghcr.io/actions/actions-runner-controller-charts
+      chart: gha-runner-scale-set-controller
       targetRevision: 0.14.2
     - repoURL: https://github.com/aliAljaffer/homelab.git
       targetRevision: main
@@ -37,7 +38,8 @@ metadata:
 spec:
   project: workloads
   sources:
-    - repoURL: oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
+    - repoURL: oci://ghcr.io/actions/actions-runner-controller-charts
+      chart: gha-runner-scale-set
       targetRevision: 0.14.2
       helm:
         valueFiles:
