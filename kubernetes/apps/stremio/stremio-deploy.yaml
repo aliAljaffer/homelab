@@ -25,9 +25,7 @@ spec:
     spec:
       volumes:
       - name: stremio-data
-        hostPath:
-          path: "/etc/stremio-data"
-          type: DirectoryOrCreate
+        emptyDir: {}  # hostPath not supported on Talos read-only filesystem
       containers:
       - image: tsaridas/stremio-docker:latest
         name: stremio-docker
