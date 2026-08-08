@@ -225,11 +225,21 @@ Use the standard images directly in the profile in Step 5. You do not need to cl
      127.0.0.1:5005/talos/imager/imager:v1.13.8 -
    ```
 
-3. Write the ISO to a USB drive. Replace `/dev/sdX` with your USB device.
+3. Write the ISO to a USB drive.
+
+   **Option A — from WSL2 using `dd`:** Replace `/dev/sdX` with your USB device (check with `lsblk`).
 
    ```bash
    sudo dd if=_out/metal-amd64.iso of=/dev/sdX bs=4M status=progress oflag=sync
    ```
+
+   **Option B — using Rufus on Windows:** If the USB drive does not appear in `lsblk`, copy the ISO to the Windows filesystem and use Rufus to write it.
+
+   ```bash
+   cp _out/metal-amd64.iso /mnt/c/Users/$USER/Downloads/talos-macbook.iso
+   ```
+
+   Then open Rufus on Windows, select the ISO from `Downloads`, and write it to the USB drive.
 
 ---
 
