@@ -1,0 +1,24 @@
+---
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: daily-full
+  namespace: velero
+spec:
+  schedule: "0 2 * * *"
+  template:
+    ttl: 72h0m0s
+    defaultVolumesToFsBackup: true
+    excludedNamespaces:
+      - kube-system
+      - kube-node-lease
+      - kube-public
+      - velero
+      - longhorn-system
+      - metallb-system
+      - cert-manager
+      - external-dns
+      - cilium-secrets
+      - kubelet-serving-cert-approver
+      - arc-systems
+      - arc-runners

@@ -16,8 +16,6 @@ resources:
   - deploy-frontend.yaml
   - cip-frontend.yaml
   - hpa-frontend.yaml
-  - cloudflared/deployment.yaml
-  - cloudflared/config.yaml
   - httproutes.yaml
   - secrets.sealed.yaml
   - postgresql-secret.sealed.yaml

@@ -1,0 +1,32 @@
+---
+initContainers:
+  - name: velero-plugin-for-gcp
+    image: velero/velero-plugin-for-gcp:v1.13.0
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+      - mountPath: /target
+        name: plugins
+
+credentials:
+  useSecret: true
+  existingSecret: cloud-credentials
+
+configuration:
+  backupStorageLocation:
+    - name: default
+      provider: gcp
+      bucket: alialjaffer-homelab
+      credential:
+        name: cloud-credentials
+        key: cloud
+
+  volumeSnapshotLocation:
+    - name: default
+      provider: gcp
+      credential:
+        name: cloud-credentials
+        key: cloud
+
+  defaultVolumesToFsBackup: true
+
+deployNodeAgent: true
