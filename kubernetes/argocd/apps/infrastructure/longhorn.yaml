@@ -1,7 +1,7 @@
 ---
 # Wave -3: Longhorn distributed storage
 # BOOTSTRAP NOTE: First install done via 'helm install --no-hooks' to bypass pre-upgrade hook.
-# See kubernetes/bootstrap/README.md Step 1 (Talos extensions) — requires iscsi-tools on workers.
+# See kubernetes/bootstrap/README.md Step 1 (Talos extensions)  -  requires iscsi-tools on workers.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

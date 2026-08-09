@@ -24,7 +24,7 @@ Cilium and ArgoCD are bootstrap-installed imperatively (their Helm releases are 
 
 ---
 
-## Before you start
+## Setup
 
 ```bash
 export KUBECONFIG=~/.kube/homelab-talos
@@ -78,7 +78,7 @@ machine:
       rotate-server-certificates: "true"
 EOF
 
-talosctl patch machineconfig -n 192.168.8.100 -m no-reboot --patch-file /tmp/cp-patch.yaml
+talosctl patch machineconfig -n 192.168.8.99 -m no-reboot --patch-file /tmp/cp-patch.yaml
 talosctl patch machineconfig -n 192.168.8.101 -m no-reboot --patch-file /tmp/worker-patch.yaml
 talosctl patch machineconfig -n 192.168.8.102 -m no-reboot --patch-file /tmp/worker-patch.yaml
 ```
@@ -92,7 +92,7 @@ for node in 192.168.8.101 192.168.8.102; do
 done
 
 # Upgrade control plane (intel-ucode only)
-talosctl upgrade -n 192.168.8.100 --image "factory.talos.dev/installer/${CP_ID}:v1.13.7"
+talosctl upgrade -n 192.168.8.99 --image "factory.talos.dev/installer/${CP_ID}:v1.13.7"
 ```
 
 Nodes will reboot into NotReady state. That's expected until Cilium is deployed.

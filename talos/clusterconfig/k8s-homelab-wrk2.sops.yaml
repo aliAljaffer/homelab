@@ -3,7 +3,7 @@ debug: false
 persist: true
 machine:
     type: worker
-    token: ENC[AES256_GCM,data:ecG7VCirjksAhV5o1/duomz+BwEOa7g=,iv:yNvhmH9nauhsYICKrmg84BXEauWZL92KvvmfOaYiqTk=,tag:GC8e6XYKJjoOoQpwaPinEQ==,type:str]
+    token: ENC[AES256_GCM,data:Eivbi4Mwi2iCsjaxJdnp9mISl2sBOMQ=,iv:vZbL2qiHV8r9mgZ0IYXJOKwoDoW0Q8zZL79C6cRe+kU=,tag:hGgkmXtqn7Ib4t0MImUFCQ==,type:str]
     ca:
         crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJQakNCOGFBREFnRUNBaEJJLzhPcVIyWGpZWDZZOWJXZzFCMmJNQVVHQXl0bGNEQVFNUTR3REFZRFZRUUsKRXdWMFlXeHZjekFlRncweU5qQTNNamd4TlRFd01ERmFGdzB6TmpBM01qVXhOVEV3TURGYU1CQXhEakFNQmdOVgpCQW9UQlhSaGJHOXpNQ293QlFZREsyVndBeUVBUFlKMW1hc2RtdlpLQzFwUmg5Z3pFMkJaMjUwalo0RGgvcE11ClcrS0NCbHVqWVRCZk1BNEdBMVVkRHdFQi93UUVBd0lDaERBZEJnTlZIU1VFRmpBVUJnZ3JCZ0VGQlFjREFRWUkKS3dZQkJRVUhBd0l3RHdZRFZSMFRBUUgvQkFVd0F3RUIvekFkQmdOVkhRNEVGZ1FVSHZQOFpYQjBjWWtPKzlvOAorLzZFSUx1RkV5Y3dCUVlESzJWd0EwRUFESE5TWHJ5MW9LWVpNTFc0VWNKV3RtenlhMEs4ZUxKNDVBbG9LakdxCkYzaTVYWmhWS0ZOTlUvaUN0TnZQdWdJL3pXYkIyVlo0bUsyaUloYlEvanZoREE9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
         key: ""
@@ -29,7 +29,7 @@ machine:
             forwardKubeDNSToHost: true
 cluster:
     id: hPEZEXUQ2jkxmyO6ueDejoY9OkCLFGOFjqLpas6WNug=
-    secret: ENC[AES256_GCM,data:3FN8NrHqniPEe0v+siYorn4cIoncqtLIcyzvcobvzF31UPo0cBmJiLKZ5fc=,iv:TUZgb65jcOLvceCBKSCBBTJFThiC73aoQNXsaKol2LI=,tag:BsULukKLI2Qi/a5wWFZ0ww==,type:str]
+    secret: ENC[AES256_GCM,data:nDwSVaWSdnKGB7lmSAtzi+4GJIgJSA39y/s2/eVZsDG9Cm110BQIYtGXDQk=,iv:Om9pJlZ7agbLIaClOp1nB/yF5GWA5qj7dXCuBCGMZ9A=,tag:AjJxFlL2kWTx0ldbthoCGw==,type:str]
     controlPlane:
         endpoint: https://192.168.8.99:6443
     clusterName: k8s-homelab
@@ -39,7 +39,7 @@ cluster:
             - 10.244.0.0/16
         serviceSubnets:
             - 10.96.0.0/12
-    token: ENC[AES256_GCM,data:88/VXxELsdVy4B9AWXi2hWTGaaeFIgU=,iv:XfT2NkXroBk1MLeWH5znskUJxBZsPi83cMD4kL8QYkU=,tag:McO8qnXo9WHr+2SRvGVNBA==,type:str]
+    token: ENC[AES256_GCM,data:lx2AIacOo5pmt98T/b8queqMblD4h90=,iv:NNTGoXsRu4ro/JYihe6PFkwslKkKY8GcFu0/mC3ZzVY=,tag:6OIB9XMJVPmYwdbXp6/QNw==,type:str]
     ca:
         crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJpekNDQVRDZ0F3SUJBZ0lSQUpvOXhydHpaemVrQ3FTNVAray9ZR1V3Q2dZSUtvWkl6ajBFQXdJd0ZURVQKTUJFR0ExVUVDaE1LYTNWaVpYSnVaWFJsY3pBZUZ3MHlOakEzTWpneE5URXdNREZhRncwek5qQTNNalV4TlRFdwpNREZhTUJVeEV6QVJCZ05WQkFvVENtdDFZbVZ5Ym1WMFpYTXdXVEFUQmdjcWhrak9QUUlCQmdncWhrak9QUU1CCkJ3TkNBQVJMNUltUjNnTzNnN2ZyQWJKb2pkRmJmckZPTUIwYitTK3QwbjBxazh4ZTI3NDk0SXY5bXZqVGFQb28KTUxHclVKcFlWTStiQmEyQTRnY1Z6bFpHVWNmR28yRXdYekFPQmdOVkhROEJBZjhFQkFNQ0FvUXdIUVlEVlIwbApCQll3RkFZSUt3WUJCUVVIQXdFR0NDc0dBUVVGQndNQ01BOEdBMVVkRXdFQi93UUZNQU1CQWY4d0hRWURWUjBPCkJCWUVGR3lrOVQ4U1M1YURZWFFWM2VDSEFCNmtXdlRTTUFvR0NDcUdTTTQ5QkFNQ0Ewa0FNRVlDSVFDMVBTQ1IKL0pzK0RZbS9sZjNOM2NISGNWRTZZYVh1bisrWldrVjd3d2JUVFFJaEFMZkRWb29vaUp0VjUwb0NWaUxtSUhQVwpMUmNnVnlOUkdBNUE5V0g5KzZFdgotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
         key: ""
@@ -55,16 +55,16 @@ sops:
     age:
         - enc: |
             -----BEGIN AGE ENCRYPTED FILE-----
-            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBYd094djdNdU5UU3o5d2JI
-            Q3VVUUgrM0lRRit3RWYyYzh5Qy9nWFd2b2dVCklnRlVkSzZEUE5sTnJDVzd3SExq
-            Z3RDM24wSGNIQVFGNDhnNllTYmg1NUUKLS0tIFdZU3F6ays1T0JuczBHM0FsUjhB
-            QWwvTjBrcWdZRzhLN3MrNEwzemZPNXMKmaRRSTB3TNc0V9UPRbFLjg55bNTJjZ98
-            rs2SBBruQhswRKRxlTRtfsXsQGU8e/nUMehLqass63P/SHBs+UaGfQ==
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA2cEZ4ME8ybERPZVBwdDIy
+            eHEwYTZONjVpSVpsYlRIbEg0bkU2OEpQTUhnCi9EeDVpYXF5VXI4S2V5bU0xS1NC
+            blBlWDVyelBvcFpiYnd3My9FMHZYdkUKLS0tIDduNFFZaXNJTUpKQ2Z2OU9kcHBy
+            K0s3M2dBdWNQSTV0S0d6c0FmWmRMSkkKHIaZCjdosk4ccG3/XZIRH5R3b96JbzIk
+            cUGPrUjxImlZNt9CLV63zo7uvJThP7hxlNXEHKRyU3Eq1IJ4pLWXgg==
             -----END AGE ENCRYPTED FILE-----
           recipient: age13jd0rndp589yqxpxw36fkrn8jkgazqrlvj22txp4gfh8e0qskusq97zta9
     encrypted_regex: ^(key|token|secret|secretboxEncryptionSecret)$
     lastmodified: "2026-08-08T16:23:50Z"
-    mac: ENC[AES256_GCM,data:rthEs91a255wPsWKTkQqJT3DYSE1K1yKe7/39n75zOL8C1vwe8fY+cS3pLcA15zd/gCMf4lXoiArIj+Udv+x952JAq/z7wDoSwXOfKtcQKtskTxgXjIduvTnbcrSeQSVqwKWw+qPXh7yI8b4Vbwjq8qzi4TVDB9AqYw1LlWZuLs=,iv:c2npuQ0mxjvn678FZwtgviC8E6fpEDGsO6MgDbNChL0=,tag:6Wgz9SWC8EJZjYgaFXFThA==,type:str]
+    mac: ENC[AES256_GCM,data:ciKDsABY5+pA/UuInPmQ3d9+NjO4oNG3M4zYIvsZ5U+NYhYDHcfRVtqFbNHwpKDBqBqXrlLT0H/CUklowsYauj9AUkNmyP7DFtgN9Sx4J6BidtM5D0waFsOkDSyIjmDy81vAZ+n4QXYmDjz9sBjaLALTHP4zgxP/WC4q2LUWSg4=,iv:C7J8dRPM4fKc7i2Vfx3BAQt+fcj6JPA4M/8etZxcUAc=,tag:sCtkDKHi0GghleyCebU5tA==,type:str]
     version: 3.13.3
 ---
 apiVersion: v1alpha1
@@ -74,14 +74,14 @@ sops:
     age:
         - enc: |
             -----BEGIN AGE ENCRYPTED FILE-----
-            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBYd094djdNdU5UU3o5d2JI
-            Q3VVUUgrM0lRRit3RWYyYzh5Qy9nWFd2b2dVCklnRlVkSzZEUE5sTnJDVzd3SExq
-            Z3RDM24wSGNIQVFGNDhnNllTYmg1NUUKLS0tIFdZU3F6ays1T0JuczBHM0FsUjhB
-            QWwvTjBrcWdZRzhLN3MrNEwzemZPNXMKmaRRSTB3TNc0V9UPRbFLjg55bNTJjZ98
-            rs2SBBruQhswRKRxlTRtfsXsQGU8e/nUMehLqass63P/SHBs+UaGfQ==
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA2cEZ4ME8ybERPZVBwdDIy
+            eHEwYTZONjVpSVpsYlRIbEg0bkU2OEpQTUhnCi9EeDVpYXF5VXI4S2V5bU0xS1NC
+            blBlWDVyelBvcFpiYnd3My9FMHZYdkUKLS0tIDduNFFZaXNJTUpKQ2Z2OU9kcHBy
+            K0s3M2dBdWNQSTV0S0d6c0FmWmRMSkkKHIaZCjdosk4ccG3/XZIRH5R3b96JbzIk
+            cUGPrUjxImlZNt9CLV63zo7uvJThP7hxlNXEHKRyU3Eq1IJ4pLWXgg==
             -----END AGE ENCRYPTED FILE-----
           recipient: age13jd0rndp589yqxpxw36fkrn8jkgazqrlvj22txp4gfh8e0qskusq97zta9
     encrypted_regex: ^(key|token|secret|secretboxEncryptionSecret)$
     lastmodified: "2026-08-08T16:23:50Z"
-    mac: ENC[AES256_GCM,data:rthEs91a255wPsWKTkQqJT3DYSE1K1yKe7/39n75zOL8C1vwe8fY+cS3pLcA15zd/gCMf4lXoiArIj+Udv+x952JAq/z7wDoSwXOfKtcQKtskTxgXjIduvTnbcrSeQSVqwKWw+qPXh7yI8b4Vbwjq8qzi4TVDB9AqYw1LlWZuLs=,iv:c2npuQ0mxjvn678FZwtgviC8E6fpEDGsO6MgDbNChL0=,tag:6Wgz9SWC8EJZjYgaFXFThA==,type:str]
+    mac: ENC[AES256_GCM,data:ciKDsABY5+pA/UuInPmQ3d9+NjO4oNG3M4zYIvsZ5U+NYhYDHcfRVtqFbNHwpKDBqBqXrlLT0H/CUklowsYauj9AUkNmyP7DFtgN9Sx4J6BidtM5D0waFsOkDSyIjmDy81vAZ+n4QXYmDjz9sBjaLALTHP4zgxP/WC4q2LUWSg4=,iv:C7J8dRPM4fKc7i2Vfx3BAQt+fcj6JPA4M/8etZxcUAc=,tag:sCtkDKHi0GghleyCebU5tA==,type:str]
     version: 3.13.3

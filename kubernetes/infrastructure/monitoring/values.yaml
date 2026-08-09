@@ -8,7 +8,7 @@ fullnameOverride: kube-prometheus
 # --- Prometheus ---
 prometheus:
   prometheusSpec:
-    # Short local retention — historical data lives in Thanos/MinIO
+    # Short local retention  -  historical data lives in Thanos/MinIO
     retention: 2d
     retentionSize: 15GB
     storageSpec:
@@ -20,7 +20,7 @@ prometheus:
             requests:
               storage: 20Gi
 
-    # Thanos sidecar — uploads TSDB blocks to MinIO continuously
+    # Thanos sidecar  -  uploads TSDB blocks to MinIO continuously
     thanos:
       image: quay.io/thanos/thanos:v0.37.2
       objectStorageConfig:
@@ -60,6 +60,10 @@ grafana:
       root_url: https://grafana.alialjaffer.com
     database:
       wal: true  # required for SQLite on networked (Longhorn) storage
+
+  sidecar:
+    datasources:
+      defaultDatasourceEnabled: false  # prevent conflict with Thanos as default
 
   # Point Grafana at Thanos Query for long-term metrics
   additionalDataSources:

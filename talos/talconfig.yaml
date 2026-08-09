@@ -14,7 +14,7 @@ allowSchedulingOnControlPlanes: false
 # against cp0's IP without following docs/talos-intel-mac.md first, or it
 # will install standard Talos and hang at boot on this hardware again.
 # The declaration below is for config-only operations (patches, upgrades
-# to an already-installed node) — not a fresh-install source of truth
+# to an already-installed node)  -  not a fresh-install source of truth
 # for this specific node.
 
 cniConfig:
@@ -27,7 +27,7 @@ clusterSvcNets:
 
 nodes:
 # MacBook Pro (Mid-2012, 13"). See the topology-change note above and
-# docs/talos-intel-mac.md — do not treat this entry as a fresh-install
+# docs/talos-intel-mac.md  -  do not treat this entry as a fresh-install
 # source of truth without following that doc.
 - hostname: cp0
   ipAddress: 192.168.8.99
@@ -77,7 +77,7 @@ nodes:
 
 # NOTE: cp0 is now Mac hardware and does not need/want intel-ucode via this
 # blanket section for a standard install (moot anyway since cp0 can't use
-# the standard install path — see the topology note above). Left in place
+# the standard install path  -  see the topology note above). Left in place
 # for if another M920q ever becomes an additional control-plane node.
 controlPlane:
   extensions:
@@ -108,8 +108,8 @@ worker:
           rotate-server-certificates: "true"
   extensions:
   # Longhorn storage dependencies
-  - image: ghcr.io/siderolabs/iscsi-tools:v0.1.6
-  - image: ghcr.io/siderolabs/util-linux-tools:v2.40.2
+  - image: ghcr.io/siderolabs/iscsi-tools:v0.2.0
+  - image: ghcr.io/siderolabs/util-linux-tools:2.41.4
   # Intel M920q Tiny: CPU microcode (required for security/stability on bare metal)
   - image: ghcr.io/siderolabs/intel-ucode:20250211
   # Intel M920q Tiny: UHD 630 iGPU driver (enables Quick Sync transcoding via VA-API)

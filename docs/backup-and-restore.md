@@ -166,11 +166,11 @@ You need `homelab.age` on your local machine, and both `sops` and `talosctl` ins
 
 | File | Node |
 |---|---|
-| `talos/clusterconfig/k8s-homelab-cp0.sops.yaml` | ⚠️ STALE — see note below |
-| `talos/clusterconfig/k8s-homelab-wrk0.sops.yaml` | wrk0 - 192.168.8.101 |
-| `talos/clusterconfig/k8s-homelab-wrk1.sops.yaml` | wrk1 - 192.168.8.102 |
+| `talos/clusterconfig/k8s-homelab-cp0.sops.yaml` | ⚠️ STALE  -  see note below |
+| `talos/clusterconfig/k8s-homelab-wrk0.sops.yaml` | wrk0 - 192.168.8.100 |
+| `talos/clusterconfig/k8s-homelab-wrk1.sops.yaml` | wrk1 - 192.168.8.101 |
 
-> **⚠️ cp0 topology change (2026-08-08):** control plane moved from the M920q (was `cp0`, 192.168.8.100, now repurposed as `wrk3`) to the MacBook Pro (`cp0`, 192.168.8.99). `k8s-homelab-cp0.sops.yaml` still contains the **old M920q's** config (wrong disk, wrong hardware) — do not apply it as-is. It needs regenerating via `talhelper genconfig` against an updated `talconfig.yaml`, and there's no SOPS file yet for `wrk3`. The Mac also requires a non-standard install (custom kernel + GRUB bootloader instead of systemd-boot) — see `docs/talos-intel-mac.md` before reinstalling it via any standard flow, or it will silently regress to the boot hang that doc describes.
+> **⚠️ cp0 topology change (2026-08-08):** control plane moved from the M920q (was `cp0`, 192.168.8.99, now repurposed as `wrk3`) to the MacBook Pro (`cp0`, 192.168.8.99). `k8s-homelab-cp0.sops.yaml` still contains the **old M920q's** config (wrong disk, wrong hardware)  -  do not apply it as-is. It needs regenerating via `talhelper genconfig` against an updated `talconfig.yaml`, and there's no SOPS file yet for `wrk3`. The Mac also requires a non-standard install (custom kernel + GRUB bootloader instead of systemd-boot)  -  see `docs/talos-intel-mac.md` before reinstalling it via any standard flow, or it will silently regress to the boot hang that doc describes.
 
 1. Set the age key path.
 
@@ -180,17 +180,17 @@ You need `homelab.age` on your local machine, and both `sops` and `talosctl` ins
 
 2. Apply the config for each node. This decrypts inline without writing plaintext to disk.
 
-   **Do not run the `cp0` command below until `k8s-homelab-cp0.sops.yaml` has been regenerated** — see the warning above.
+   **Do not run the `cp0` command below until `k8s-homelab-cp0.sops.yaml` has been regenerated**  -  see the warning above.
 
    ```bash
    sops --decrypt talos/clusterconfig/k8s-homelab-cp0.sops.yaml \
      | talosctl apply-config -n 192.168.8.99 --file /dev/stdin
 
    sops --decrypt talos/clusterconfig/k8s-homelab-wrk0.sops.yaml \
-     | talosctl apply-config -n 192.168.8.101 --file /dev/stdin
+     | talosctl apply-config -n 192.168.8.100 --file /dev/stdin
 
    sops --decrypt talos/clusterconfig/k8s-homelab-wrk1.sops.yaml \
-     | talosctl apply-config -n 192.168.8.102 --file /dev/stdin
+     | talosctl apply-config -n 192.168.8.101 --file /dev/stdin
    ```
 
 3. If you need the plaintext on disk for inspection, decrypt it and delete it when done.
