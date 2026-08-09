@@ -16,7 +16,7 @@ machine:
         disableManifestsDirectory: true
     install:
         disk: /dev/nvme0n1
-        image: ghcr.io/siderolabs/installer:v1.13.7
+        image: factory.talos.dev/installer/bc2522764e5655d92dbfa1bc08ed9ae8da5de7622019d3842cfe0dc024c4671e:v1.13.7
         wipe: false
         grubUseUKICmdline: true
     features:
@@ -69,7 +69,7 @@ sops:
 ---
 apiVersion: v1alpha1
 kind: HostnameConfig
-auto: stable
+hostname: wrk2
 sops:
     age:
         - enc: |
