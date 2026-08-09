@@ -6,3 +6,4 @@ resources:
   - httproute-hubble.yaml
   - httproute-longhorn.yaml
   - httproute-argocd.yaml
+  - refgrant-longhorn.yaml
