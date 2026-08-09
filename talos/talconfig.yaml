@@ -106,11 +106,5 @@ worker:
       kubelet:
         extraArgs:
           rotate-server-certificates: "true"
-  extensions:
-  # Longhorn storage dependencies
-  - image: ghcr.io/siderolabs/iscsi-tools:v0.2.0
-  - image: ghcr.io/siderolabs/util-linux-tools:2.41.4
-  # Intel M920q Tiny: CPU microcode (required for security/stability on bare metal)
-  - image: ghcr.io/siderolabs/intel-ucode:20250211
-  # Intel M920q Tiny: UHD 630 iGPU driver (enables Quick Sync transcoding via VA-API)
-  - image: ghcr.io/siderolabs/i915:20250609
+  # Extensions are managed via Image Factory schematic (bc2522764e5655d92dbfa1bc08ed9ae8da5de7622019d3842cfe0dc024c4671e).
+  # Use `talosctl upgrade --image factory.talos.dev/installer/<schematic>:<version>` to apply.

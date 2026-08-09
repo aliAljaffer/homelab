@@ -19,11 +19,6 @@ machine:
         image: ghcr.io/siderolabs/installer:v1.13.7
         wipe: false
         grubUseUKICmdline: true
-        extensions:
-            - image: ghcr.io/siderolabs/iscsi-tools:v0.2.0
-            - image: ghcr.io/siderolabs/util-linux-tools:2.41.4
-            - image: ghcr.io/siderolabs/intel-ucode:20250211
-            - image: ghcr.io/siderolabs/i915:20250609
     features:
         diskQuotaSupport: true
         kubePrism:
