@@ -1,48 +1,38 @@
 # homelab
 
-My Kubernetes homelab, running on Talos Linux and managed entirely through ArgoCD. Everything is in this repo — if it's not here, it doesn't exist on the cluster.
+My Kubernetes homelab, running on Talos Linux and managed entirely through ArgoCD. Everything is in this repo - if it's not here, it doesn't exist on the cluster.
 
 **Talos:** v1.13.8 (control plane) / v1.13.7 (workers)
 **Kubernetes:** v1.36.2
-**GitOps:** ArgoCD with App-of-Apps pattern
 
 ---
 
 ## Nodes
 
-### Control Plane
+### Control plane
 
-MacBook Pro Mid-2012 (13") — yes, really.
+MacBook Pro Mid-2012 (13"). Yes, really.
 
-- **IP:** 192.168.8.99
-- **OS:** Talos Linux v1.13.8 (custom kernel build — see [docs/talos-intel-mac.md](docs/talos-intel-mac.md))
-- **CPU:** Intel Core i5 (Ivy Bridge)
-- **RAM:** 16GB DDR3
-- **Storage:** 256GB SATA SSD
+It runs `cp0` at `192.168.8.99` with a custom-built Talos kernel because Apple's EFI firmware rejects the LLD-compiled kernel that ships in v1.13.0+. Intel Core i5 (Ivy Bridge), 16GB DDR3, 256GB SATA SSD. The whole kernel build story is in [docs/talos-intel-mac.md](docs/talos-intel-mac.md).
 
 ### Workers
 
 Four Lenovo M920q Tiny nodes. Fanless-ish, low power, surprisingly capable.
 
-| Node | IP | Status | Storage |
-|---|---|---|---|
-| wrk0 | 192.168.8.100 | Ready | NVMe |
-| wrk1 | 192.168.8.101 | Ready | NVMe |
-| wrk2 | 192.168.8.102 | Ready | NVMe |
-| wrk3 | 192.168.8.103 | Offline | NVMe |
+| Node | IP | Status |
+|---|---|---|
+| wrk0 | 192.168.8.101 | Ready |
+| wrk1 | 192.168.8.102 | Ready |
+| wrk2 | 192.168.8.103 | Ready |
+| wrk3 | 192.168.8.100 | Setting up (repurposed from old cp0) |
 
-All workers: Intel Core i5/i7 (8th/9th gen), 16–32GB DDR4, Intel UHD 630 iGPU (exposed via i915 extension for Quick Sync).
+All on Intel Core i5/i7 (8th/9th gen), 16-32GB DDR4, NVMe storage. The iGPU (Intel UHD 630) is exposed via the `i915` Talos extension for Quick Sync transcoding.
 
-### GPU Node (bonus, used for AI workloads)
+### GPU node (on-demand)
 
-My main PC, dual-boots Fedora. Joins the cluster on-demand with a `gpu=nvidia` taint.
+My main PC joins the cluster on-demand with a `gpu=nvidia` taint for AI workloads.
 
-- **CPU:** AMD Ryzen 7 7800X3D
-- **RAM:** 32GB
-- **GPU:** RTX 4070 Ti Super
-- **Storage:** 3× 2TB NVMe
-
-Build: [PCPartPicker](https://pcpartpicker.com/b/QMRTwP)
+AMD Ryzen 7 7800X3D, 32GB RAM, RTX 4070 Ti Super, 3x 2TB NVMe, dual-boots Fedora. [PCPartPicker build](https://pcpartpicker.com/b/QMRTwP).
 
 ---
 
@@ -56,25 +46,25 @@ Build: [PCPartPicker](https://pcpartpicker.com/b/QMRTwP)
 | Storage | Longhorn (distributed, 2 replicas) |
 | GitOps | ArgoCD (App-of-Apps, 22 applications) |
 | Secrets | Sealed Secrets + SOPS (age) |
-| Metrics | kube-prometheus-stack + Thanos → MinIO (indefinite retention) |
-| Logs | Loki → MinIO (90-day retention) |
+| Metrics | kube-prometheus-stack + Thanos (indefinite retention via MinIO) |
+| Logs | Loki (90-day retention via MinIO) |
 | Log collector | Grafana Alloy |
 | DNS | Cloudflare (ExternalDNS + cert-manager DNS01) |
-| Backups | Velero → GCS |
+| Backups | Velero (scheduled, GCS bucket) |
 | Remote access | Cloudflare Access Zero Trust tunnel |
 
 ---
 
 ## Workloads
 
-- **catus-locatus** — my main app (PostGIS backend, Next.js frontend, MinIO)
-- **pihole** — DNS + ad-blocking for the home network
-- **tuwaiq-tracker** — CronJob hitting an external API every 12 hours
-- **stremio** — media server
-- **cloudflared** — Cloudflare Tunnel for public traffic
-- **arc** — GitHub Actions self-hosted runners
-- **velero** — scheduled cluster backups
-- **monitoring** — Grafana, Prometheus, Thanos, Loki, Alloy
+- **catus-locatus** - my main app (PostGIS backend, Next.js frontend, MinIO)
+- **pihole** - DNS + ad-blocking for the home network
+- **tuwaiq-tracker** - CronJob hitting an external API every 12 hours
+- **stremio** - media server
+- **cloudflared** - Cloudflare Tunnel for public traffic
+- **arc** - GitHub Actions self-hosted runners
+- **velero** - scheduled cluster backups
+- **monitoring** - Grafana, Prometheus, Thanos, Loki, Alloy
 
 ---
 
