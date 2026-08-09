@@ -24,7 +24,7 @@ Four Lenovo M920q Tiny nodes. Fanless-ish, low power, surprisingly capable.
 | wrk0 | 192.168.8.101 | Ready |
 | wrk1 | 192.168.8.102 | Ready |
 | wrk2 | 192.168.8.103 | Ready |
-| wrk3 | 192.168.8.100 | Setting up (repurposed from old cp0) |
+| wrk3 | 192.168.8.100 | Ready |
 
 All on Intel Core i5/i7 (8th/9th gen), 16-32GB DDR4, NVMe storage. The iGPU (Intel UHD 630) is exposed via the `i915` Talos extension for Quick Sync transcoding.
 
