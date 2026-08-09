@@ -43,7 +43,9 @@ grafana:
   defaultDashboardsEnabled: true
   defaultDashboardsTimezone: Asia/Riyadh
 
-  envFromSecret: grafana-discord-webhook
+  extraEnvFrom:
+    - secretRef:
+        name: grafana-discord-webhook
 
   persistence:
     enabled: true
