@@ -13,8 +13,7 @@ metadata:
 spec:
   project: infrastructure
   sources:
-  - repoURL: oci://registry-1.docker.io/bitnamicharts
-    chart: thanos
+  - repoURL: oci://registry-1.docker.io/bitnamicharts/thanos
     targetRevision: 17.3.1
     helm:
       valueFiles:
