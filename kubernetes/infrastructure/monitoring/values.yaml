@@ -43,6 +43,8 @@ grafana:
   defaultDashboardsEnabled: true
   defaultDashboardsTimezone: Asia/Riyadh
 
+  envFromSecret: grafana-discord-webhook
+
   persistence:
     enabled: true
     storageClassName: longhorn
