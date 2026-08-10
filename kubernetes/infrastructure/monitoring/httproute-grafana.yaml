@@ -13,6 +13,6 @@ spec:
     - grafana.alialjaffer.com
   rules:
     - backendRefs:
-        - name: kube-prometheus-grafana
+        - name: monitoring-grafana 
           namespace: monitoring
           port: 80
