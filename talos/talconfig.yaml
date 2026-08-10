@@ -5,18 +5,6 @@ kubernetesVersion: v1.36.2
 endpoint: https://192.168.8.99:6443
 allowSchedulingOnControlPlanes: false
 
-# ⚠️ Topology change (2026-08-08): control plane moved from the M920q
-# (was cp0, 192.168.8.100, now repurposed below as wrk3) to a MacBook Pro
-# (cp0, 192.168.8.99). The Mac requires a NON-STANDARD install: a custom
-# kernel (Clang+LLD/ThinLTO disabled) and GRUB instead of systemd-boot,
-# neither of which talhelper/the standard `talosctl apply-config` install
-# flow can produce. Do NOT run `talhelper genconfig` + a normal install
-# against cp0's IP without following docs/talos-intel-mac.md first, or it
-# will install standard Talos and hang at boot on this hardware again.
-# The declaration below is for config-only operations (patches, upgrades
-# to an already-installed node)  -  not a fresh-install source of truth
-# for this specific node.
-
 cniConfig:
   name: none # Cilium installed via bootstrap, not Talos default (Flannel)
 

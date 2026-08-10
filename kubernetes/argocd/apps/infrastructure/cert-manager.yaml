@@ -24,6 +24,13 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: cert-manager
+  ignoreDifferences:
+  - group: apps
+    kind: StatefulSet
+    jsonPointers:
+    - /status/terminatingReplicas
+    managedFieldsManagers:
+    - kube-controller-manager
   syncPolicy:
     automated:
       prune: true

@@ -21,21 +21,22 @@ loki:
 
   schemaConfig:
     configs:
-      - from: "2024-01-01"
-        store: tsdb
-        object_store: s3
-        schema: v13
-        index:
-          prefix: loki_index_
-          period: 24h
+    - from: "2024-01-01"
+      store: tsdb
+      object_store: s3
+      schema: v13
+      index:
+        prefix: loki_index_
+        period: 24h
 
   limits_config:
-    retention_period: 168h  # 7 days
+    retention_period: 168h # 7 days
     ingestion_rate_mb: 16
     ingestion_burst_size_mb: 32
     per_stream_rate_limit: 3MB
     per_stream_rate_limit_burst: 15MB
     split_queries_by_interval: 15m
+    volume_enabled: true
 
   compactor:
     retention_enabled: true
@@ -54,7 +55,7 @@ singleBinary:
   replicas: 1
   persistence:
     storageClass: longhorn
-    size: 5Gi  # WAL + temp storage; actual data is in MinIO
+    size: 5Gi # WAL + temp storage; actual data is in MinIO
 
 # Disable microservice mode components
 backend:
