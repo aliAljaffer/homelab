@@ -1,15 +1,15 @@
 ---
 defaultSettings:
-  defaultReplicaCount: 2
+  defaultReplicaCount: "2"
   defaultDataLocality: best-effort
-  storageReservedPercentageForDefaultDisk: 15
+  storageReservedPercentageForDefaultDisk: "15"
   # Uncomment after MinIO is running to enable volume backups:
   # backupTarget: "s3://velero@us-east-1/?endpoint=minio.catus-locatus.svc.cluster.local:9000&forcePathStyle=true"
   # backupTargetCredentialSecret: longhorn-backup-secret
 
 persistence:
   defaultClass: true
-  defaultClassReplicaCount: 2
+  defaultClassReplicaCount: "2"
   defaultFsType: ext4
 
 # Exposed via Gateway API HTTPRoute (see cilium-config/httproute-longhorn.yaml)
@@ -17,4 +17,17 @@ ingress:
   enabled: false
 
 longhornUI:
-  replicas: 1
+  replicas: "1"
+
+httproute:
+  enabled: true
+  parentRefs:
+  - group: gateway.networking.k8s.io
+    kind: Gateway
+    name: homelab-gateway
+    namespace: kube-system
+    sectionName: https
+  hostnames: [ "longhorn.alialjaffer.com" ]
+  path: /
+  pathType: PathPrefix
+  annotations: {}
