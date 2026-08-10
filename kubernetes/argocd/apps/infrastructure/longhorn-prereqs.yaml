@@ -1,3 +1,6 @@
+---
+# Wave -4: Pre-create Longhorn namespace + service account so the Helm pre-upgrade hook
+# can run on fresh installs (hook requires the SA from the main chart  -  circular dep).
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -13,15 +16,12 @@ spec:
     repoURL: git@github.com:aliAljaffer/homelab.git
     targetRevision: main
     path: kubernetes/infrastructure/longhorn-prereqs
-    directory:
-      recurse: false
-      exclude: 'serviceaccount.yaml'
   destination:
     server: https://kubernetes.default.svc
     namespace: longhorn-system
   syncPolicy:
     automated:
-      prune: false
+      prune: false # don't delete the SA  -  Longhorn needs it
       selfHeal: true
     syncOptions:
     - CreateNamespace=true
