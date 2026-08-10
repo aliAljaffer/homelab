@@ -6,13 +6,17 @@ metadata:
   namespace: monitoring
 spec:
   parentRefs:
-    - name: homelab-gateway
-      namespace: kube-system
-      sectionName: https
+  - group: gateway.networking.k8s.io
+    kind: Gateway
+    name: homelab-gateway
+    namespace: kube-system
+    sectionName: https
   hostnames:
-    - grafana.alialjaffer.com
+  - grafana.alialjaffer.com
   rules:
-    - backendRefs:
-        - name: monitoring-grafana 
-          namespace: monitoring
-          port: 80
+  - backendRefs:
+    - group: ""
+      kind: Service
+      name: monitoring-grafana
+      namespace: monitoring
+      port: 80
