@@ -1,15 +1,21 @@
+# kubernetes/infrastructure/thanos/values.yaml
 ---
-existingObjstoreSecret: thanos-objstore-secret  # SealedSecret: see bootstrap/README.md
+global:
+  objstore:
+    createSecret: false
+    secretName: thanos-objstore-secret # SealedSecret: see bootstrap/README.md
+    secretKey: objstore.yml # confirm this matches the key inside your sealed secret
 
 query:
   enabled: true
-  replicaLabel: prometheus_replica
-  stores:
+  replicaLabels:
+  - prometheus_replica
+  endpoints:
+    autogen:
+      enabled: true # auto-wires the in-chart storegateway
+    static:
     - prometheus-operated.monitoring.svc.cluster.local:10901
-  dnsDiscovery:
-    enabled: true
-    sidecarsService: kube-prometheus-kube-prome-thanos-discovery
-    sidecarsNamespace: monitoring
+    - dnssrv+_grpc._tcp.kube-prometheus-kube-prome-thanos-discovery.monitoring.svc.cluster.local
 
 storegateway:
   enabled: true
@@ -20,9 +26,10 @@ storegateway:
 
 compactor:
   enabled: true
-  retentionResolutionRaw: 0s   # keep raw metrics forever
-  retentionResolution5m: 0s    # keep 5m downsampled forever
-  retentionResolution1h: 0s    # keep 1h downsampled forever
+  retention:
+    resolutionRaw: "" # keep raw metrics forever
+    resolution5m: "" # keep 5m downsampled forever
+    resolution1h: "" # keep 1h downsampled forever
   persistence:
     enabled: true
     storageClass: longhorn

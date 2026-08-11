@@ -13,9 +13,9 @@ metadata:
 spec:
   project: infrastructure
   sources:
-  - repoURL: oci://registry-1.docker.io/bitnamicharts
+  - repoURL: oci://ghcr.io/thanos-community/helm-charts
     chart: thanos
-    targetRevision: 17.3.1
+    targetRevision: 0.21.0
     helm:
       valueFiles:
       - $values/kubernetes/infrastructure/thanos/values.yaml
