@@ -1,0 +1,148 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kepler-grafana-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_dashboard_folder: Kepler
+data:
+  kepler.json: |-
+    {
+      "annotations": {"list": []},
+      "editable": true,
+      "graphTooltip": 1,
+      "id": null,
+      "title": "Kepler  -  Node and Pod Power",
+      "uid": "kepler",
+      "version": 1,
+      "tags": ["kepler", "energy", "power"],
+      "timezone": "browser",
+      "time": {"from": "now-6h", "to": "now"},
+      "refresh": "15s",
+      "schemaVersion": 39,
+      "fiscalYearStartMonth": 0,
+      "links": [],
+      "liveNow": false,
+      "panels": [
+        {
+          "type": "timeseries",
+          "title": "Node CPU Power (W)",
+          "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+          "datasource": "Thanos",
+          "targets": [
+            {"expr": "sum by (node_name) (kepler_node_cpu_watts)", "legendFormat": "{{node_name}}", "refId": "A"}
+          ],
+          "fieldConfig": {"defaults": {"unit": "watt"}, "overrides": []},
+          "options": {"legend": {"displayMode": "table", "placement": "bottom"}, "tooltip": {"mode": "multi", "sort": "none"}}
+        },
+        {
+          "type": "timeseries",
+          "title": "Node CPU Active vs Idle (W)",
+          "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
+          "datasource": "Thanos",
+          "targets": [
+            {"expr": "sum by (node_name) (kepler_node_cpu_active_watts)", "legendFormat": "active {{node_name}}", "refId": "A"},
+            {"expr": "sum by (node_name) (kepler_node_cpu_idle_watts)", "legendFormat": "idle {{node_name}}", "refId": "B"}
+          ],
+          "fieldConfig": {"defaults": {"unit": "watt"}, "overrides": []},
+          "options": {"legend": {"displayMode": "table", "placement": "bottom"}, "tooltip": {"mode": "multi", "sort": "none"}}
+        },
+        {
+          "type": "timeseries",
+          "title": "Pod CPU Power (W)  -  top 10",
+          "gridPos": {"x": 0, "y": 8, "w": 12, "h": 8},
+          "datasource": "Thanos",
+          "targets": [
+            {"expr": "topk(10, sum by (pod_name, namespace) (kepler_pod_cpu_watts))", "legendFormat": "{{namespace}}/{{pod_name}}", "refId": "A"}
+          ],
+          "fieldConfig": {"defaults": {"unit": "watt"}, "overrides": []},
+          "options": {"legend": {"displayMode": "table", "placement": "right"}, "tooltip": {"mode": "multi", "sort": "none"}}
+        },
+        {
+          "type": "timeseries",
+          "title": "Container CPU Power (W)  -  top 10",
+          "gridPos": {"x": 12, "y": 8, "w": 12, "h": 8},
+          "datasource": "Thanos",
+          "targets": [
+            {"expr": "topk(10, sum by (container_name, pod_name, namespace) (kepler_container_cpu_watts))", "legendFormat": "{{namespace}}/{{pod_name}}/{{container_name}}", "refId": "A"}
+          ],
+          "fieldConfig": {"defaults": {"unit": "watt"}, "overrides": []},
+          "options": {"legend": {"displayMode": "table", "placement": "right"}, "tooltip": {"mode": "multi", "sort": "none"}}
+        },
+        {
+          "type": "timeseries",
+          "title": "Node CPU Usage Ratio",
+          "gridPos": {"x": 0, "y": 16, "w": 12, "h": 8},
+          "datasource": "Thanos",
+          "targets": [
+            {"expr": "kepler_node_cpu_usage_ratio", "legendFormat": "{{node_name}}", "refId": "A"}
+          ],
+          "fieldConfig": {"defaults": {"unit": "percentunit", "min": 0, "max": 1}, "overrides": []},
+          "options": {"legend": {"displayMode": "table", "placement": "bottom"}, "tooltip": {"mode": "multi", "sort": "none"}}
+        },
+        {
+          "type": "timeseries",
+          "title": "Node CPU Energy (J) rate",
+          "gridPos": {"x": 12, "y": 16, "w": 12, "h": 8},
+          "datasource": "Thanos",
+          "targets": [
+            {"expr": "sum by (node_name) (rate(kepler_node_cpu_joules_total[5m]))", "legendFormat": "{{node_name}}", "refId": "A"}
+          ],
+          "fieldConfig": {"defaults": {"unit": "watt"}, "overrides": []},
+          "options": {"legend": {"displayMode": "table", "placement": "bottom"}, "tooltip": {"mode": "multi", "sort": "none"}}
+        },
+        {
+          "type": "timeseries",
+          "title": "Pod CPU Energy (J)  -  top 10 rate over 5m",
+          "gridPos": {"x": 0, "y": 24, "w": 12, "h": 8},
+          "datasource": "Thanos",
+          "targets": [
+            {"expr": "topk(10, sum by (pod_name, namespace) (rate(kepler_pod_cpu_joules_total[5m])))", "legendFormat": "{{namespace}}/{{pod_name}}", "refId": "A"}
+          ],
+          "fieldConfig": {"defaults": {"unit": "watt"}, "overrides": []},
+          "options": {"legend": {"displayMode": "table", "placement": "right"}, "tooltip": {"mode": "multi", "sort": "none"}}
+        },
+        {
+          "type": "stat",
+          "title": "Cluster Total CPU Power (W)",
+          "gridPos": {"x": 12, "y": 24, "w": 4, "h": 4},
+          "datasource": "Thanos",
+          "targets": [
+            {"expr": "sum(kepler_node_cpu_watts)", "refId": "A"}
+          ],
+          "fieldConfig": {"defaults": {"unit": "watt", "decimals": 2, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 200}, {"color": "red", "value": 400}]}}, "overrides": []},
+          "options": {"colorMode": "value", "graphMode": "area", "textMode": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}}
+        },
+        {
+          "type": "stat",
+          "title": "Kepler Build Info",
+          "gridPos": {"x": 16, "y": 24, "w": 4, "h": 4},
+          "datasource": "Thanos",
+          "targets": [
+            {"expr": "kepler_build_info", "legendFormat": "{{version}}", "refId": "A"}
+          ],
+          "fieldConfig": {"defaults": {"mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}]}}, "overrides": []},
+          "options": {"colorMode": "value", "graphMode": "none", "textMode": "name", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}}
+        },
+        {
+          "type": "table",
+          "title": "Node Power Now (W)",
+          "gridPos": {"x": 20, "y": 24, "w": 4, "h": 8},
+          "datasource": "Thanos",
+          "targets": [
+            {"expr": "sum by (node_name) (kepler_node_cpu_watts)", "refId": "A", "format": "table", "instant": true}
+          ],
+          "transformations": [
+            {"id": "organize", "options": {"excludeByName": {"Time": true, "__name__": true}, "renameByName": {"Value": "watts"}}}
+          ],
+          "fieldConfig": {"defaults": {"unit": "watt", "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}, {"color": "green", "value": 0}]}}, "overrides": []}
+        }
+      ],
+      "schemaVersion": 39,
+      "style": "dark",
+      "templating": {"list": []},
+      "gnetId": null
+    }

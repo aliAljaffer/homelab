@@ -1,0 +1,90 @@
+---
+# Kepler Helm values
+# Source: oci://quay.io/sustainable_computing_io/charts/kepler
+# Chart version pinned in the Argo CD Application (kubernetes/argocd/apps/infrastructure/kepler.yaml).
+#
+# Requires the kubelet extraMounts for /sys and /proc on every node.
+# See talos/patches/kepler-kubelet-extraMounts.yaml and talconfig.yaml.
+# Without those mounts Kepler runs but reports zero watts.
+
+image:
+  repository: quay.io/sustainable_computing_io/kepler
+  pullPolicy: IfNotPresent
+  # Chart appVersion is v0.11.4. Pin the tag too for reproducibility.
+  tag: v0.11.4
+
+namespace:
+  create: false   # Namespace is managed by namespace.yaml in this kustomize.
+  name: kepler
+
+serviceAccount:
+  create: true
+  name: kepler
+
+rbac:
+  create: true
+
+service:
+  type: ClusterIP
+  port: 28282
+
+daemonset:
+  # Toleration already present in chart defaults for control-plane.
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
+    - key: node-role.kubernetes.io/master
+      operator: Exists
+      effect: NoSchedule
+
+  # Kepler 0.10+ needs read-only access to host /proc and /sys.
+  # Those paths are propagated into the kubelet mount namespace only because
+  # of the talosctl patch; the chart then bind-mounts them into the DaemonSet pod.
+  hostPID: true
+  hostUsers: true
+  securityContext:
+    privileged: true
+    runAsNonRoot: false
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+config:
+  log:
+    level: info
+    format: text
+  host:
+    sysfs: /host/sys
+    procfs: /host/proc
+  monitor:
+    interval: 5s
+    staleness: 500ms
+  kube:
+    enabled: true
+    podInformer:
+      mode: kubelet
+      pollInterval: 15s
+  exporter:
+    prometheus:
+      enabled: true
+      debugCollectors:
+        - go
+
+# ServiceMonitor is created by the kube-prometheus-stack Prometheus Operator.
+# The release=monitoring label matches the Prometheus serviceMonitorSelector.
+serviceMonitor:
+  enabled: true
+  interval: 5s
+  path: /metrics
+  labels:
+    release: monitoring
+  annotations: {}
+
+networkPolicy:
+  enabled: false

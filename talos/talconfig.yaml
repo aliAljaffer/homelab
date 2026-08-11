@@ -82,6 +82,26 @@ controlPlane:
       kubelet:
         extraArgs:
           rotate-server-certificates: "true"
+        # Kepler (https://sustainable-computing.io/kepler/) reads RAPL powercap
+        # from /sys and CPU info from /proc via hostPath volumes. Talos kubelet
+        # has its own mount namespace, so those paths must be bind-mounted
+        # explicitly. See talos/patches/kepler-kubelet-extraMounts.yaml for
+        # the standalone version applied with `talosctl patch mc`.
+        extraMounts:
+          - destination: /sys
+            type: bind
+            source: /sys
+            options:
+              - bind
+              - ro
+              - rshared
+          - destination: /proc
+            type: bind
+            source: /proc
+            options:
+              - bind
+              - ro
+              - rshared
 
 # Patches applied to all worker nodes
 worker:
@@ -94,5 +114,21 @@ worker:
       kubelet:
         extraArgs:
           rotate-server-certificates: "true"
+        # Kepler extraMounts  -  see controlPlane.patches for details.
+        extraMounts:
+          - destination: /sys
+            type: bind
+            source: /sys
+            options:
+              - bind
+              - ro
+              - rshared
+          - destination: /proc
+            type: bind
+            source: /proc
+            options:
+              - bind
+              - ro
+              - rshared
   # Extensions are managed via Image Factory schematic (bc2522764e5655d92dbfa1bc08ed9ae8da5de7622019d3842cfe0dc024c4671e).
   # Use `talosctl upgrade --image factory.talos.dev/installer/<schematic>:<version>` to apply.
