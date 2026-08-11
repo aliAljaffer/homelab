@@ -13,7 +13,11 @@ metadata:
 spec:
   project: infrastructure
   sources:
-  - repoURL: oci://ghcr.io/thanos-community/helm-charts
+  - repoURL: ghcr.io/thanos-community/helm-charts
+    # NOTE: no oci:// scheme. ArgoCD auto-detects OCI by the chart+registry form.
+    # With the oci:// prefix ArgoCD's token helper requests the wrong OAuth scope
+    # (repository:<org>/<repo> instead of repository:<org>/<repo>/<chart>) and ghcr
+    # returns 403; the Application sits at sync=Unknown with a ComparisonError.
     chart: thanos
     targetRevision: 0.21.0
     helm:
