@@ -16,6 +16,7 @@ configuration:
     - name: default
       provider: gcp
       bucket: alialjaffer-homelab
+      prefix: velero
       credential:
         name: cloud-credentials
         key: cloud
