@@ -87,21 +87,18 @@ controlPlane:
         # has its own mount namespace, so those paths must be bind-mounted
         # explicitly. See talos/patches/kepler-kubelet-extraMounts.yaml for
         # the standalone version applied with `talosctl patch mc`.
+        #
+        # /sys is intentionally omitted. Binding /sys with rshared back-propagates
+        # into the host namespace and corrupts the cgroup2 mount, breaking the
+        # kubelet. Only /proc (rprivate) is safe to add here.
         extraMounts:
-          - destination: /sys
-            type: bind
-            source: /sys
-            options:
-              - bind
-              - ro
-              - rshared
           - destination: /proc
             type: bind
             source: /proc
             options:
               - bind
               - ro
-              - rshared
+              - rprivate
 
 # Patches applied to all worker nodes
 worker:
@@ -114,21 +111,15 @@ worker:
       kubelet:
         extraArgs:
           rotate-server-certificates: "true"
-        # Kepler extraMounts  -  see controlPlane.patches for details.
+        # Kepler extraMounts: /sys omitted (back-propagation via rshared corrupts
+        # host cgroup2). Only /proc with rprivate is safe. See controlPlane.patches.
         extraMounts:
-          - destination: /sys
-            type: bind
-            source: /sys
-            options:
-              - bind
-              - ro
-              - rshared
           - destination: /proc
             type: bind
             source: /proc
             options:
               - bind
               - ro
-              - rshared
+              - rprivate
   # Extensions are managed via Image Factory schematic (bc2522764e5655d92dbfa1bc08ed9ae8da5de7622019d3842cfe0dc024c4671e).
   # Use `talosctl upgrade --image factory.talos.dev/installer/<schematic>:<version>` to apply.

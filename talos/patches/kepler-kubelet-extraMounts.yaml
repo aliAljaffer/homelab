@@ -1,10 +1,15 @@
 ---
 # Kubelet extraMounts required for Kepler (https://sustainable-computing.io/kepler/)
-# Kepler's DaemonSet mounts host /sys and /proc via hostPath so it can read
-# RAPL powercap (Intel RAPL / AMD Energy Engine) and /proc/cpu info.
+# Kepler's DaemonSet mounts host /proc via hostPath so it can read
+# CPU info from /proc/cpuinfo and process data.
 # On Talos the kubelet has its own mount namespace, so those host paths must
-# be explicitly bind-mounted into the kubelet container, otherwise Kepler pods
-# get empty/zero readings.
+# be explicitly bind-mounted into the kubelet container.
+#
+# NOTE: /sys is intentionally NOT mounted here. Binding /sys with rshared
+# back-propagates into the host namespace and corrupts the cgroup2 mount at
+# /sys/fs/cgroup, preventing the kubelet from creating cgroups (ENOENT on
+# mkdir /sys/fs/cgroup/podruntime). Use rprivate for /proc to prevent the
+# same back-propagation issue.
 #
 # Apply to a node:
 #   talosctl patch mc -n <node> --endpoints 127.0.0.1 \
@@ -15,17 +20,10 @@
 machine:
   kubelet:
     extraMounts:
-      - destination: /sys
-        type: bind
-        source: /sys
-        options:
-          - bind
-          - ro
-          - rshared
       - destination: /proc
         type: bind
         source: /proc
         options:
           - bind
           - ro
-          - rshared
+          - rprivate
