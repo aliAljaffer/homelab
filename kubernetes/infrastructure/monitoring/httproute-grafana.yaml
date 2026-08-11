@@ -14,14 +14,14 @@ spec:
   hostnames:
   - grafana.alialjaffer.com
   rules:
-  - backendRefs:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
     - group: ""
       kind: Service
       name: monitoring-grafana
       namespace: monitoring
       port: 80
       weight: 1
-      matches:
-      - path:
-          type: PathPrefix
-          value: /
