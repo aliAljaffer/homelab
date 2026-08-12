@@ -23,6 +23,9 @@ spec:
   - https://bitnami-labs.github.io/sealed-secrets
   - https://charts.bitnami.com/bitnami
   - https://vmware-tanzu.github.io/helm-charts
+  - https://cloudnative-pg.io/charts
+  - https://helm.releases.hashicorp.com
+  - https://kyverno.github.io/kyverno/
   destinations:
   - server: https://kubernetes.default.svc
     namespace: "*"

@@ -1,0 +1,42 @@
+---
+# HA via Raft integrated storage (no external Consul dependency).
+# TLS is terminated at the shared Gateway (homelab-gateway), same pattern
+# as Grafana/ArgoCD/pihole, so the listener here stays plain HTTP internally.
+server:
+  ha:
+    enabled: true
+    replicas: 3
+    raft:
+      enabled: true
+      config: |
+        ui = true
+
+        listener "tcp" {
+          tls_disable = 1
+          address = "[::]:8200"
+          cluster_address = "[::]:8201"
+        }
+
+        storage "raft" {
+          path = "/vault/data"
+        }
+
+        seal "awskms" {
+          region     = "eu-north-1"
+          kms_key_id = "4579ff84-e232-4e56-a6b5-291e2ff288a6"
+        }
+
+        service_registration "kubernetes" {}
+
+  # AWS credentials for the awskms seal, injected as env vars from a
+  # Secret sealed per kubernetes/bootstrap/README.md.
+  extraSecretEnvironmentVars:
+  - envName: AWS_ACCESS_KEY_ID
+    secretName: vault-aws-credentials
+    secretKey: AWS_ACCESS_KEY_ID
+  - envName: AWS_SECRET_ACCESS_KEY
+    secretName: vault-aws-credentials
+    secretKey: AWS_SECRET_ACCESS_KEY
+
+ui:
+  enabled: true

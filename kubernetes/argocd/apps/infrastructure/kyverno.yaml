@@ -1,0 +1,34 @@
+---
+# Wave -2: Kyverno policy engine. Runs early so admission/mutation policies
+# are in force before workloads sync.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kyverno
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infrastructure
+  sources:
+  - repoURL: https://kyverno.github.io/kyverno/
+    chart: kyverno
+    targetRevision: 3.8.2
+    helm:
+      valueFiles:
+      - $values/kubernetes/infrastructure/kyverno/values.yaml
+  - repoURL: git@github.com:aliAljaffer/homelab.git
+    targetRevision: main
+    ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kyverno
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - ServerSideApply=true

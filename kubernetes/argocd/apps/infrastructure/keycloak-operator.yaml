@@ -1,0 +1,27 @@
+---
+# Wave -1: Keycloak Operator + CRDs. Must exist before the keycloak Application (wave 1).
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: keycloak-operator
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infrastructure
+  source:
+    repoURL: git@github.com:aliAljaffer/homelab.git
+    targetRevision: main
+    path: kubernetes/infrastructure/keycloak-operator
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: keycloak
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - ServerSideApply=true

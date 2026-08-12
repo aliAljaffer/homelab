@@ -19,6 +19,13 @@ All Helm chart values are committed to Git alongside their ArgoCD Applications. 
 | Loki | `kubernetes/infrastructure/loki/values.yaml` |
 | Thanos | `kubernetes/infrastructure/thanos/values.yaml` |
 | Grafana Alloy | `kubernetes/infrastructure/alloy/values.yaml` |
+| CloudNativePG | `kubernetes/infrastructure/cloudnative-pg/values.yaml` |
+| Kyverno | `kubernetes/infrastructure/kyverno/values.yaml` |
+| Vault | `kubernetes/infrastructure/vault/values.yaml` |
+
+Keycloak (operator + CR) and Knative Serving (CRDs + core + net-gateway-api) are installed from
+upstream raw/kustomize-remote manifests, not Helm charts. See their `kustomization.yaml` files
+under `kubernetes/infrastructure/`.
 
 Cilium and ArgoCD are bootstrap-installed imperatively (their Helm releases are not managed by ArgoCD). Values are tracked in `kubernetes/bootstrap/`. Everything else is fully ArgoCD-managed.
 
@@ -237,4 +244,57 @@ sops --encrypt talos/clusterconfig/k8s-homelab-worker.yaml \
   > talos/clusterconfig/k8s-homelab-worker.sops
 
 # Store homelab.age securely (NOT in Git)
+```
+
+## Step 10 - Vault: AWS KMS auto-unseal credentials
+
+Vault runs HA with Raft integrated storage and unseals itself via AWS KMS on every
+restart (see `kubernetes/infrastructure/vault/values.yaml`). This needs a real KMS
+key and an IAM user scoped to it before the `vault` Application can come up healthy.
+
+```bash
+# Create the KMS key (adjust region if you don't use eu-north-1)
+aws kms create-key --region eu-north-1 --description "vault-auto-unseal"
+# Note the KeyId/Arn from the output, then fill in:
+#   kubernetes/infrastructure/vault/values.yaml   (kms_key_id)
+#   kubernetes/infrastructure/vault/iam-policy.json (Resource ARN)
+
+# Create an IAM user/policy scoped to that key, then generate an access key,
+# and seal the credentials:
+kubectl create secret generic vault-aws-credentials \
+  --namespace vault \
+  --from-literal=AWS_ACCESS_KEY_ID=AWS_ACCESS_KEY_ID \
+  --from-literal=AWS_SECRET_ACCESS_KEY=AWS_SECRET_ACCESS_KEY \
+  --dry-run=client -o yaml \
+  | kubeseal --cert pub-sealed-secrets.pem -o yaml \
+  > kubernetes/infrastructure/vault/vault-aws-credentials.sealed.yaml
+```
+
+Add the new file to `kubernetes/infrastructure/vault/kustomization.yaml` under `resources:`,
+then commit both files.
+
+## Step 11 - Vault: initialize Raft HA
+
+AWS KMS only auto-unseals; it doesn't replace the one-time `vault operator init`. Run
+this once after the `vault` Application is synced and the first pod is running:
+
+```bash
+kubectl exec -n vault vault-0 -- vault operator init -key-shares=1 -key-threshold=1
+
+# Join the other two Raft peers to the leader
+kubectl exec -n vault vault-1 -- vault operator raft join http://vault-0.vault-internal:8200
+kubectl exec -n vault vault-2 -- vault operator raft join http://vault-0.vault-internal:8200
+```
+
+Save the initial root token from the `init` output somewhere safe (ideally into Vault
+itself once you have another root of trust, or a password manager) — it is not stored
+in Git or in the cluster.
+
+## Step 12 - Keycloak: retrieve the auto-generated admin password
+
+The operator generates the initial admin credentials; nothing to seal here.
+
+```bash
+kubectl get secret keycloak-initial-admin -n keycloak \
+  -o go-template='{{.data.username | base64decode}}{{"\n"}}{{.data.password | base64decode}}{{"\n"}}'
 ```
