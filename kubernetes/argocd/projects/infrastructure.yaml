@@ -12,7 +12,7 @@ spec:
   - git@github.com:aliAljaffer/homelab.git
   - https://github.com/aliAljaffer/homelab.git
   - ghcr.io/thanos-community/helm-charts # OCI helm registry; no oci:// scheme (see apps/infrastructure/thanos.yaml)
-  - quay.io/sustainable_computing_io/charts/kepler # OCI helm registry for Kepler (no oci:// scheme)
+  - quay.io/sustainable_computing_io/charts # OCI helm registry prefix for Kepler (no oci:// scheme); Argo appends chart name
   - https://helm.cilium.io/
   - https://charts.jetstack.io
   - https://metallb.github.io/metallb
