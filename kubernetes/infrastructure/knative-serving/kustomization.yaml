@@ -1,0 +1,58 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - https://github.com/knative/serving/releases/download/knative-v1.23.0/serving-core.yaml
+  - https://github.com/knative-extensions/net-gateway-api/releases/download/knative-v1.23.0/net-gateway-api.yaml
+
+# Route Knative through the existing Cilium GatewayClass / homelab-gateway
+# instead of Istio/Contour/Envoy Gateway.
+patches:
+  - target:
+      kind: ConfigMap
+      name: config-gateway
+      namespace: knative-serving
+    patch: |
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: config-gateway
+        namespace: knative-serving
+      data:
+        external-gateways: |
+          - class: cilium
+            gateway: kube-system/homelab-gateway
+            service: kube-system/cilium-gateway-homelab-gateway
+        local-gateways: |
+          - class: cilium
+            gateway: kube-system/homelab-gateway
+            service: kube-system/cilium-gateway-homelab-gateway
+
+  - target:
+      kind: ConfigMap
+      name: config-network
+      namespace: knative-serving
+    patch: |
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: config-network
+        namespace: knative-serving
+      data:
+        ingress-class: gateway-api.ingress.networking.knative.dev
+        # Single-label subdomains so Knative routes fit the existing
+        # *.alialjaffer.com wildcard cert (which doesn't cover nested labels).
+        domain-template: "{{.Name}}-{{.Namespace}}.{{.Domain}}"
+
+  - target:
+      kind: ConfigMap
+      name: config-domain
+      namespace: knative-serving
+    patch: |
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: config-domain
+        namespace: knative-serving
+      data:
+        alialjaffer.com: |

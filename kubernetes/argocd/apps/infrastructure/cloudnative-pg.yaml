@@ -1,0 +1,33 @@
+---
+# Wave -2: CloudNativePG operator (Postgres). Needed before any Cluster CR (e.g. Keycloak's DB).
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloudnative-pg
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infrastructure
+  sources:
+  - repoURL: https://cloudnative-pg.io/charts
+    chart: cloudnative-pg
+    targetRevision: 0.29.0
+    helm:
+      valueFiles:
+      - $values/kubernetes/infrastructure/cloudnative-pg/values.yaml
+  - repoURL: git@github.com:aliAljaffer/homelab.git
+    targetRevision: main
+    ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cnpg-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - ServerSideApply=true
