@@ -1,0 +1,265 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-health-grafana-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_dashboard_folder: Cluster
+data:
+  cluster-health.json: |-
+    {
+      "annotations": {"list": []},
+      "editable": true,
+      "graphTooltip": 1,
+      "id": null,
+      "title": "Cluster Health",
+      "uid": "cluster-health",
+      "version": 1,
+      "tags": ["cluster", "nodes", "power", "kepler"],
+      "timezone": "browser",
+      "time": {"from": "now-6h", "to": "now"},
+      "refresh": "30s",
+      "schemaVersion": 39,
+      "fiscalYearStartMonth": 0,
+      "links": [],
+      "liveNow": false,
+      "templating": {
+        "list": [
+          {
+            "name": "datasource",
+            "type": "datasource",
+            "query": "prometheus",
+            "current": {"text": "Thanos", "value": "Thanos"},
+            "hide": 0,
+            "label": "Datasource",
+            "multi": false,
+            "includeAll": false,
+            "refresh": 1
+          }
+        ]
+      },
+      "panels": [
+        {
+          "type": "table",
+          "title": "Node Status",
+          "gridPos": {"x": 0, "y": 0, "w": 24, "h": 4},
+          "datasource": "$datasource",
+          "targets": [
+            {"expr": "kube_node_info", "refId": "A", "instant": true, "format": "table", "legendFormat": ""},
+            {"expr": "kube_node_status_condition{condition=\"Ready\",status=\"true\"}", "refId": "B", "instant": true, "format": "table", "legendFormat": ""}
+          ],
+          "transformations": [
+            {"id": "merge", "options": {}},
+            {"id": "organize", "options": {"excludeByName": {"Time": true, "__name__": true, "endpoint": true, "instance": true, "job": true, "namespace": true, "pod": true, "service": true, "container": true, "uid": true, "created_by_kind": true, "created_by_name": true, "host_ip": true, "pod_ip": true, "host_network": true, "status": true, "condition": true}, "renameByName": {"node": "Node", "internal_ip": "Internal IP", "os_image": "OS", "kubelet_version": "Kubelet", "kubeproxy_version": "kube-proxy", "container_runtime_version": "Runtime", "kernel_version": "Kernel", "pod_cidr": "Pod CIDR", "system_uuid": "System UUID", "Value #B": "Ready"}}},
+            {"id": "sortBy", "options": {"fields": {}}}
+          ],
+          "fieldConfig": {"defaults": {"custom": {"align": "auto", "filterable": true}}, "overrides": []},
+          "options": {"showHeader": true, "footer": {"show": false}}
+        },
+        {
+          "type": "stat",
+          "title": "Nodes Ready",
+          "gridPos": {"x": 0, "y": 4, "w": 4, "h": 3},
+          "datasource": "$datasource",
+          "targets": [
+            {"expr": "count(kube_node_status_condition{condition=\"Ready\",status=\"true\"})", "refId": "A"}
+          ],
+          "fieldConfig": {"defaults": {"unit": "short", "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 5}]}}, "overrides": []},
+          "options": {"colorMode": "value", "graphMode": "none", "textMode": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}}
+        },
+        {
+          "type": "stat",
+          "title": "Total Pods",
+          "gridPos": {"x": 4, "y": 4, "w": 4, "h": 3},
+          "datasource": "$datasource",
+          "targets": [
+            {"expr": "count(kube_pod_info)", "refId": "A"}
+          ],
+          "fieldConfig": {"defaults": {"unit": "short", "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}]}}, "overrides": []},
+          "options": {"colorMode": "value", "graphMode": "area", "textMode": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}}
+        },
+        {
+          "type": "stat",
+          "title": "Cluster CPU Power (W)",
+          "gridPos": {"x": 8, "y": 4, "w": 4, "h": 3},
+          "datasource": "$datasource",
+          "targets": [
+            {"expr": "sum(kepler_node_cpu_watts)", "refId": "A"}
+          ],
+          "fieldConfig": {"defaults": {"unit": "watt", "decimals": 2, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 200}, {"color": "red", "value": 400}]}}, "overrides": []},
+          "options": {"colorMode": "value", "graphMode": "area", "textMode": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}}
+        },
+        {
+          "type": "stat",
+          "title": "Cluster CPU Energy Rate (J/s)",
+          "gridPos": {"x": 12, "y": 4, "w": 4, "h": 3},
+          "datasource": "$datasource",
+          "targets": [
+            {"expr": "sum(rate(kepler_node_cpu_joules_total[5m]))", "refId": "A"}
+          ],
+          "fieldConfig": {"defaults": {"unit": "watt", "decimals": 2, "thresholds": {"mode": "absolute", "steps": [{"color": "purple", "value": null}]}}, "overrides": []},
+          "options": {"colorMode": "value", "graphMode": "area", "textMode": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}}
+        },
+        {
+          "type": "stat",
+          "title": "Avg Node Load (1m)",
+          "gridPos": {"x": 16, "y": 4, "w": 4, "h": 3},
+          "datasource": "$datasource",
+          "targets": [
+            {"expr": "avg(node_load1)", "refId": "A"}
+          ],
+          "fieldConfig": {"defaults": {"unit": "short", "decimals": 2, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 4}, {"color": "red", "value": 8}]}}, "overrides": []},
+          "options": {"colorMode": "value", "graphMode": "area", "textMode": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}}
+        },
+        {
+          "type": "stat",
+          "title": "Pods per Node (max)",
+          "gridPos": {"x": 20, "y": 4, "w": 4, "h": 3},
+          "datasource": "$datasource",
+          "targets": [
+            {"expr": "max(count by (node) (kube_pod_info))", "refId": "A"}
+          ],
+          "fieldConfig": {"defaults": {"unit": "short", "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}]}}, "overrides": []},
+          "options": {"colorMode": "value", "graphMode": "none", "textMode": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}}
+        },
+        {
+          "type": "timeseries",
+          "title": "Node CPU Power (W)  -  Kepler",
+          "gridPos": {"x": 0, "y": 7, "w": 12, "h": 8},
+          "datasource": "$datasource",
+          "targets": [
+            {"expr": "sum by (node_name) (kepler_node_cpu_watts)", "legendFormat": "{{node_name}}", "refId": "A"}
+          ],
+          "fieldConfig": {"defaults": {"unit": "watt"}, "overrides": []},
+          "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"]}, "tooltip": {"mode": "multi", "sort": "desc"}}
+        },
+        {
+          "type": "timeseries",
+          "title": "Node CPU Active vs Idle (W)  -  Kepler",
+          "gridPos": {"x": 12, "y": 7, "w": 12, "h": 8},
+          "datasource": "$datasource",
+          "targets": [
+            {"expr": "sum by (node_name) (kepler_node_cpu_active_watts)", "legendFormat": "active {{node_name}}", "refId": "A"},
+            {"expr": "sum by (node_name) (kepler_node_cpu_idle_watts)", "legendFormat": "idle {{node_name}}", "refId": "B"}
+          ],
+          "fieldConfig": {"defaults": {"unit": "watt"}, "overrides": []},
+          "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull"]}, "tooltip": {"mode": "multi", "sort": "desc"}}
+        },
+        {
+          "type": "timeseries",
+          "title": "CPU Usage % per Node",
+          "gridPos": {"x": 0, "y": 15, "w": 12, "h": 8},
+          "datasource": "$datasource",
+          "targets": [
+            {"expr": "100 * (1 - avg by (nodename) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m]) * on(instance) group_left(nodename) node_uname_info))", "legendFormat": "{{nodename}}", "refId": "A"}
+          ],
+          "fieldConfig": {"defaults": {"unit": "percent", "min": 0, "max": 100}, "overrides": []},
+          "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"]}, "tooltip": {"mode": "multi", "sort": "desc"}}
+        },
+        {
+          "type": "timeseries",
+          "title": "Memory Usage % per Node",
+          "gridPos": {"x": 12, "y": 15, "w": 12, "h": 8},
+          "datasource": "$datasource",
+          "targets": [
+            {"expr": "100 * (1 - (node_memory_MemAvailable_bytes * on(instance) group_left(nodename) node_uname_info) / (node_memory_MemTotal_bytes * on(instance) group_left(nodename) node_uname_info))", "legendFormat": "{{nodename}}", "refId": "A"}
+          ],
+          "fieldConfig": {"defaults": {"unit": "percent", "min": 0, "max": 100}, "overrides": []},
+          "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"]}, "tooltip": {"mode": "multi", "sort": "desc"}}
+        },
+        {
+          "type": "timeseries",
+          "title": "Disk Usage % per Node (rootfs)",
+          "gridPos": {"x": 0, "y": 23, "w": 12, "h": 8},
+          "datasource": "$datasource",
+          "targets": [
+            {"expr": "100 * (1 - (node_filesystem_avail_bytes{mountpoint=\"/var\"} / node_filesystem_size_bytes{mountpoint=\"/var\"})) * on(instance) group_left(nodename) node_uname_info", "legendFormat": "{{nodename}}", "refId": "A"}
+          ],
+          "fieldConfig": {"defaults": {"unit": "percent", "min": 0, "max": 100}, "overrides": []},
+          "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"]}, "tooltip": {"mode": "multi", "sort": "desc"}}
+        },
+        {
+          "type": "timeseries",
+          "title": "Load Average (1m / 5m / 15m) per Node",
+          "gridPos": {"x": 12, "y": 23, "w": 12, "h": 8},
+          "datasource": "$datasource",
+          "targets": [
+            {"expr": "node_load1 * on(instance) group_left(nodename) node_uname_info", "legendFormat": "1m {{nodename}}", "refId": "A"},
+            {"expr": "node_load5 * on(instance) group_left(nodename) node_uname_info", "legendFormat": "5m {{nodename}}", "refId": "B"},
+            {"expr": "node_load15 * on(instance) group_left(nodename) node_uname_info", "legendFormat": "15m {{nodename}}", "refId": "C"}
+          ],
+          "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+          "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull"]}, "tooltip": {"mode": "multi", "sort": "desc"}}
+        },
+        {
+          "type": "timeseries",
+          "title": "Network RX Rate per Node",
+          "gridPos": {"x": 0, "y": 31, "w": 12, "h": 8},
+          "datasource": "$datasource",
+          "targets": [
+            {"expr": "sum by (instance) (rate(node_network_receive_bytes_total{device!~\"lo|veth.*|cni.*|cilium.*|flannel.*\"}[5m])) * on(instance) group_left(nodename) node_uname_info", "legendFormat": "RX {{nodename}}", "refId": "A"},
+            {"expr": "sum by (instance) (rate(node_network_transmit_bytes_total{device!~\"lo|veth.*|cni.*|cilium.*|flannel.*\"}[5m])) * on(instance) group_left(nodename) node_uname_info", "legendFormat": "TX {{nodename}}", "refId": "B"}
+          ],
+          "fieldConfig": {"defaults": {"unit": "Bps"}, "overrides": []},
+          "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull"]}, "tooltip": {"mode": "multi", "sort": "desc"}}
+        },
+        {
+          "type": "timeseries",
+          "title": "Pods per Node",
+          "gridPos": {"x": 12, "y": 31, "w": 12, "h": 8},
+          "datasource": "$datasource",
+          "targets": [
+            {"expr": "count by (node) (kube_pod_info)", "legendFormat": "{{node}}", "refId": "A"}
+          ],
+          "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+          "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"]}, "tooltip": {"mode": "multi", "sort": "desc"}}
+        },
+        {
+          "type": "timeseries",
+          "title": "Kepler CPU Usage Ratio vs node-exporter CPU %",
+          "gridPos": {"x": 0, "y": 39, "w": 12, "h": 8},
+          "datasource": "$datasource",
+          "targets": [
+            {"expr": "100 * kepler_node_cpu_usage_ratio", "legendFormat": "kepler {{node_name}}", "refId": "A"},
+            {"expr": "100 * (1 - avg by (nodename) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m]) * on(instance) group_left(nodename) node_uname_info))", "legendFormat": "node-exporter {{nodename}}", "refId": "B"}
+          ],
+          "fieldConfig": {"defaults": {"unit": "percent", "min": 0, "max": 100}, "overrides": []},
+          "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull"]}, "tooltip": {"mode": "multi", "sort": "desc"}}
+        },
+        {
+          "type": "timeseries",
+          "title": "Node CPU Energy (J) rate  -  Kepler",
+          "gridPos": {"x": 12, "y": 39, "w": 12, "h": 8},
+          "datasource": "$datasource",
+          "targets": [
+            {"expr": "sum by (node_name) (rate(kepler_node_cpu_joules_total[5m]))", "legendFormat": "{{node_name}}", "refId": "A"}
+          ],
+          "fieldConfig": {"defaults": {"unit": "watt"}, "overrides": []},
+          "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"]}, "tooltip": {"mode": "multi", "sort": "desc"}}
+        },
+        {
+          "type": "table",
+          "title": "Node Power Now (W)",
+          "gridPos": {"x": 0, "y": 47, "w": 24, "h": 5},
+          "datasource": "$datasource",
+          "targets": [
+            {"expr": "sum by (node_name) (kepler_node_cpu_watts)", "refId": "A", "format": "table", "instant": true},
+            {"expr": "sum by (node_name) (kepler_node_cpu_active_watts)", "refId": "B", "format": "table", "instant": true},
+            {"expr": "sum by (node_name) (kepler_node_cpu_idle_watts)", "refId": "C", "format": "table", "instant": true},
+            {"expr": "100 * kepler_node_cpu_usage_ratio", "refId": "D", "format": "table", "instant": true}
+          ],
+          "transformations": [
+            {"id": "joinByField", "options": {"byField": "node_name"}},
+            {"id": "organize", "options": {"excludeByName": {"Time": true, "__name__": true, "endpoint": true, "instance": true, "job": true, "namespace": true, "pod": true, "service": true, "container": true, "path": true, "zone": true}, "renameByName": {"node_name": "Node", "Value #A": "Total W", "Value #B": "Active W", "Value #C": "Idle W", "Value #D": "Kepler CPU %"}}}
+          ],
+          "fieldConfig": {"defaults": {"unit": "watt", "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}, {"color": "green", "value": 0}]}}, "overrides": [{"matcher": {"id": "byName", "options": "Kepler CPU %"}, "properties": [{"id": "unit", "value": "percent"}, {"id": "min", "value": 0}, {"id": "max", "value": 100}]}]},
+          "options": {"showHeader": true, "footer": {"show": true, "reducer": ["sum"], "fields": ["Total W", "Active W", "Idle W"]}}
+        }
+      ],
+      "schemaVersion": 39,
+      "style": "dark",
+      "gnetId": null
+    }
