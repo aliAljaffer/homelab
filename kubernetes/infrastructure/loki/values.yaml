@@ -2,6 +2,11 @@
 # Loki single-binary mode with MinIO (S3) backend
 # 7-day log retention enforced by the compactor
 
+# Chart defaults to SimpleScalable; without this switch, read/write/backend
+# (explicitly disabled below) are the only serving components, leaving Loki
+# with zero ingest/query capacity despite singleBinary.replicas: 1.
+deploymentMode: SingleBinary
+
 loki:
   auth_enabled: false
 
