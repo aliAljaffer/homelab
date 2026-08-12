@@ -11,9 +11,11 @@ metadata:
 spec:
   project: infrastructure
   sources:
-  - repoURL: quay.io/sustainable_computing_io/charts/kepler
-    # NOTE: no oci:// scheme. ArgoCD auto-detects OCI by the chart+registry form.
-    # AppProject sourceRepos entry must match exactly (see projects/infrastructure.yaml).
+  - repoURL: quay.io/sustainable_computing_io/charts
+    # NOTE: no oci:// scheme. ArgoCD auto-detects OCI and appends the `chart`
+    # field to compose `quay.io/sustainable_computing_io/charts/kepler`.
+    # AppProject sourceRepos entry must match the namespace prefix
+    # (see projects/infrastructure.yaml).
     chart: kepler
     targetRevision: 0.11.4
     helm:
