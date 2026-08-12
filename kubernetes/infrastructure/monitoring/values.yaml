@@ -43,6 +43,10 @@ grafana:
   defaultDashboardsEnabled: true
   defaultDashboardsTimezone: Asia/Riyadh
 
+  # RWO Longhorn PVC: Recreate avoids Multi-Attach deadlock on rollouts
+  strategy:
+    type: Recreate
+
   extraEnvFrom:
     - secretRef:
         name: grafana-discord-webhook
