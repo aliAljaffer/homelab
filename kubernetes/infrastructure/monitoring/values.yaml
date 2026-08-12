@@ -81,6 +81,14 @@ grafana:
       type: loki
       url: http://loki-gateway.monitoring.svc.cluster.local
       access: proxy
+      isDefault: false
+      jsonData:
+        maxLines: 1000
+        derivedFields:
+          - name: traceID
+            matcherRegex: traceID=(\w+)
+            url: $${__value.raw}
+            datasourceUid: prometheus
 
   # Alerting provisioning (migrated from grafana-alerting-configmap.yaml)
   alerting:
