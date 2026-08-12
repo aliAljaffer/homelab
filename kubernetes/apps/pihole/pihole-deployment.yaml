@@ -18,7 +18,7 @@ spec:
           resources:
             limits:
               cpu: 500m
-              memory: 512Mi
+              memory: 1Gi  # 1.5M-domain adlist pushes gravity/FTL memory well past 512Mi
             requests:
               cpu: 100m
               memory: 128Mi
@@ -53,7 +53,37 @@ spec:
             - name: custom-dnsmasq
               mountPath: /etc/dnsmasq.d/02-custom.conf
               subPath: 02-custom.conf
+            - name: pihole-data
+              mountPath: /etc/pihole
+        - name: exporter
+          image: ekofr/pihole-exporter:latest
+          ports:
+            - containerPort: 9617
+              name: metrics
+              protocol: TCP
+          env:
+            - name: PIHOLE_HOSTNAME
+              value: "127.0.0.1"
+            - name: PIHOLE_PROTOCOL
+              value: "http"
+            - name: PIHOLE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pihole-secret
+                  key: WEBPASSWORD
+            - name: PORT
+              value: "9617"
+          resources:
+            limits:
+              cpu: 100m
+              memory: 64Mi
+            requests:
+              cpu: 10m
+              memory: 32Mi
       volumes:
         - name: custom-dnsmasq
           configMap:
             name: pihole-custom-dnsmasq
+        - name: pihole-data
+          persistentVolumeClaim:
+            claimName: pihole-pvc
