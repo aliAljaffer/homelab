@@ -3,8 +3,9 @@ defaultSettings:
   defaultReplicaCount: "2"
   defaultDataLocality: best-effort
   storageReservedPercentageForDefaultDisk: "15"
-  backupTarget: "s3://alialjaffer-longhorn@eu-north-1/"
-  backupTargetCredentialSecret: longhorn-backup-secret
+  # backupTarget and backupTargetCredentialSecret are managed via
+  # backup-target.yaml (BackupTarget CR) in this same kustomize path,
+  # not here — Longhorn ignores defaultSettings for an already-created BackupTarget.
 
 persistence:
   defaultClass: true
