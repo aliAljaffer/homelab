@@ -1,0 +1,40 @@
+---
+# Wave 0: Cloudflare Tunnel Gateway Controller - binds a dedicated Cloudflare
+# Tunnel to Gateway API (HTTPRoute/GRPCRoute), replacing manual cloudflared
+# ConfigMap edits for public-facing routes. Requires the Gateway API CRDs
+# (gateway-api, wave -5) and Cilium's GatewayClass controller (cilium-config,
+# wave -1) to already be present.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloudflare-tunnel-gateway-controller
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infrastructure
+  sources:
+  - repoURL: ghcr.io/lexfrei/charts
+    # NOTE: no oci:// scheme, see projects/infrastructure.yaml comment.
+    chart: cloudflare-tunnel-gateway-controller
+    targetRevision: 1.0.0
+    helm:
+      valueFiles:
+      - $values/kubernetes/infrastructure/cloudflare-tunnel-gateway-controller/values.yaml
+  - repoURL: git@github.com:aliAljaffer/homelab.git
+    targetRevision: main
+    ref: values
+  - repoURL: git@github.com:aliAljaffer/homelab.git
+    targetRevision: main
+    path: kubernetes/infrastructure/cloudflare-tunnel-gateway-controller
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cloudflare-tunnel-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true

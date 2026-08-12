@@ -1,0 +1,10 @@
+---
+gatewayClassConfig:
+  create: true
+  tunnelID: "f75afd15-0948-45ce-b6a1-67c69e4adabe"
+  cloudflareCredentialsSecretRef:
+    name: cloudflare-credentials
+
+proxy:
+  tunnelTokenSecretRef:
+    name: cloudflare-tunnel-token
