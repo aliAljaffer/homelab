@@ -36,6 +36,12 @@ prometheus:
               - "catus-locatus-svc.catus-locatus.svc.cluster.local:4001"
         metrics_path: /api/metrics
         scrape_interval: 10s
+      - job_name: "pihole"
+        static_configs:
+          - targets:
+              - "pihole-metrics.pihole.svc.cluster.local:9617"
+        metrics_path: /metrics
+        scrape_interval: 30s
 
 # --- Grafana ---
 grafana:

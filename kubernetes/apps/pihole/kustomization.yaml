@@ -4,8 +4,10 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - pihole-configmap.yaml
+  - pihole-pvc.yaml
   - pihole-deployment.yaml
   - pihole-service-dns.yaml
   - pihole-service-web.yaml
+  - pihole-service-metrics.yaml
   - httproute-pihole.yaml
   - pihole-secret.sealed.yaml
