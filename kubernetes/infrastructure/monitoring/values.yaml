@@ -71,6 +71,7 @@ grafana:
   additionalDataSources:
     - name: Thanos
       type: prometheus
+      uid: thanos
       url: http://thanos-query.monitoring.svc.cluster.local:9090
       access: proxy
       isDefault: true
@@ -145,7 +146,7 @@ grafana:
                   relativeTimeRange:
                     from: 600
                     to: 0
-                  datasourceUid: Thanos
+                  datasourceUid: thanos
                   model:
                     expr: '100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)'
                     instant: true
@@ -178,7 +179,7 @@ grafana:
                   relativeTimeRange:
                     from: 600
                     to: 0
-                  datasourceUid: Thanos
+                  datasourceUid: thanos
                   model:
                     expr: 'node_hwmon_temp_celsius{chip="platform_coretemp_0",sensor="temp1"}'
                     instant: true
@@ -211,7 +212,7 @@ grafana:
                   relativeTimeRange:
                     from: 600
                     to: 0
-                  datasourceUid: Thanos
+                  datasourceUid: thanos
                   model:
                     expr: '100 * (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes))'
                     instant: true
