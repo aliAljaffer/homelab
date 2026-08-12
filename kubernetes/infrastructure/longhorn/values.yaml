@@ -11,6 +11,9 @@ persistence:
   defaultClass: true
   defaultClassReplicaCount: "2"
   defaultFsType: ext4
+  recurringJobSelector:
+    enable: true
+    jobList: '[{"name":"default","isGroup":true}]'
 
 # Exposed via Gateway API HTTPRoute (see cilium-config/httproute-longhorn.yaml)
 ingress:
