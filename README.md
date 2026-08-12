@@ -59,7 +59,7 @@ AMD Ryzen 7 7800X3D, 32GB RAM, RTX 4070 Ti Super, 3x 2TB NVMe, dual-boots Fedora
 ## Workloads
 
 - **catus-locatus** - my main app (PostGIS backend, Next.js frontend, MinIO)
-- **pihole** - DNS + ad-blocking for the home network
+- **pihole** - DNS + ad-blocking for the home network (Longhorn-persisted, Prometheus metrics via exporter sidecar)
 - **tuwaiq-tracker** - CronJob hitting an external API every 12 hours
 - **stremio** - media server
 - **cloudflared** - Cloudflare Tunnel for public traffic
