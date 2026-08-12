@@ -25,6 +25,11 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: kyverno
+  ignoreDifferences:
+  - group: apiextensions.k8s.io
+    kind: CustomResourceDefinition
+    jsonPointers:
+    - /metadata/labels
   syncPolicy:
     automated:
       prune: true
