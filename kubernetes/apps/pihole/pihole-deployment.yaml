@@ -45,13 +45,9 @@ spec:
               value: "192.168.8.153"  # MetalLB LoadBalancer IP for pihole-dns-udp
             - name: PIHOLE_DNS_
               value: "8.8.8.8;8.8.4.4"
-            - name: DNSMASQ_LISTENING
-              value: all
-            - name: INTERFACE
-              value: eth0
-            - name: DNSMASQ_USER
-              value: root
-            - name: REV_SERVER
+            - name: FTLCONF_dns_listeningMode
+              value: "ALL"
+            - name: FTLCONF_dns_revServer_active
               value: "false"
           volumeMounts:
             - name: custom-dnsmasq
