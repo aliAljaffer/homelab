@@ -50,7 +50,7 @@ AMD Ryzen 7 7800X3D, 32GB RAM, RTX 4070 Ti Super, 3x 2TB NVMe, dual-boots Fedora
 | Logs | Loki (90-day retention via MinIO) |
 | Log collector | Grafana Alloy |
 | DNS | Cloudflare (ExternalDNS + cert-manager DNS01) |
-| Backups | Velero (scheduled, GCS, CSI snapshots via Longhorn) + Longhorn native backup (AWS S3) |
+| Backups | Velero (scheduled, GCS, CSI snapshots via Longhorn) + Longhorn native backup (AWS S3, daily at 02:00 UTC, 14-day retention) |
 | Power monitoring | Kepler (RAPL energy counters, node-level) |
 | Remote access | Cloudflare Access Zero Trust tunnel |
 
