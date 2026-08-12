@@ -59,6 +59,14 @@ daemonset:
       cpu: 500m
       memory: 512Mi
 
+  livenessProbe:
+    httpGet:
+      path: /metrics
+      port: http
+    initialDelaySeconds: 10
+    periodSeconds: 60
+    timeoutSeconds: 10
+
 config:
   log:
     level: info
@@ -83,14 +91,6 @@ config:
 
 # ServiceMonitor is created by the kube-prometheus-stack Prometheus Operator.
 # The release=monitoring label matches the Prometheus serviceMonitorSelector.
-livenessProbe:
-  httpGet:
-    path: /metrics
-    port: http
-  initialDelaySeconds: 10
-  periodSeconds: 60
-  timeoutSeconds: 10
-
 serviceMonitor:
   enabled: true
   interval: 5s
