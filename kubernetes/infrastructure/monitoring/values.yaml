@@ -43,6 +43,10 @@ grafana:
   defaultDashboardsEnabled: true
   defaultDashboardsTimezone: Asia/Riyadh
 
+  # RWO Longhorn PVC: Recreate avoids Multi-Attach deadlock on rollouts
+  deploymentStrategy:
+    type: Recreate
+
   extraEnvFrom:
     - secretRef:
         name: grafana-discord-webhook
@@ -67,6 +71,7 @@ grafana:
   additionalDataSources:
     - name: Thanos
       type: prometheus
+      uid: thanos
       url: http://thanos-query.monitoring.svc.cluster.local:9090
       access: proxy
       isDefault: true
@@ -77,6 +82,30 @@ grafana:
       type: loki
       url: http://loki-gateway.monitoring.svc.cluster.local
       access: proxy
+      isDefault: false
+      jsonData:
+        maxLines: 1000
+        lokiVersion: 3
+        derivedFields:
+          - name: traceID
+            matcherRegex: traceID=(\w+)
+            url: $${__value.raw}
+            datasourceUid: prometheus
+          - name: spanID
+            matcherRegex: spanID=(\w+)
+            url: $${__value.raw}
+            datasourceUid: prometheus
+    # Alias so dashboards that hardcode a "prometheus" name/uid resolve.
+    # Points at Thanos Query (not raw Prometheus) for full retention.
+    - name: Prometheus
+      type: prometheus
+      uid: prometheus
+      url: http://thanos-query.monitoring.svc.cluster.local:9090
+      access: proxy
+      isDefault: false
+      jsonData:
+        httpMethod: POST
+        timeInterval: 15s
 
   # Alerting provisioning (migrated from grafana-alerting-configmap.yaml)
   alerting:
@@ -117,7 +146,7 @@ grafana:
                   relativeTimeRange:
                     from: 600
                     to: 0
-                  datasourceUid: Thanos
+                  datasourceUid: thanos
                   model:
                     expr: '100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)'
                     instant: true
@@ -150,7 +179,7 @@ grafana:
                   relativeTimeRange:
                     from: 600
                     to: 0
-                  datasourceUid: Thanos
+                  datasourceUid: thanos
                   model:
                     expr: 'node_hwmon_temp_celsius{chip="platform_coretemp_0",sensor="temp1"}'
                     instant: true
@@ -183,7 +212,7 @@ grafana:
                   relativeTimeRange:
                     from: 600
                     to: 0
-                  datasourceUid: Thanos
+                  datasourceUid: thanos
                   model:
                     expr: '100 * (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes))'
                     instant: true

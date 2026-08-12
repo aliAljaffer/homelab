@@ -23,6 +23,9 @@ spec:
   - repoURL: git@github.com:aliAljaffer/homelab.git
     targetRevision: main
     ref: values
+  - repoURL: git@github.com:aliAljaffer/homelab.git
+    targetRevision: main
+    path: kubernetes/infrastructure/longhorn
   destination:
     server: https://kubernetes.default.svc
     namespace: longhorn-system
