@@ -44,7 +44,7 @@ grafana:
   defaultDashboardsTimezone: Asia/Riyadh
 
   # RWO Longhorn PVC: Recreate avoids Multi-Attach deadlock on rollouts
-  strategy:
+  deploymentStrategy:
     type: Recreate
 
   extraEnvFrom:
