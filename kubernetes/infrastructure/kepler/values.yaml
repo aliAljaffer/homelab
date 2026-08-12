@@ -3,9 +3,13 @@
 # Source: oci://quay.io/sustainable_computing_io/charts/kepler
 # Chart version pinned in the Argo CD Application (kubernetes/argocd/apps/infrastructure/kepler.yaml).
 #
-# Requires the kubelet extraMounts for /sys and /proc on every node.
-# See talos/patches/kepler-kubelet-extraMounts.yaml and talconfig.yaml.
-# Without those mounts Kepler runs but reports zero watts.
+# Kepler reads RAPL powercap from /sys and CPU info from /proc via hostPath
+# volumes in its DaemonSet pod. On Talos a privileged pod with hostPath /sys
+# reaches the real host /sys directly, so no kubelet-level extraMounts is
+# needed. Do NOT add kubelet.extraMounts for /sys with ro+rshared: that
+# breaks cgroup creation in the kubelet container (CrashLoopBackOff with
+# "mkdir /sys/fs/cgroup/podruntime: no such file or directory"). See the
+# memory-store entry under kepler/ for the full incident.
 
 image:
   repository: quay.io/sustainable_computing_io/kepler
