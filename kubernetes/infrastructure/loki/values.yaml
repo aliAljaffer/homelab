@@ -2,6 +2,11 @@
 # Loki single-binary mode with MinIO (S3) backend
 # 7-day log retention enforced by the compactor
 
+# Chart defaults to SimpleScalable; without this switch, read/write/backend
+# (explicitly disabled below) are the only serving components, leaving Loki
+# with zero ingest/query capacity despite singleBinary.replicas: 1.
+deploymentMode: SingleBinary
+
 loki:
   auth_enabled: false
 
@@ -10,20 +15,19 @@ loki:
 
   storage:
     type: gcs
-    gcs:
-      bucket_name: alialjaffer-homelab
     bucketNames:
       chunks: alialjaffer-homelab
       ruler: alialjaffer-homelab
       admin: alialjaffer-homelab
-    # Credentials from loki-gcs-credentials SealedSecret (key: service_account.json)
-    secretName: loki-gcs-credentials
+    # Credentials mounted via singleBinary.extraVolumes/extraEnv below
+    # (this chart has no storage.secretName field; GOOGLE_APPLICATION_CREDENTIALS
+    # is how the GCS SDK picks up the mounted loki-gcs-credentials secret).
 
   schemaConfig:
     configs:
     - from: "2024-01-01"
       store: tsdb
-      object_store: s3
+      object_store: gcs
       schema: v13
       index:
         prefix: loki_index_
@@ -56,6 +60,20 @@ singleBinary:
   persistence:
     storageClass: longhorn
     size: 5Gi # WAL + temp storage; actual data is in MinIO
+  # GCS credentials (chart has no storage.secretName field; the GCS SDK
+  # reads GOOGLE_APPLICATION_CREDENTIALS instead).
+  # Secret: loki-gcs-credentials SealedSecret, key: service_account.json
+  extraEnv:
+    - name: GOOGLE_APPLICATION_CREDENTIALS
+      value: /etc/loki/gcs-credentials/service_account.json
+  extraVolumes:
+    - name: gcs-credentials
+      secret:
+        secretName: loki-gcs-credentials
+  extraVolumeMounts:
+    - name: gcs-credentials
+      mountPath: /etc/loki/gcs-credentials
+      readOnly: true
 
 # Disable microservice mode components
 backend:

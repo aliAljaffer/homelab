@@ -8,3 +8,4 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - grafana-dashboard.yaml
+  - grafana-dashboard-cluster-health.yaml
