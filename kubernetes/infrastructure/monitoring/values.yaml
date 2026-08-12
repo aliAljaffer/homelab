@@ -84,9 +84,14 @@ grafana:
       isDefault: false
       jsonData:
         maxLines: 1000
+        lokiVersion: 3
         derivedFields:
           - name: traceID
             matcherRegex: traceID=(\w+)
+            url: $${__value.raw}
+            datasourceUid: prometheus
+          - name: spanID
+            matcherRegex: spanID=(\w+)
             url: $${__value.raw}
             datasourceUid: prometheus
 
