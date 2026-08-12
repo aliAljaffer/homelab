@@ -67,6 +67,15 @@ grafana:
       isDefaultDatasource: false
       defaultDatasourceEnabled: false
 
+  # One-time: the existing "Thanos" datasource predates the explicit uid: thanos
+  # below and kept its old auto-generated uid (provisioner never rewrites uid on
+  # an existing datasource). Forces delete+recreate so it picks up uid: thanos.
+  # Safe to remove once confirmed (alert rules resolve, no more "data source
+  # not found" errors).
+  deleteDatasources:
+    - name: Thanos
+      orgId: 1
+
   # Point Grafana at Thanos Query for long-term metrics
   additionalDataSources:
     - name: Thanos
