@@ -94,6 +94,17 @@ grafana:
             matcherRegex: spanID=(\w+)
             url: $${__value.raw}
             datasourceUid: prometheus
+    # Alias so dashboards that hardcode a "prometheus" name/uid resolve.
+    # Points at Thanos Query (not raw Prometheus) for full retention.
+    - name: Prometheus
+      type: prometheus
+      uid: prometheus
+      url: http://thanos-query.monitoring.svc.cluster.local:9090
+      access: proxy
+      isDefault: false
+      jsonData:
+        httpMethod: POST
+        timeInterval: 15s
 
   # Alerting provisioning (migrated from grafana-alerting-configmap.yaml)
   alerting:
