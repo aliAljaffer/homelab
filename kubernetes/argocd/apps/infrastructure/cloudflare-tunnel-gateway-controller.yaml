@@ -19,7 +19,7 @@ spec:
   - repoURL: ghcr.io/lexfrei/charts
     # NOTE: no oci:// scheme, see projects/infrastructure.yaml comment.
     chart: cloudflare-tunnel-gateway-controller
-    targetRevision: 1.0.0
+    targetRevision: 3.4.0
     helm:
       valueFiles:
       - $values/kubernetes/infrastructure/cloudflare-tunnel-gateway-controller/values.yaml
