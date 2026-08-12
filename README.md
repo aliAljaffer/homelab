@@ -44,13 +44,14 @@ AMD Ryzen 7 7800X3D, 32GB RAM, RTX 4070 Ti Super, 3x 2TB NVMe, dual-boots Fedora
 | CNI | Cilium (kube-proxy replacement, Gateway API, Hubble) |
 | Ingress | Gateway API + HTTPRoutes (no NGINX) |
 | Storage | Longhorn (distributed, 2 replicas) |
-| GitOps | ArgoCD (App-of-Apps, 22 applications) |
+| GitOps | ArgoCD (App-of-Apps, 24 applications) |
 | Secrets | Sealed Secrets + SOPS (age) |
 | Metrics | kube-prometheus-stack + Thanos (indefinite retention via MinIO) |
 | Logs | Loki (90-day retention via MinIO) |
 | Log collector | Grafana Alloy |
 | DNS | Cloudflare (ExternalDNS + cert-manager DNS01) |
-| Backups | Velero (scheduled, GCS bucket) |
+| Backups | Velero (scheduled, GCS, CSI snapshots via Longhorn) + Longhorn native backup (AWS S3) |
+| Power monitoring | Kepler (RAPL energy counters, node-level) |
 | Remote access | Cloudflare Access Zero Trust tunnel |
 
 ---
