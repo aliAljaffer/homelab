@@ -69,11 +69,12 @@ config:
   monitor:
     interval: 5s
     staleness: 500ms
-  kube:
-    enabled: true
-    podInformer:
-      mode: kubelet
-      pollInterval: 15s
+  # Do NOT set kube.enabled in the config file. The chart's DaemonSet
+  # template hardcodes the CLI args `--kube.enable --kube.node-name=$(NODE_NAME)`
+  # (the env NODE_NAME comes from the downward API). Setting kube.enabled in
+  # the ConfigMap triggers file validation that fails because nodeName is empty
+  # in the YAML. Leave kube defaults at enabled=false and let the CLI args turn
+  # it on at runtime.
   exporter:
     prometheus:
       enabled: true
