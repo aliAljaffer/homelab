@@ -62,7 +62,7 @@ data:
         {
           "type": "stat",
           "title": "Nodes Ready",
-          "gridPos": {"x": 0, "y": 4, "w": 4, "h": 3},
+          "gridPos": {"x": 0, "y": 4, "w": 3, "h": 3},
           "datasource": "$datasource",
           "targets": [
             {"expr": "count(kube_node_status_condition{condition=\"Ready\",status=\"true\"})", "refId": "A"}
@@ -73,7 +73,7 @@ data:
         {
           "type": "stat",
           "title": "Total Pods",
-          "gridPos": {"x": 4, "y": 4, "w": 4, "h": 3},
+          "gridPos": {"x": 3, "y": 4, "w": 3, "h": 3},
           "datasource": "$datasource",
           "targets": [
             {"expr": "count(kube_pod_info)", "refId": "A"}
@@ -84,7 +84,7 @@ data:
         {
           "type": "stat",
           "title": "Cluster CPU Power (W)",
-          "gridPos": {"x": 8, "y": 4, "w": 4, "h": 3},
+          "gridPos": {"x": 6, "y": 4, "w": 3, "h": 3},
           "datasource": "$datasource",
           "targets": [
             {"expr": "sum(kepler_node_cpu_watts)", "refId": "A"}
@@ -94,8 +94,32 @@ data:
         },
         {
           "type": "stat",
+          "title": "Estimated Monthly Energy (kWh)",
+          "description": "Extrapolated from trailing 7-day average cluster CPU power draw (Kepler), projected to a 30-day month. Kepler's kepler_node_cpu_watts covers CPU package power only  -  actual total node power (memory, disk, fans, PSU overhead) will be higher, so this is a floor estimate, not the full bill.",
+          "gridPos": {"x": 9, "y": 4, "w": 3, "h": 3},
+          "datasource": "$datasource",
+          "targets": [
+            {"expr": "avg_over_time((sum(kepler_node_cpu_watts))[7d:1m]) * 24 * 30 / 1000", "refId": "A"}
+          ],
+          "fieldConfig": {"defaults": {"unit": "none", "decimals": 1, "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}]}}, "overrides": []},
+          "options": {"colorMode": "value", "graphMode": "none", "textMode": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}}
+        },
+        {
+          "type": "stat",
+          "title": "Estimated Monthly Cost (SAR)",
+          "description": "Tiered SEC-style rate: 0.18 SAR/kWh up to 6000 kWh/month, 0.30 SAR/kWh above. Based on the same trailing 7-day average CPU power extrapolation as the kWh panel  -  CPU-only, so treat as a lower bound.",
+          "gridPos": {"x": 12, "y": 4, "w": 3, "h": 3},
+          "datasource": "$datasource",
+          "targets": [
+            {"expr": "clamp_max(avg_over_time((sum(kepler_node_cpu_watts))[7d:1m]) * 24 * 30 / 1000, 6000) * 0.18 + clamp_min(avg_over_time((sum(kepler_node_cpu_watts))[7d:1m]) * 24 * 30 / 1000 - 6000, 0) * 0.30", "refId": "A"}
+          ],
+          "fieldConfig": {"defaults": {"unit": "SAR", "decimals": 2, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}}, "overrides": []},
+          "options": {"colorMode": "value", "graphMode": "none", "textMode": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}}
+        },
+        {
+          "type": "stat",
           "title": "Cluster CPU Energy Rate (J/s)",
-          "gridPos": {"x": 12, "y": 4, "w": 4, "h": 3},
+          "gridPos": {"x": 15, "y": 4, "w": 3, "h": 3},
           "datasource": "$datasource",
           "targets": [
             {"expr": "sum(rate(kepler_node_cpu_joules_total[5m]))", "refId": "A"}
@@ -106,7 +130,7 @@ data:
         {
           "type": "stat",
           "title": "Avg Node Load (1m)",
-          "gridPos": {"x": 16, "y": 4, "w": 4, "h": 3},
+          "gridPos": {"x": 18, "y": 4, "w": 3, "h": 3},
           "datasource": "$datasource",
           "targets": [
             {"expr": "avg(node_load1)", "refId": "A"}
@@ -116,13 +140,13 @@ data:
         },
         {
           "type": "stat",
-          "title": "Pods per Node (max)",
-          "gridPos": {"x": 20, "y": 4, "w": 4, "h": 3},
+          "title": "Pods per Node (avg)",
+          "gridPos": {"x": 21, "y": 4, "w": 3, "h": 3},
           "datasource": "$datasource",
           "targets": [
-            {"expr": "max(count by (node) (kube_pod_info))", "refId": "A"}
+            {"expr": "avg(count by (node) (kube_pod_info))", "refId": "A"}
           ],
-          "fieldConfig": {"defaults": {"unit": "short", "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}]}}, "overrides": []},
+          "fieldConfig": {"defaults": {"unit": "short", "decimals": 1, "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}]}}, "overrides": []},
           "options": {"colorMode": "value", "graphMode": "none", "textMode": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}}
         },
         {
@@ -257,30 +281,6 @@ data:
           ],
           "fieldConfig": {"defaults": {"unit": "watt", "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}, {"color": "green", "value": 0}]}}, "overrides": [{"matcher": {"id": "byName", "options": "Kepler CPU %"}, "properties": [{"id": "unit", "value": "percent"}, {"id": "min", "value": 0}, {"id": "max", "value": 100}]}]},
           "options": {"showHeader": true, "footer": {"show": true, "reducer": ["sum"], "fields": ["Total W", "Active W", "Idle W"]}}
-        },
-        {
-          "type": "stat",
-          "title": "Estimated Monthly Energy (kWh)",
-          "description": "Extrapolated from trailing 7-day average cluster CPU power draw (Kepler), projected to a 30-day month. Kepler's kepler_node_cpu_watts covers CPU package power only  -  actual total node power (memory, disk, fans, PSU overhead) will be higher, so this is a floor estimate, not the full bill.",
-          "gridPos": {"x": 0, "y": 52, "w": 6, "h": 4},
-          "datasource": "$datasource",
-          "targets": [
-            {"expr": "avg_over_time((sum(kepler_node_cpu_watts))[7d:1m]) * 24 * 30 / 1000", "refId": "A"}
-          ],
-          "fieldConfig": {"defaults": {"unit": "none", "decimals": 1, "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}]}}, "overrides": []},
-          "options": {"colorMode": "value", "graphMode": "none", "textMode": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}}
-        },
-        {
-          "type": "stat",
-          "title": "Estimated Monthly Cost (SAR)",
-          "description": "Tiered SEC-style rate: 0.18 SAR/kWh up to 6000 kWh/month, 0.30 SAR/kWh above. Based on the same trailing 7-day average CPU power extrapolation as the kWh panel  -  CPU-only, so treat as a lower bound.",
-          "gridPos": {"x": 6, "y": 52, "w": 6, "h": 4},
-          "datasource": "$datasource",
-          "targets": [
-            {"expr": "clamp_max(avg_over_time((sum(kepler_node_cpu_watts))[7d:1m]) * 24 * 30 / 1000, 6000) * 0.18 + clamp_min(avg_over_time((sum(kepler_node_cpu_watts))[7d:1m]) * 24 * 30 / 1000 - 6000, 0) * 0.30", "refId": "A"}
-          ],
-          "fieldConfig": {"defaults": {"unit": "SAR", "decimals": 2, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}}, "overrides": []},
-          "options": {"colorMode": "value", "graphMode": "none", "textMode": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}}
         }
       ],
       "schemaVersion": 39,
