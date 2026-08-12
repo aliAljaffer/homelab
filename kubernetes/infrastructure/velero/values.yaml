@@ -29,5 +29,6 @@ configuration:
         key: cloud
 
   defaultVolumesToFsBackup: true
+  features: EnableCSI
 
 deployNodeAgent: true
