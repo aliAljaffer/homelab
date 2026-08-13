@@ -6,12 +6,12 @@ metadata:
   namespace: keycloak
 spec:
   parentRefs:
-    - name: homelab-gateway
-      namespace: kube-system
-      sectionName: https
+  - name: cloudflare-tunnel
+    namespace: cloudflare-tunnel-system
+    sectionName: https
   hostnames:
-    - keycloak.alialjaffer.com
+  - keycloak.alialjaffer.com
   rules:
-    - backendRefs:
-        - name: keycloak-service
-          port: 8080
+  - backendRefs:
+    - name: keycloak-service
+      port: 8080

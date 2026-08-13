@@ -6,12 +6,12 @@ metadata:
   namespace: vaultwarden
 spec:
   parentRefs:
-    - name: homelab-gateway
-      namespace: kube-system
-      sectionName: https
+  - name: cloudflare-tunnel
+    namespace: cloudflare-tunnel-system
+    sectionName: https
   hostnames:
-    - vaultwarden.alialjaffer.com
+  - vaultwarden.alialjaffer.com
   rules:
-    - backendRefs:
-        - name: vaultwarden
-          port: 80
+  - backendRefs:
+    - name: vaultwarden
+      port: 80
