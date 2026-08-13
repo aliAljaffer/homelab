@@ -5,13 +5,6 @@ kind: HTTPRoute
 metadata:
   name: minio-console
   namespace: catus-locatus
-  annotations:
-    gethomepage.dev/enabled: "true"
-    gethomepage.dev/name: MinIO Console
-    gethomepage.dev/description: Object storage console
-    gethomepage.dev/group: Storage
-    gethomepage.dev/icon: minio.png
-    gethomepage.dev/pod-selector: "app=minio"
 spec:
   parentRefs:
     - name: homelab-gateway

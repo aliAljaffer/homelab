@@ -5,5 +5,3 @@ resources:
   - postgres-cluster.yaml
   - keycloak.yaml
   - httproute-keycloak.yaml
-  - homelab-realm-secrets.sealed.yaml
-  - realm-homelab.yaml

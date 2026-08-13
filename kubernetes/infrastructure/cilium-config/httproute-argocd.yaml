@@ -6,12 +6,6 @@ metadata:
   namespace: argocd
   annotations:
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
-    gethomepage.dev/enabled: "true"
-    gethomepage.dev/name: ArgoCD
-    gethomepage.dev/description: GitOps continuous delivery
-    gethomepage.dev/group: Infrastructure
-    gethomepage.dev/icon: argo-cd.png
-    gethomepage.dev/pod-selector: "app.kubernetes.io/name=argocd-server"
 spec:
   parentRefs:
   - name: cloudflare-tunnel
