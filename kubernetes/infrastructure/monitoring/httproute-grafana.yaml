@@ -8,8 +8,8 @@ spec:
   parentRefs:
   - group: gateway.networking.k8s.io
     kind: Gateway
-    name: homelab-gateway
-    namespace: kube-system
+    name: cloudflare-tunnel
+    namespace: cloudflare-tunnel-system
     sectionName: https
   hostnames:
   - grafana.alialjaffer.com

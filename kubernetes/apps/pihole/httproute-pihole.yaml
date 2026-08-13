@@ -6,12 +6,12 @@ metadata:
   namespace: pihole
 spec:
   parentRefs:
-    - name: homelab-gateway
-      namespace: kube-system
-      sectionName: https
+  - name: cloudflare-tunnel
+    namespace: cloudflare-tunnel-system
+    sectionName: https
   hostnames:
-    - pihole.alialjaffer.com
+  - pihole.alialjaffer.com
   rules:
-    - backendRefs:
-        - name: pihole-web
-          port: 80
+  - backendRefs:
+    - name: pihole-web
+      port: 80

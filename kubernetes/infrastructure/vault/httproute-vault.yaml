@@ -6,12 +6,12 @@ metadata:
   namespace: vault
 spec:
   parentRefs:
-    - name: homelab-gateway
-      namespace: kube-system
-      sectionName: https
+  - name: cloudflare-tunnel
+    namespace: cloudflare-tunnel-system
+    sectionName: https
   hostnames:
-    - vault.alialjaffer.com
+  - vault.alialjaffer.com
   rules:
-    - backendRefs:
-        - name: vault
-          port: 8200
+  - backendRefs:
+    - name: vault
+      port: 8200

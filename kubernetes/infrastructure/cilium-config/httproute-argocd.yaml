@@ -6,13 +6,13 @@ metadata:
   namespace: argocd
 spec:
   parentRefs:
-    - name: homelab-gateway
-      namespace: kube-system
-      sectionName: https
+  - name: cloudflare-tunnel
+    namespace: cloudflare-tunnel-system
+    sectionName: https
   hostnames:
-    - argocd.alialjaffer.com
+  - argocd.alialjaffer.com
   rules:
-    - backendRefs:
-        - name: argocd-server
-          namespace: argocd
-          port: 80
+  - backendRefs:
+    - name: argocd-server
+      namespace: argocd
+      port: 80
