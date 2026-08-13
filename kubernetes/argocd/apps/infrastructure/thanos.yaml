@@ -26,6 +26,9 @@ spec:
   - repoURL: git@github.com:aliAljaffer/homelab.git
     targetRevision: main
     ref: values
+  - repoURL: git@github.com:aliAljaffer/homelab.git
+    targetRevision: main
+    path: kubernetes/infrastructure/thanos
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
@@ -35,3 +38,4 @@ spec:
       selfHeal: true
     syncOptions:
     - CreateNamespace=true
+    - ServerSideApply=true
