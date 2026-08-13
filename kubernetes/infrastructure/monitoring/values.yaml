@@ -53,11 +53,12 @@ grafana:
   deploymentStrategy:
     type: Recreate
 
-  extraEnvFrom:
-    - secretRef:
-        name: grafana-discord-webhook
-    - secretRef:
-        name: grafana-github-token
+  # NOTE: "extraEnvFrom" is not a field this chart recognizes (silently
+  # ignored) - the correct key is envFromSecrets. Confirmed against
+  # charts/grafana/templates/_pod.tpl for chart 12.10.4.
+  envFromSecrets:
+    - name: grafana-discord-webhook
+    - name: grafana-github-token
 
   plugins:
     - grafana-github-datasource
