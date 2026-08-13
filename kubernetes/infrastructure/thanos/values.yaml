@@ -5,6 +5,11 @@ global:
     createSecret: false
     secretName: thanos-objstore-secret # SealedSecret: see bootstrap/README.md
     secretKey: objstore.yml # confirm this matches the key inside your sealed secret
+  # Default ServiceMonitor for all enabled components (query, storegateway, compactor).
+  serviceMonitor:
+    enabled: true
+    labels:
+      release: monitoring
 
 query:
   enabled: true

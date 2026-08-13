@@ -3,3 +3,27 @@
 # them under this directory and wire into a kustomization.yaml when
 # policies are defined.
 
+admissionController:
+  serviceMonitor:
+    enabled: true
+    additionalLabels:
+      release: monitoring
+
+backgroundController:
+  serviceMonitor:
+    enabled: true
+    additionalLabels:
+      release: monitoring
+
+cleanupController:
+  serviceMonitor:
+    enabled: true
+    additionalLabels:
+      release: monitoring
+
+reportsController:
+  serviceMonitor:
+    enabled: true
+    additionalLabels:
+      release: monitoring
+

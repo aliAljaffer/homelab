@@ -8,3 +8,8 @@ gatewayClassConfig:
 proxy:
   tunnelTokenSecretRef:
     name: cloudflare-tunnel-token
+
+serviceMonitor:
+  enabled: true
+  labels:
+    release: monitoring
