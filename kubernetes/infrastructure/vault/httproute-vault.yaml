@@ -6,12 +6,6 @@ metadata:
   namespace: vault
   annotations:
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
-    gethomepage.dev/enabled: "true"
-    gethomepage.dev/name: Vault
-    gethomepage.dev/description: Secrets management
-    gethomepage.dev/group: Infrastructure
-    gethomepage.dev/icon: vault.png
-    gethomepage.dev/pod-selector: "app.kubernetes.io/name=vault"
 spec:
   parentRefs:
   - name: cloudflare-tunnel

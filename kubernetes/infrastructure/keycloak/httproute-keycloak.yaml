@@ -6,12 +6,6 @@ metadata:
   namespace: keycloak
   annotations:
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
-    gethomepage.dev/enabled: "true"
-    gethomepage.dev/name: Keycloak
-    gethomepage.dev/description: Identity and access management
-    gethomepage.dev/group: Infrastructure
-    gethomepage.dev/icon: keycloak.png
-    gethomepage.dev/pod-selector: "app=keycloak"
 spec:
   parentRefs:
   - name: cloudflare-tunnel

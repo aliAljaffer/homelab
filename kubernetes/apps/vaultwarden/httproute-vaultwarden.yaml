@@ -6,12 +6,6 @@ metadata:
   namespace: vaultwarden
   annotations:
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
-    gethomepage.dev/enabled: "true"
-    gethomepage.dev/name: Vaultwarden
-    gethomepage.dev/description: Password manager
-    gethomepage.dev/group: Security
-    gethomepage.dev/icon: vaultwarden.png
-    gethomepage.dev/pod-selector: "app=vaultwarden"
 spec:
   parentRefs:
   - name: cloudflare-tunnel
