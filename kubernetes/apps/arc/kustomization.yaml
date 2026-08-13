@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - arc-namespaces.yaml
   - github-token.sealed.yaml
+  - podmonitor.yaml
