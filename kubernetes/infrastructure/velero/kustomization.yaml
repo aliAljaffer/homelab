@@ -6,3 +6,4 @@ resources:
   - cloud-credentials.sealed.yaml
   - schedule.yaml
   - volumesnapshotclass.yaml
+  - grafana-dashboard.yaml

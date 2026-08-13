@@ -5,3 +5,4 @@ resources:
   - cloudflare-credentials.sealed.yaml
   - cloudflare-tunnel-token.sealed.yaml
   - gateway.yaml
+  - grafana-dashboard.yaml

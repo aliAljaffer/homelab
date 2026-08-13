@@ -30,3 +30,4 @@ docs/cluster-overview.md
 talos/clusterconfig/*.yaml
 !talos/clusterconfig/*.sops.yaml
 !talos/clusterconfig/.gitkeep
+.pat
