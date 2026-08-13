@@ -46,7 +46,7 @@ AMD Ryzen 7 7800X3D, 32GB RAM, RTX 4070 Ti Super, 3x 2TB NVMe, dual-boots Fedora
 | Storage | Longhorn (distributed, 2 replicas) |
 | Database | CloudNativePG (Postgres operator) |
 | Identity | Keycloak (HA, 3 instances, CloudNativePG-backed) |
-| GitOps | ArgoCD (App-of-Apps, 32 applications) |
+| GitOps | ArgoCD (App-of-Apps, 34 applications) |
 | Secrets (static) | Sealed Secrets + SOPS (age) |
 | Secrets (dynamic) | HashiCorp Vault (HA, Raft storage, AWS KMS auto-unseal) |
 | Policy engine | Kyverno |
@@ -64,6 +64,7 @@ AMD Ryzen 7 7800X3D, 32GB RAM, RTX 4070 Ti Super, 3x 2TB NVMe, dual-boots Fedora
 ## Workloads
 
 - **catus-locatus** - my main app (PostGIS backend, Next.js frontend, MinIO)
+- **vaultwarden** - self-hosted Bitwarden-compatible password manager (SQLite on Longhorn)
 - **pihole** - DNS + ad-blocking for the home network (Longhorn-persisted, Prometheus metrics via exporter sidecar)
 - **tuwaiq-tracker** - CronJob hitting an external API every 12 hours
 - **stremio** - media server
