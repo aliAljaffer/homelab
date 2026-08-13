@@ -56,6 +56,11 @@ grafana:
   extraEnvFrom:
     - secretRef:
         name: grafana-discord-webhook
+    - secretRef:
+        name: grafana-github-token
+
+  plugins:
+    - grafana-github-datasource
 
   persistence:
     enabled: true
@@ -112,6 +117,15 @@ grafana:
       jsonData:
         httpMethod: POST
         timeInterval: 15s
+    - name: GitHub
+      type: grafana-github-datasource
+      access: proxy
+      isDefault: false
+      editable: false
+      jsonData:
+        selectedAuthType: personal-access-token
+      secureJsonData:
+        accessToken: "${GITHUB_TOKEN}"  # Set via grafana.extraEnvFrom
 
   # Alerting provisioning (migrated from grafana-alerting-configmap.yaml)
   alerting:
