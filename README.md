@@ -42,7 +42,8 @@ AMD Ryzen 7 7800X3D, 32GB RAM, RTX 4070 Ti Super, 3x 2TB NVMe, dual-boots Fedora
 |---|---|
 | OS | Talos Linux (immutable, API-managed) |
 | CNI | Cilium (kube-proxy replacement, Gateway API, Hubble) |
-| Ingress | Gateway API + HTTPRoutes (no NGINX) |
+| Ingress (LAN) | Gateway API + HTTPRoutes via Cilium's GatewayClass (no NGINX) |
+| Ingress (public) | cloudflare-tunnel-gateway-controller - dedicated Cloudflare Tunnel bound to its own GatewayClass/Gateway, so public HTTPRoutes need no manual tunnel config |
 | Storage | Longhorn (distributed, 2 replicas) |
 | Database | CloudNativePG (Postgres operator) |
 | Identity | Keycloak (HA, 3 instances, CloudNativePG-backed) |
@@ -57,7 +58,7 @@ AMD Ryzen 7 7800X3D, 32GB RAM, RTX 4070 Ti Super, 3x 2TB NVMe, dual-boots Fedora
 | Serverless | Knative Serving (net-gateway-api on the Cilium Gateway) |
 | Backups | Velero (scheduled, GCS, CSI snapshots via Longhorn) + Longhorn native backup (AWS S3, daily at 02:00 UTC, 14-day retention) |
 | Power monitoring | Kepler (RAPL energy counters, node-level) |
-| Remote access | Cloudflare Access Zero Trust tunnel |
+| Remote access | Legacy `cloudflared` tunnel (workload-specific routes) + the public Gateway tunnel above expose argocd, grafana, keycloak, vault, vaultwarden, and pihole externally (Cloudflare-proxied); everything else (Hubble, Longhorn, MinIO console) stays LAN-only on the internal Gateway |
 
 ---
 
