@@ -8,6 +8,15 @@ gatewayClassConfig:
 proxy:
   tunnelTokenSecretRef:
     name: cloudflare-tunnel-token
+  networkPolicy:
+    # Default policy only admits the controller's own namespace; without this,
+    # Prometheus (in `monitoring`) can't reach the config-API/metrics port and
+    # scrapes time out (TCP-level, not a 404).
+    ingress:
+      from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
 
 serviceMonitor:
   enabled: true
