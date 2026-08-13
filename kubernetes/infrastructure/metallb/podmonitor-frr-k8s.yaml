@@ -1,0 +1,30 @@
+---
+# frr-k8s's ServiceMonitor template has no additionalLabels field (checked
+# v0.16.1, see values.yaml), so its metrics were left unscraped. This
+# PodMonitor targets the same pods directly and carries release: monitoring
+# manually. Both ports are HTTPS with no extra RBAC needed - confirmed live
+# that Prometheus's own ServiceAccount token authenticates fine, since its
+# ClusterRole already grants `nonResourceURLs: ["/metrics"], verbs: ["get"]`
+# cluster-wide (the same grant that lets it scrape kube-apiserver).
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: metallb-frr-k8s
+  namespace: metallb-system
+  labels:
+    release: monitoring
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: frr-k8s
+  podMetricsEndpoints:
+    - port: metricshttps
+      scheme: https
+      tlsConfig:
+        insecureSkipVerify: true
+      bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+    - port: frrmetricshttps
+      scheme: https
+      tlsConfig:
+        insecureSkipVerify: true
+      bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
