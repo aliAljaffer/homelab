@@ -10,6 +10,8 @@ env:
 
 txtOwnerId: "homelab-talos"
 
+policy: sync
+
 # Watch Gateway API HTTPRoutes instead of legacy Ingress
 sources:
   - service
