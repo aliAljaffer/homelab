@@ -31,6 +31,11 @@ server:
 
         service_registration "kubernetes" {}
 
+        telemetry {
+          prometheus_retention_time = "24h"
+          disable_hostname = true
+        }
+
   # AWS credentials for the awskms seal, injected as env vars from a
   # Secret sealed per kubernetes/bootstrap/README.md.
   extraSecretEnvironmentVars:
