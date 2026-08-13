@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - cluster-issuer.yaml
   - cloudflare-token.sealed.yaml
+  - grafana-dashboard.yaml

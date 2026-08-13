@@ -7,3 +7,4 @@ resources:
   - namespace.yaml
   - httproute-grafana.yaml
   - thanos-objstore.sealed.yaml
+  - grafana-dashboard-argocd.yaml
