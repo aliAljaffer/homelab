@@ -17,6 +17,13 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
+  ignoreDifferences:
+  - group: argoproj.io
+    kind: Application
+    jsonPointers:
+    - /metadata/finalizers
+    - /metadata/annotations/argocd.argoproj.io~1hydrate
+    - /metadata/annotations/kubectl.kubernetes.io~1last-applied-configuration
   syncPolicy:
     automated:
       prune: true

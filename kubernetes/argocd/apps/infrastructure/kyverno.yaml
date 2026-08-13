@@ -30,6 +30,10 @@ spec:
     kind: CustomResourceDefinition
     jsonPointers:
     - /metadata/labels
+    - /spec/conversion
+    - /status
+    managedFieldsManagers:
+    - kube-apiserver
   syncPolicy:
     automated:
       prune: true
