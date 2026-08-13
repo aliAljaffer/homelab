@@ -1,0 +1,596 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloudflare-tunnel-gateway-controller-grafana-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_dashboard_folder: Cloudflare Tunnel
+data:
+  cloudflare-tunnel-gateway-controller.json: |-
+    {
+      "annotations": {
+        "list": []
+      },
+      "editable": true,
+      "graphTooltip": 1,
+      "id": null,
+      "title": "Cloudflare Tunnel Gateway Controller",
+      "uid": "cloudflare-tunnel-gateway-controller",
+      "version": 1,
+      "tags": [
+        "cloudflare",
+        "tunnel",
+        "gateway-api"
+      ],
+      "timezone": "browser",
+      "time": {
+        "from": "now-6h",
+        "to": "now"
+      },
+      "refresh": "30s",
+      "schemaVersion": 39,
+      "fiscalYearStartMonth": 0,
+      "links": [],
+      "liveNow": false,
+      "panels": [
+        {
+          "type": "stat",
+          "title": "Proxy Requests In Flight",
+          "gridPos": {
+            "x": 0,
+            "y": 0,
+            "w": 6,
+            "h": 4
+          },
+          "datasource": "Thanos",
+          "targets": [
+            {
+              "expr": "sum(cftunnel_proxy_requests_in_flight)",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "orientation": "horizontal",
+            "colorMode": "value",
+            "graphMode": "area"
+          }
+        },
+        {
+          "type": "stat",
+          "title": "Active WebSocket Sessions",
+          "gridPos": {
+            "x": 6,
+            "y": 0,
+            "w": 6,
+            "h": 4
+          },
+          "datasource": "Thanos",
+          "targets": [
+            {
+              "expr": "sum(cftunnel_proxy_websocket_active_sessions)",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "orientation": "horizontal",
+            "colorMode": "value",
+            "graphMode": "area"
+          }
+        },
+        {
+          "type": "stat",
+          "title": "HA Connections",
+          "gridPos": {
+            "x": 12,
+            "y": 0,
+            "w": 6,
+            "h": 4
+          },
+          "datasource": "Thanos",
+          "targets": [
+            {
+              "expr": "sum(cloudflared_tunnel_ha_connections)",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "orientation": "horizontal",
+            "colorMode": "value",
+            "graphMode": "area"
+          }
+        },
+        {
+          "type": "stat",
+          "title": "Ingress Rules",
+          "gridPos": {
+            "x": 18,
+            "y": 0,
+            "w": 6,
+            "h": 4
+          },
+          "datasource": "Thanos",
+          "targets": [
+            {
+              "expr": "sum(cftunnel_ingress_rules)",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "orientation": "horizontal",
+            "colorMode": "value",
+            "graphMode": "area"
+          }
+        },
+        {
+          "type": "timeseries",
+          "title": "Proxy Request Rate",
+          "gridPos": {
+            "x": 0,
+            "y": 4,
+            "w": 12,
+            "h": 8
+          },
+          "datasource": "Thanos",
+          "targets": [
+            {
+              "expr": "sum by (pod) (rate(cftunnel_proxy_requests_total[5m]))",
+              "legendFormat": "{{pod}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "reqps"
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          }
+        },
+        {
+          "type": "timeseries",
+          "title": "Proxy Backend Errors",
+          "gridPos": {
+            "x": 12,
+            "y": 4,
+            "w": 12,
+            "h": 8
+          },
+          "datasource": "Thanos",
+          "targets": [
+            {
+              "expr": "sum by (pod) (rate(cftunnel_proxy_backend_errors_total[5m]))",
+              "legendFormat": "{{pod}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "errps"
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          }
+        },
+        {
+          "type": "timeseries",
+          "title": "Proxy Request Duration (p50 / p99)",
+          "gridPos": {
+            "x": 0,
+            "y": 12,
+            "w": 12,
+            "h": 8
+          },
+          "datasource": "Thanos",
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.50, sum by (le) (rate(cftunnel_proxy_request_duration_seconds_bucket[5m])))",
+              "legendFormat": "p50",
+              "refId": "A"
+            },
+            {
+              "expr": "histogram_quantile(0.99, sum by (le) (rate(cftunnel_proxy_request_duration_seconds_bucket[5m])))",
+              "legendFormat": "p99",
+              "refId": "B"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          }
+        },
+        {
+          "type": "timeseries",
+          "title": "Proxy Request / Response Bytes",
+          "gridPos": {
+            "x": 12,
+            "y": 12,
+            "w": 12,
+            "h": 8
+          },
+          "datasource": "Thanos",
+          "targets": [
+            {
+              "expr": "sum(rate(cftunnel_proxy_request_bytes_total[5m]))",
+              "legendFormat": "request bytes/s",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(rate(cftunnel_proxy_response_bytes_total[5m]))",
+              "legendFormat": "response bytes/s",
+              "refId": "B"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "Bps"
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          }
+        },
+        {
+          "type": "timeseries",
+          "title": "Cloudflared Tunnel Register Success / Fail",
+          "gridPos": {
+            "x": 0,
+            "y": 20,
+            "w": 12,
+            "h": 8
+          },
+          "datasource": "Thanos",
+          "targets": [
+            {
+              "expr": "sum(rate(cloudflared_tunnel_tunnel_register_success[5m]))",
+              "legendFormat": "success/s",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(rate(cloudflared_tunnel_tunnel_register_fail[5m]))",
+              "legendFormat": "fail/s",
+              "refId": "B"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ops"
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          }
+        },
+        {
+          "type": "timeseries",
+          "title": "Cloudflared Total Requests",
+          "gridPos": {
+            "x": 12,
+            "y": 20,
+            "w": 12,
+            "h": 8
+          },
+          "datasource": "Thanos",
+          "targets": [
+            {
+              "expr": "sum(rate(cloudflared_tunnel_total_requests[5m]))",
+              "legendFormat": "requests/s",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "reqps"
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          }
+        },
+        {
+          "type": "stat",
+          "title": "Synced Routes",
+          "gridPos": {
+            "x": 0,
+            "y": 28,
+            "w": 6,
+            "h": 4
+          },
+          "datasource": "Thanos",
+          "targets": [
+            {
+              "expr": "sum(cftunnel_synced_routes)",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "orientation": "horizontal",
+            "colorMode": "value",
+            "graphMode": "area"
+          }
+        },
+        {
+          "type": "stat",
+          "title": "Failed Backend Refs",
+          "gridPos": {
+            "x": 6,
+            "y": 28,
+            "w": 6,
+            "h": 4
+          },
+          "datasource": "Thanos",
+          "targets": [
+            {
+              "expr": "sum(cftunnel_failed_backend_refs)",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "orientation": "horizontal",
+            "colorMode": "value",
+            "graphMode": "area"
+          }
+        },
+        {
+          "type": "stat",
+          "title": "Reconcile Errors (5m rate)",
+          "gridPos": {
+            "x": 12,
+            "y": 28,
+            "w": 6,
+            "h": 4
+          },
+          "datasource": "Thanos",
+          "targets": [
+            {
+              "expr": "sum(rate(controller_runtime_reconcile_errors_total[5m]))",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "orientation": "horizontal",
+            "colorMode": "value",
+            "graphMode": "area"
+          }
+        },
+        {
+          "type": "stat",
+          "title": "Cloudflare API Errors (5m rate)",
+          "gridPos": {
+            "x": 18,
+            "y": 28,
+            "w": 6,
+            "h": 4
+          },
+          "datasource": "Thanos",
+          "targets": [
+            {
+              "expr": "sum(rate(cftunnel_cloudflare_api_errors_total[5m]))",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "orientation": "horizontal",
+            "colorMode": "value",
+            "graphMode": "area"
+          }
+        },
+        {
+          "type": "timeseries",
+          "title": "Cloudflare API Call Rate & Duration (p99)",
+          "gridPos": {
+            "x": 0,
+            "y": 32,
+            "w": 12,
+            "h": 8
+          },
+          "datasource": "Thanos",
+          "targets": [
+            {
+              "expr": "sum(rate(cftunnel_cloudflare_api_calls_total[5m]))",
+              "legendFormat": "calls/s",
+              "refId": "A"
+            },
+            {
+              "expr": "histogram_quantile(0.99, sum by (le) (rate(cftunnel_cloudflare_api_duration_seconds_bucket[5m])))",
+              "legendFormat": "p99 duration (s)",
+              "refId": "B"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          }
+        },
+        {
+          "type": "timeseries",
+          "title": "Controller Reconcile Time (p99)",
+          "gridPos": {
+            "x": 12,
+            "y": 32,
+            "w": 12,
+            "h": 8
+          },
+          "datasource": "Thanos",
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.99, sum by (le) (rate(controller_runtime_reconcile_time_seconds_bucket[5m])))",
+              "legendFormat": "p99",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          }
+        }
+      ]
+    }
