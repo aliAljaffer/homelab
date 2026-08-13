@@ -8,3 +8,4 @@ resources:
   - httproute-grafana.yaml
   - thanos-objstore.sealed.yaml
   - grafana-dashboard-argocd.yaml
+  - grafana-github-token.sealed.yaml
