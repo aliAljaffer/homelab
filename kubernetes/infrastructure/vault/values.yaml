@@ -40,3 +40,9 @@ server:
 
 ui:
   enabled: true
+
+serverTelemetry:
+  serviceMonitor:
+    enabled: true
+    selectors:
+      release: monitoring

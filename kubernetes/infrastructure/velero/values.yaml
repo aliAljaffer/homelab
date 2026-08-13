@@ -32,3 +32,10 @@ configuration:
   features: EnableCSI
 
 deployNodeAgent: true
+
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    additionalLabels:
+      release: monitoring

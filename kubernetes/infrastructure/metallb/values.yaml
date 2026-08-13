@@ -1,3 +1,22 @@
 ---
 speaker:
   tolerateMaster: true
+
+prometheus:
+  rbacPrometheus: true
+  serviceAccount: kube-prometheus-prometheus
+  namespace: monitoring
+  serviceMonitor:
+    enabled: true
+    speaker:
+      additionalLabels:
+        release: monitoring
+    controller:
+      additionalLabels:
+        release: monitoring
+
+# frr-k8s's ServiceMonitor has no additionalLabels field in its chart schema
+# (checked v0.16.1), so it can't carry the release: monitoring label our
+# Prometheus instance requires (serviceMonitorSelector.matchLabels).
+# Left disabled; would need a separate ServiceMonitor manifest + label patch
+# to actually get scraped.

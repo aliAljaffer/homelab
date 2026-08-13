@@ -22,6 +22,12 @@ ingress:
 longhornUI:
   replicas: "1"
 
+metrics:
+  serviceMonitor:
+    enabled: true
+    additionalLabels:
+      release: monitoring
+
 httproute:
   enabled: true
   parentRefs:

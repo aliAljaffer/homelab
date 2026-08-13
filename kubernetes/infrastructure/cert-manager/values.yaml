@@ -3,3 +3,10 @@ crds:
   enabled: true
 # Required for cert-manager to provision TLS via Gateway API listeners
 featureGates: "ExperimentalGatewayAPISupport=true"
+
+prometheus:
+  enabled: true
+  servicemonitor:
+    enabled: true
+    labels:
+      release: monitoring

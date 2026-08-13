@@ -19,3 +19,8 @@ sources:
 
 domainFilters:
   - alialjaffer.com
+
+serviceMonitor:
+  enabled: true
+  additionalLabels:
+    release: monitoring
