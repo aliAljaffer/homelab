@@ -129,7 +129,7 @@ kubectl wait --for=condition=Ready nodes --all --timeout=300s
 
 ```bash
 helm repo add argo https://argoproj.github.io/argo-helm
-helm install argocd argo/argo-cd --version 7.9.0 \
+helm install argocd argo/argo-cd --version 10.3.0 \
   --namespace argocd --create-namespace \
   --values kubernetes/bootstrap/argocd/values.yaml
 ```
