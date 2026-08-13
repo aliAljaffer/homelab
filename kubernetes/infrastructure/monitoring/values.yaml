@@ -132,6 +132,7 @@ grafana:
         timeInterval: 15s
     - name: GitHub
       type: grafana-github-datasource
+      uid: github
       access: proxy
       isDefault: false
       editable: false
