@@ -49,6 +49,18 @@ grafana:
   defaultDashboardsEnabled: true
   defaultDashboardsTimezone: Asia/Riyadh
 
+  # Static admin credentials via a self-managed SealedSecret. Without this,
+  # the chart auto-generates a random admin password on every render using
+  # Helm's `lookup` function to try to reuse the existing one - but ArgoCD's
+  # repo-server renders Helm charts without reliable live-cluster access, so
+  # `lookup` intermittently returns nothing and the password gets randomized
+  # again, silently invalidating whatever's actually set on the running
+  # Grafana instance (it only reads the password at first DB init).
+  admin:
+    existingSecret: grafana-admin-credentials
+    userKey: admin-user
+    passwordKey: admin-password
+
   # RWO Longhorn PVC: Recreate avoids Multi-Attach deadlock on rollouts
   deploymentStrategy:
     type: Recreate

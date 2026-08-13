@@ -9,3 +9,4 @@ resources:
   - thanos-objstore.sealed.yaml
   - grafana-dashboard-argocd.yaml
   - grafana-github-token.sealed.yaml
+  - grafana-admin-credentials.sealed.yaml
