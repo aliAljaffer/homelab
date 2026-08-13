@@ -1,0 +1,50 @@
+---
+# Dedicated ServiceAccount + narrow ClusterRole for scraping frr-k8s's
+# HTTPS-only, kube-rbac-proxy-style metrics ports (see podmonitor-frr-k8s.yaml).
+#
+# Two same-namespace constraints turned out to conflict: Kubernetes only
+# auto-populates a legacy service-account-token Secret when it's in the
+# SAME namespace as its ServiceAccount, but Prometheus Operator only
+# resolves a PodMonitor's authorization.credentials Secret when it's in
+# the SAME namespace as the PodMonitor. Reusing Prometheus's own
+# ServiceAccount/token can't satisfy both (it lives in "monitoring", the
+# PodMonitor lives in "metallb-system"), so this creates a second,
+# metallb-system-local identity instead - scoped to nothing but the one
+# nonResourceURL it needs, not reusing Prometheus's broader ClusterRole.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: frr-k8s-metrics-reader
+  namespace: metallb-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: frr-k8s-metrics-reader
+rules:
+  - nonResourceURLs:
+      - /metrics
+    verbs:
+      - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: frr-k8s-metrics-reader
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: frr-k8s-metrics-reader
+subjects:
+  - kind: ServiceAccount
+    name: frr-k8s-metrics-reader
+    namespace: metallb-system
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: frr-k8s-metrics-reader-token
+  namespace: metallb-system
+  annotations:
+    kubernetes.io/service-account.name: frr-k8s-metrics-reader
+type: kubernetes.io/service-account-token

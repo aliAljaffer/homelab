@@ -2,10 +2,16 @@
 # frr-k8s's ServiceMonitor template has no additionalLabels field (checked
 # v0.16.1, see values.yaml), so its metrics were left unscraped. This
 # PodMonitor targets the same pods directly and carries release: monitoring
-# manually. Both ports are HTTPS with no extra RBAC needed - confirmed live
-# that Prometheus's own ServiceAccount token authenticates fine, since its
-# ClusterRole already grants `nonResourceURLs: ["/metrics"], verbs: ["get"]`
-# cluster-wide (the same grant that lets it scrape kube-apiserver).
+# manually.
+#
+# Both metrics ports are HTTPS + bearer-token auth (kube-rbac-proxy style;
+# confirmed live - plain HTTP is rejected, HTTPS with no token says
+# "Unauthorized"). bearerTokenFile isn't in this cluster's PodMonitor CRD
+# schema (checked live - only bearerTokenSecret/authorization exist), so
+# auth goes through authorization.credentials instead, referencing the
+# token Secret created in frr-k8s-metrics-rbac.yaml. That token belongs to
+# a dedicated ServiceAccount rather than Prometheus's own: see that file
+# for why Prometheus's own token can't be reused here.
 apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
 metadata:
@@ -22,9 +28,15 @@ spec:
       scheme: https
       tlsConfig:
         insecureSkipVerify: true
-      bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+      authorization:
+        credentials:
+          name: frr-k8s-metrics-reader-token
+          key: token
     - port: frrmetricshttps
       scheme: https
       tlsConfig:
         insecureSkipVerify: true
-      bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+      authorization:
+        credentials:
+          name: frr-k8s-metrics-reader-token
+          key: token
