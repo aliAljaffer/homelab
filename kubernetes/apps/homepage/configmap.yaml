@@ -1,0 +1,55 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage-config
+  namespace: homepage
+data:
+  kubernetes.yaml: |
+    mode: cluster
+    ingress: false
+    gateway: true
+
+  settings.yaml: |
+    title: Homelab
+    theme: dark
+    color: slate
+    headerStyle: clean
+    layout:
+      Infrastructure:
+        style: row
+        columns: 4
+      Home:
+        style: row
+        columns: 4
+      Storage:
+        style: row
+        columns: 4
+      Media:
+        style: row
+        columns: 4
+      Projects:
+        style: row
+        columns: 4
+
+  widgets.yaml: |
+    []
+
+  bookmarks.yaml: |
+    []
+
+  services.yaml: |
+    - Media:
+        - Stremio:
+            href: http://192.168.8.200:8099
+            description: Media streaming
+            icon: stremio.png
+
+    - Projects:
+        - Portfolio:
+            href: https://alialjaffer.com
+            description: Personal website
+            icon: mdi-web
+        - Tuwaiq Tracker:
+            href: https://team4.tuwaiqtracker.com
+            description: Tuwaiq Tracker frontend
+            icon: mdi-chart-timeline-variant

@@ -6,6 +6,12 @@ metadata:
   namespace: pihole
   annotations:
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: Pi-hole
+    gethomepage.dev/description: DNS ad-blocking
+    gethomepage.dev/group: Home
+    gethomepage.dev/icon: pi-hole.png
+    gethomepage.dev/pod-selector: "app=pihole"
 spec:
   parentRefs:
   - name: cloudflare-tunnel

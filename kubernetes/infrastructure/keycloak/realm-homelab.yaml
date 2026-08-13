@@ -1,0 +1,52 @@
+---
+# Creates the "homelab" realm plus the oauth2-proxy client used to gate
+# access to Homepage (hp.alialjaffer.com). The client secret and the
+# seeded user's temporary password come from homelab-realm-secrets
+# (sealed), injected as env vars into the import Job and referenced here
+# via Keycloak's own ${VAR} realm-file substitution.
+apiVersion: k8s.keycloak.org/v2beta1
+kind: KeycloakRealmImport
+metadata:
+  name: homelab-realm
+  namespace: keycloak
+spec:
+  keycloakCRName: keycloak
+  placeholders:
+    OAUTH2_PROXY_CLIENT_SECRET:
+      secret:
+        name: homelab-realm-secrets
+        key: OAUTH2_PROXY_CLIENT_SECRET
+    ALI_TEMP_PASSWORD:
+      secret:
+        name: homelab-realm-secrets
+        key: ALI_TEMP_PASSWORD
+  realm:
+    id: homelab
+    realm: homelab
+    displayName: Homelab
+    enabled: true
+    clients:
+      - clientId: oauth2-proxy
+        name: oauth2-proxy
+        protocol: openid-connect
+        enabled: true
+        publicClient: false
+        standardFlowEnabled: true
+        directAccessGrantsEnabled: false
+        serviceAccountsEnabled: false
+        secret: "${OAUTH2_PROXY_CLIENT_SECRET}"
+        redirectUris:
+          - "https://hp.alialjaffer.com/oauth2/callback"
+        webOrigins:
+          - "https://hp.alialjaffer.com"
+    users:
+      - username: ali
+        email: ali.aljaffer@azm.sa
+        firstName: Ali
+        lastName: Aljaffer
+        enabled: true
+        emailVerified: true
+        credentials:
+          - type: password
+            value: "${ALI_TEMP_PASSWORD}"
+            temporary: true
