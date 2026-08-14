@@ -72,6 +72,10 @@ grafana:
     - name: grafana-discord-webhook
     - name: grafana-github-token
 
+  # user/password injected as GF_SMTP_USER / GF_SMTP_PASSWORD from the secret
+  smtp:
+    existingSecret: grafana-smtp-secret
+
   plugins:
     - grafana-github-datasource
 
@@ -85,6 +89,12 @@ grafana:
       root_url: https://grafana.alialjaffer.com
     database:
       wal: true  # required for SQLite on networked (Longhorn) storage
+    smtp:
+      enabled: true
+      host: email-smtp.us-east-1.amazonaws.com:587
+      from_address: homelab@alialjaffer.com
+      from_name: Grafana
+      startTLS_policy: MandatoryStartTLS
 
   sidecar:
     datasources:
