@@ -1,0 +1,27 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: metallb-frr-probe-timeout
+spec:
+  background: false
+  rules:
+    - name: frr-probe-timeout
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+              namespaces: [metallb-system]
+      preconditions:
+        all:
+          - key: "{{ request.object.spec.containers[?name=='frr'] | length(@) }}"
+            operator: GreaterThan
+            value: 0
+      mutate:
+        patchStrategicMerge:
+          spec:
+            containers:
+              - name: frr
+                startupProbe:
+                  timeoutSeconds: 5
+                livenessProbe:
+                  timeoutSeconds: 5
