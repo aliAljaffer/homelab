@@ -27,6 +27,23 @@ prometheus:
         existingSecret:
           name: thanos-objstore-secret   # SealedSecret: see bootstrap/README.md Step 6
           key: objstore.yml
+      # ThanosSpec.resources - passed straight through to the Prometheus CR,
+      # not a chart-templated field, so it's absent from `helm show values`.
+      resources:
+        requests:
+          cpu: 5m
+          memory: 176Mi
+        limits:
+          cpu: 20m
+          memory: 352Mi
+
+    resources:
+      requests:
+        cpu: 180m
+        memory: 3816Mi
+      limits:
+        cpu: 540m
+        memory: 7632Mi
 
     # Scrape all pods with prometheus.io/scrape=true
     additionalScrapeConfigs:
@@ -84,6 +101,14 @@ grafana:
     storageClassName: longhorn
     size: 5Gi
 
+  resources:
+    requests:
+      cpu: 50m
+      memory: 880Mi
+    limits:
+      cpu: 150m
+      memory: 1760Mi
+
   grafana.ini:
     server:
       root_url: https://grafana.alialjaffer.com
@@ -96,10 +121,21 @@ grafana:
       from_name: Grafana
       startTLS_policy: MandatoryStartTLS
 
+  # sidecar.resources is shared by both grafana-sc-dashboard and
+  # grafana-sc-datasources (chart has one resources key for all k8s-sidecar
+  # containers, no per-type override) - sized to the larger of the two
+  # observed.
   sidecar:
     datasources:
       isDefaultDatasource: false
       defaultDatasourceEnabled: false
+    resources:
+      requests:
+        cpu: 25m
+        memory: 136Mi
+      limits:
+        cpu: 75m
+        memory: 272Mi
 
   # Point Grafana at Thanos Query for long-term metrics
   additionalDataSources:
@@ -305,15 +341,58 @@ kubeApiServer:
 # --- AlertManager ---
 alertmanager:
   enabled: true
+  alertmanagerSpec:
+    resources:
+      requests:
+        cpu: 5m
+        memory: 56Mi
+      limits:
+        cpu: 20m
+        memory: 112Mi
 
 # --- Node Exporter ---
 nodeExporter:
   enabled: true
 
+prometheus-node-exporter:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 40Mi
+    limits:
+      cpu: 30m
+      memory: 80Mi
+
 # --- kube-state-metrics ---
 kubeStateMetrics:
   enabled: true
 
+kube-state-metrics:
+  resources:
+    requests:
+      cpu: 25m
+      memory: 104Mi
+    limits:
+      cpu: 75m
+      memory: 208Mi
+
 # --- Prometheus Operator ---
 prometheusOperator:
   enabled: true
+  resources:
+    requests:
+      cpu: 5m
+      memory: 48Mi
+    limits:
+      cpu: 20m
+      memory: 96Mi
+  # Shared setting: also sizes the config-reloader sidecar injected into the
+  # Alertmanager StatefulSet, not just Prometheus's.
+  prometheusConfigReloader:
+    resources:
+      requests:
+        cpu: 5m
+        memory: 24Mi
+      limits:
+        cpu: 20m
+        memory: 48Mi

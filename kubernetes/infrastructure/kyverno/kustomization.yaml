@@ -1,7 +1,6 @@
 ---
-# Extra resources deployed alongside the Kyverno Helm release.
-# Referenced by kubernetes/argocd/apps/infrastructure/kyverno.yaml.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - grafana-dashboard.yaml
+  - policy-default-resources.yaml

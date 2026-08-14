@@ -4,6 +4,32 @@ crds:
 # Required for cert-manager to provision TLS via Gateway API listeners
 featureGates: "ExperimentalGatewayAPISupport=true"
 
+resources:
+  requests:
+    cpu: 5m
+    memory: 120Mi
+  limits:
+    cpu: 20m
+    memory: 240Mi
+
+cainjector:
+  resources:
+    requests:
+      cpu: 5m
+      memory: 176Mi
+    limits:
+      cpu: 20m
+      memory: 352Mi
+
+webhook:
+  resources:
+    requests:
+      cpu: 5m
+      memory: 80Mi
+    limits:
+      cpu: 20m
+      memory: 160Mi
+
 prometheus:
   enabled: true
   servicemonitor:

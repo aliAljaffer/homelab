@@ -1,12 +1,12 @@
-# ARC controller values - managed via helm CLI, not ArgoCD (ghcr.io OCI limitation)
-# helm upgrade arc-controller oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller \
-#   --namespace arc-systems --version 0.14.2 -f arc-controller-values.yaml
-
-# Undocumented field - absent from `helm show values`, only visible by reading
-# templates/deployment.yaml. Without it, the chart hardcodes
-# --metrics-addr=0 / --listener-metrics-addr=0 (metrics off). Setting this
-# also declares a "metrics" containerPort on the controller pod automatically.
 metrics:
   controllerManagerAddr: ":8080"
   listenerAddr: ":8080"
   listenerEndpoint: "/metrics"
+
+resources:
+  requests:
+    cpu: 5m
+    memory: 88Mi
+  limits:
+    cpu: 20m
+    memory: 176Mi

@@ -2,7 +2,23 @@
 controller:
   type: daemonset
 
+configReloader:
+  resources:
+    requests:
+      cpu: 5m
+      memory: 48Mi
+    limits:
+      cpu: 20m
+      memory: 96Mi
+
 alloy:
+  resources:
+    requests:
+      cpu: 60m
+      memory: 576Mi
+    limits:
+      cpu: 180m
+      memory: 1152Mi
   configMap:
     create: true
     content: |

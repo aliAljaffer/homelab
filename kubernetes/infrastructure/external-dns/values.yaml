@@ -12,7 +12,6 @@ txtOwnerId: "homelab-talos"
 
 policy: sync
 
-# Watch Gateway API HTTPRoutes instead of legacy Ingress
 sources:
   - service
   - gateway-httproute
@@ -24,3 +23,11 @@ serviceMonitor:
   enabled: true
   additionalLabels:
     release: monitoring
+
+resources:
+  requests:
+    cpu: 5m
+    memory: 144Mi
+  limits:
+    cpu: 20m
+    memory: 288Mi

@@ -1,3 +1,8 @@
 ---
-# Chart defaults are used. Tracked here per this repo's convention
-# (see kubernetes/bootstrap/README.md Helm values tracking table).
+resources:
+  requests:
+    cpu: 15m
+    memory: 104Mi
+  limits:
+    cpu: 45m
+    memory: 208Mi
