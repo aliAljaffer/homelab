@@ -687,6 +687,25 @@ data:
           {
             "current": {
               "selected": false,
+              "text": "Thanos",
+              "value": "thanos"
+            },
+            "hide": 0,
+            "includeAll": false,
+            "label": "Datasource",
+            "multi": false,
+            "name": "DS_PROMETHEUS",
+            "options": [],
+            "query": "prometheus",
+            "queryValue": "",
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "type": "datasource"
+          },
+          {
+            "current": {
+              "selected": false,
               "text": "default",
               "value": "default"
             },
