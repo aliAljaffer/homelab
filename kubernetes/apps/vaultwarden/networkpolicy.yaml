@@ -1,0 +1,43 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: vaultwarden-default
+  namespace: vaultwarden
+spec:
+  endpointSelector: {}
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": cloudflare-tunnel-system
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+    # kubelet liveness/readiness probe (httpGet :80 /alive).
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    # Matches SMTP_HOST in vaultwarden-deployment.yaml.
+    - toFQDNs:
+        - matchName: "email-smtp.us-east-1.amazonaws.com"
+      toPorts:
+        - ports:
+            - port: "587"
+              protocol: TCP

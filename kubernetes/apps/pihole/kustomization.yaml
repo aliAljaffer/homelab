@@ -11,3 +11,4 @@ resources:
   - pihole-service-metrics.yaml
   - httproute-pihole.yaml
   - pihole-secret.sealed.yaml
+  - networkpolicy.yaml

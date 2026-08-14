@@ -1,0 +1,195 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: cl-be-default
+  namespace: catus-locatus
+spec:
+  endpointSelector:
+    matchLabels:
+      app: cl-be
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": cloudflared
+      toPorts:
+        - ports:
+            - port: "4001"
+              protocol: TCP
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": monitoring
+      toPorts:
+        - ports:
+            - port: "4001"
+              protocol: TCP
+    # kubelet liveness/readiness probe (httpGet :4001 /api/health).
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "4001"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEndpoints:
+        - matchLabels:
+            app: minio-svc
+      toPorts:
+        - ports:
+            - port: "9000"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            cnpg.io/cluster: catus-locatus-db
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: cl-fe-default
+  namespace: catus-locatus
+spec:
+  endpointSelector:
+    matchLabels:
+      app: cl-fe
+  ingress:
+    # cl-fe-svc maps 80 -> 8080; Cilium enforces on the post-DNAT port (confirmed via Hubble).
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": cloudflared
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+    # kubelet liveness/readiness probe (httpGet :8080 /health, /).
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: minio-default
+  namespace: catus-locatus
+spec:
+  endpointSelector:
+    matchLabels:
+      app: minio
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": cloudflared
+      toPorts:
+        - ports:
+            - port: "9000"
+              protocol: TCP
+    - fromEndpoints:
+        - matchLabels:
+            app: cl-be
+      toPorts:
+        - ports:
+            - port: "9000"
+              protocol: TCP
+    # kube-system: homelab-gateway pod, for the minio-console HTTPRoute.
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+      toPorts:
+        - ports:
+            - port: "9001"
+              protocol: TCP
+    # kubelet liveness probe (httpGet :9000 /minio/health/live).
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "9000"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: catus-locatus-db-default
+  namespace: catus-locatus
+spec:
+  endpointSelector:
+    matchLabels:
+      cnpg.io/cluster: catus-locatus-db
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app: cl-be
+        - matchLabels:
+            cnpg.io/cluster: catus-locatus-db
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    # CNPG operator -> instance traffic (failover/backup orchestration), pre-allowed though not yet observed live.
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": cnpg-system
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+    # kubelet liveness/readiness/startup probe (httpGet :8000 /healthz, /readyz, /startupz).
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEndpoints:
+        - matchLabels:
+            cnpg.io/cluster: catus-locatus-db
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP

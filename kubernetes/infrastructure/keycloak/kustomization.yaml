@@ -6,3 +6,4 @@ resources:
   - keycloak.yaml
   - httproute-keycloak.yaml
   - keycloak-smtp-secret.sealed.yaml
+  - networkpolicy.yaml
