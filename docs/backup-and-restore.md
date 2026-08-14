@@ -10,12 +10,12 @@ Honestly, if there's one thing you do for this cluster, make it these backups. L
 
 ## Quick reference
 
-| Term | Meaning |
-|---|---|
-| Sealed Secrets key | The cluster private key that decrypts SealedSecret resources |
-| SOPS age key | The age private key that decrypts `*.sops` files in `talos/clusterconfig/` |
-| ArgoCD | The GitOps controller that applies all manifests to the cluster |
-| Longhorn | The distributed storage system that holds all persistent volumes |
+| Term               | Meaning                                                                    |
+| ------------------ | -------------------------------------------------------------------------- |
+| Sealed Secrets key | The cluster private key that decrypts SealedSecret resources               |
+| SOPS age key       | The age private key that decrypts `*.sops` files in `talos/clusterconfig/` |
+| ArgoCD             | The GitOps controller that applies all manifests to the cluster            |
+| Longhorn           | The distributed storage system that holds all persistent volumes           |
 
 ---
 
@@ -106,7 +106,7 @@ The backup lands in the `velero` MinIO bucket.
 
 ### Longhorn snapshots
 
-Do this before Longhorn or node upgrades. Open the Longhorn UI at `https://longhorn.alialjaffer.com`, go to **Volume**, and for each volume click **Create Snapshot**. Takes 2 minutes.
+Do this before Longhorn or node upgrades. Open the Longhorn UI at `https://lh.alialjaffer.com`, go to **Volume**, and for each volume click **Create Snapshot**. Takes 2 minutes.
 
 ---
 
@@ -164,13 +164,13 @@ You need `homelab.age` on your local machine, and both `sops` and `talosctl` ins
 
 **Note:** Each node has its own file in `talos/clusterconfig/`. Only the secret values are encrypted - the cluster structure is readable without decryption.
 
-| File | Node |
-|---|---|
-| `talos/clusterconfig/k8s-homelab-cp0.sops.yaml` | ⚠️ STALE  -  see note below |
-| `talos/clusterconfig/k8s-homelab-wrk0.sops.yaml` | wrk0 - 192.168.8.100 |
-| `talos/clusterconfig/k8s-homelab-wrk1.sops.yaml` | wrk1 - 192.168.8.101 |
+| File                                             | Node                      |
+| ------------------------------------------------ | ------------------------- |
+| `talos/clusterconfig/k8s-homelab-cp0.sops.yaml`  | ⚠️ STALE - see note below |
+| `talos/clusterconfig/k8s-homelab-wrk0.sops.yaml` | wrk0 - 192.168.8.100      |
+| `talos/clusterconfig/k8s-homelab-wrk1.sops.yaml` | wrk1 - 192.168.8.101      |
 
-> **⚠️ cp0 topology change (2026-08-08):** control plane moved from the M920q (was `cp0`, 192.168.8.99, now repurposed as `wrk3`) to the MacBook Pro (`cp0`, 192.168.8.99). `k8s-homelab-cp0.sops.yaml` still contains the **old M920q's** config (wrong disk, wrong hardware)  -  do not apply it as-is. It needs regenerating via `talhelper genconfig` against an updated `talconfig.yaml`, and there's no SOPS file yet for `wrk3`. The Mac also requires a non-standard install (custom kernel + GRUB bootloader instead of systemd-boot)  -  see `docs/talos-intel-mac.md` before reinstalling it via any standard flow, or it will silently regress to the boot hang that doc describes.
+> **⚠️ cp0 topology change (2026-08-08):** control plane moved from the M920q (was `cp0`, 192.168.8.99, now repurposed as `wrk3`) to the MacBook Pro (`cp0`, 192.168.8.99). `k8s-homelab-cp0.sops.yaml` still contains the **old M920q's** config (wrong disk, wrong hardware) - do not apply it as-is. It needs regenerating via `talhelper genconfig` against an updated `talconfig.yaml`, and there's no SOPS file yet for `wrk3`. The Mac also requires a non-standard install (custom kernel + GRUB bootloader instead of systemd-boot) - see `docs/talos-intel-mac.md` before reinstalling it via any standard flow, or it will silently regress to the boot hang that doc describes.
 
 1. Set the age key path.
 
@@ -180,7 +180,7 @@ You need `homelab.age` on your local machine, and both `sops` and `talosctl` ins
 
 2. Apply the config for each node. This decrypts inline without writing plaintext to disk.
 
-   **Do not run the `cp0` command below until `k8s-homelab-cp0.sops.yaml` has been regenerated**  -  see the warning above.
+   **Do not run the `cp0` command below until `k8s-homelab-cp0.sops.yaml` has been regenerated** - see the warning above.
 
    ```bash
    sops --decrypt talos/clusterconfig/k8s-homelab-cp0.sops.yaml \
@@ -264,6 +264,7 @@ Data restored to the state at the time of backup.
 This is the nuclear option - all nodes lost, rebuilding everything. Budget 1 to 3 hours depending on how fast everything syncs.
 
 Before you start, you need all of these:
+
 - `sealed-secrets-master-key.yaml` from your secure storage
 - `homelab.age` on your local machine
 - Access to this Git repo
@@ -287,11 +288,11 @@ Before you start, you need all of these:
 
 7. Confirm all services are accessible.
 
-   | Service | URL |
-   |---|---|
-   | ArgoCD | `https://argocd.alialjaffer.com` |
-   | Grafana | `https://grafana.alialjaffer.com` |
-   | Longhorn | `https://longhorn.alialjaffer.com` |
-   | Pihole | `https://pihole.alialjaffer.com` |
+   | Service  | URL                               |
+   | -------- | --------------------------------- |
+   | ArgoCD   | `https://argocd.alialjaffer.com`  |
+   | Grafana  | `https://grafana.alialjaffer.com` |
+   | Longhorn | `https://lh.alialjaffer.com`      |
+   | Pihole   | `https://pihole.alialjaffer.com`  |
 
 Cluster is fully back up. Everything running.

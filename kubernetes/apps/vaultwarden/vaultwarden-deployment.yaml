@@ -16,49 +16,49 @@ spec:
         app: vaultwarden
     spec:
       containers:
-        - name: vaultwarden
-          image: vaultwarden/server:1.37.1
-          resources:
-            limits:
-              cpu: 500m
-              memory: 256Mi
-            requests:
-              cpu: 50m
-              memory: 64Mi
-          ports:
-            - containerPort: 80
-              name: http
-              protocol: TCP
-          env:
-            - name: TZ
-              value: Asia/Riyadh
-            - name: DOMAIN
-              value: "https://vaultwarden.alialjaffer.com"
-            - name: SIGNUPS_ALLOWED
-              value: "false"
-            - name: ENABLE_WEBSOCKET
-              value: "true"
-            - name: ADMIN_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: vaultwarden-secret
-                  key: ADMIN_TOKEN
-          volumeMounts:
-            - name: vaultwarden-data
-              mountPath: /data
-          readinessProbe:
-            httpGet:
-              path: /alive
-              port: 80
-            initialDelaySeconds: 5
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /alive
-              port: 80
-            initialDelaySeconds: 15
-            periodSeconds: 20
-      volumes:
+      - name: vaultwarden
+        image: vaultwarden/server:1.37.1
+        resources:
+          limits:
+            cpu: 500m
+            memory: 256Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        env:
+        - name: TZ
+          value: Asia/Riyadh
+        - name: DOMAIN
+          value: "https://vw.alialjaffer.com"
+        - name: SIGNUPS_ALLOWED
+          value: "false"
+        - name: ENABLE_WEBSOCKET
+          value: "true"
+        - name: ADMIN_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: vaultwarden-secret
+              key: ADMIN_TOKEN
+        volumeMounts:
         - name: vaultwarden-data
-          persistentVolumeClaim:
-            claimName: vaultwarden-pvc
+          mountPath: /data
+        readinessProbe:
+          httpGet:
+            path: /alive
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /alive
+            port: 80
+          initialDelaySeconds: 15
+          periodSeconds: 20
+      volumes:
+      - name: vaultwarden-data
+        persistentVolumeClaim:
+          claimName: vaultwarden-pvc

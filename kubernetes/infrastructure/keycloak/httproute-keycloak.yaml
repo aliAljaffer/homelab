@@ -12,7 +12,7 @@ spec:
     namespace: cloudflare-tunnel-system
     sectionName: https
   hostnames:
-  - keycloak.alialjaffer.com
+  - kc.alialjaffer.com
   rules:
   - backendRefs:
     - name: keycloak-service

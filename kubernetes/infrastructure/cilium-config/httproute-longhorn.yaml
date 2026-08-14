@@ -6,13 +6,13 @@ metadata:
   namespace: kube-system
 spec:
   parentRefs:
-    - name: homelab-gateway
-      namespace: kube-system
-      sectionName: https
+  - name: homelab-gateway
+    namespace: kube-system
+    sectionName: https
   hostnames:
-    - longhorn.alialjaffer.com
+  - lh.alialjaffer.com
   rules:
-    - backendRefs:
-        - name: longhorn-frontend
-          namespace: longhorn-system
-          port: 80
+  - backendRefs:
+    - name: longhorn-frontend
+      namespace: longhorn-system
+      port: 80

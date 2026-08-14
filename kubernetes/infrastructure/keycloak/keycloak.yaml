@@ -22,7 +22,7 @@ spec:
   http:
     httpEnabled: true
   hostname:
-    hostname: keycloak.alialjaffer.com
+    hostname: kc.alialjaffer.com
   ingress:
     enabled: false
   proxy:

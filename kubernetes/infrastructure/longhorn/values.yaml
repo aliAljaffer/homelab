@@ -36,7 +36,7 @@ httproute:
     name: homelab-gateway
     namespace: kube-system
     sectionName: https
-  hostnames: [ "longhorn.alialjaffer.com" ]
+  hostnames: [ "lh.alialjaffer.com" ]
   path: /
   pathType: PathPrefix
   annotations: {}
