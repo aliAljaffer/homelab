@@ -3,9 +3,6 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - namespace.yaml
-  - postgresql-pvc.yaml
-  - postgresql-statefulset.yaml
-  - postgresql-svc.yaml
   - postgresql-cnpg-cluster.yaml
   - minio-cm.yaml
   - minio-pvc.yaml
@@ -19,6 +16,5 @@ resources:
   - hpa-frontend.yaml
   - httproutes.yaml
   - secrets.sealed.yaml
-  - postgresql-secret.sealed.yaml
   - minio-secret.sealed.yaml
   - cloudflared/tunnel-credentials.sealed.yaml
