@@ -52,7 +52,7 @@ spec:
         - name: SMTP_FROM
           value: "homelab@alialjaffer.com"
         - name: SMTP_FROM_NAME
-          value: "Vaultwarden"
+          value: "Ali's Vaultwarden"
         - name: SMTP_USERNAME
           valueFrom:
             secretKeyRef:
