@@ -178,7 +178,7 @@ data:
           "gridPos": {"x": 0, "y": 15, "w": 12, "h": 8},
           "datasource": "$datasource",
           "targets": [
-            {"expr": "100 * (1 - avg by (nodename) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m]) * on(instance) group_left(nodename) node_uname_info))", "legendFormat": "{{nodename}}", "refId": "A"}
+            {"expr": "100 * (1 - avg by (nodename) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m]) * on(instance) group_left(nodename) (max by(instance, nodename) (node_uname_info))))", "legendFormat": "{{nodename}}", "refId": "A"}
           ],
           "fieldConfig": {"defaults": {"unit": "percent", "min": 0, "max": 100}, "overrides": []},
           "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"]}, "tooltip": {"mode": "multi", "sort": "desc"}}
@@ -189,7 +189,7 @@ data:
           "gridPos": {"x": 12, "y": 15, "w": 12, "h": 8},
           "datasource": "$datasource",
           "targets": [
-            {"expr": "100 * (1 - (node_memory_MemAvailable_bytes * on(instance) group_left(nodename) node_uname_info) / (node_memory_MemTotal_bytes * on(instance) group_left(nodename) node_uname_info))", "legendFormat": "{{nodename}}", "refId": "A"}
+            {"expr": "100 * (1 - (node_memory_MemAvailable_bytes * on(instance) group_left(nodename) (max by(instance, nodename) (node_uname_info))) / (node_memory_MemTotal_bytes * on(instance) group_left(nodename) (max by(instance, nodename) (node_uname_info))))", "legendFormat": "{{nodename}}", "refId": "A"}
           ],
           "fieldConfig": {"defaults": {"unit": "percent", "min": 0, "max": 100}, "overrides": []},
           "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"]}, "tooltip": {"mode": "multi", "sort": "desc"}}
@@ -200,7 +200,7 @@ data:
           "gridPos": {"x": 0, "y": 23, "w": 12, "h": 8},
           "datasource": "$datasource",
           "targets": [
-            {"expr": "100 * (1 - (node_filesystem_avail_bytes{mountpoint=\"/var\"} / node_filesystem_size_bytes{mountpoint=\"/var\"})) * on(instance) group_left(nodename) node_uname_info", "legendFormat": "{{nodename}}", "refId": "A"}
+            {"expr": "100 * (1 - (node_filesystem_avail_bytes{mountpoint=\"/var\"} / node_filesystem_size_bytes{mountpoint=\"/var\"})) * on(instance) group_left(nodename) (max by(instance, nodename) (node_uname_info))", "legendFormat": "{{nodename}}", "refId": "A"}
           ],
           "fieldConfig": {"defaults": {"unit": "percent", "min": 0, "max": 100}, "overrides": []},
           "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"]}, "tooltip": {"mode": "multi", "sort": "desc"}}
@@ -211,9 +211,9 @@ data:
           "gridPos": {"x": 12, "y": 23, "w": 12, "h": 8},
           "datasource": "$datasource",
           "targets": [
-            {"expr": "node_load1 * on(instance) group_left(nodename) node_uname_info", "legendFormat": "1m {{nodename}}", "refId": "A"},
-            {"expr": "node_load5 * on(instance) group_left(nodename) node_uname_info", "legendFormat": "5m {{nodename}}", "refId": "B"},
-            {"expr": "node_load15 * on(instance) group_left(nodename) node_uname_info", "legendFormat": "15m {{nodename}}", "refId": "C"}
+            {"expr": "node_load1 * on(instance) group_left(nodename) (max by(instance, nodename) (node_uname_info))", "legendFormat": "1m {{nodename}}", "refId": "A"},
+            {"expr": "node_load5 * on(instance) group_left(nodename) (max by(instance, nodename) (node_uname_info))", "legendFormat": "5m {{nodename}}", "refId": "B"},
+            {"expr": "node_load15 * on(instance) group_left(nodename) (max by(instance, nodename) (node_uname_info))", "legendFormat": "15m {{nodename}}", "refId": "C"}
           ],
           "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
           "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull"]}, "tooltip": {"mode": "multi", "sort": "desc"}}
@@ -224,8 +224,8 @@ data:
           "gridPos": {"x": 0, "y": 31, "w": 12, "h": 8},
           "datasource": "$datasource",
           "targets": [
-            {"expr": "sum by (instance) (rate(node_network_receive_bytes_total{device!~\"lo|veth.*|cni.*|cilium.*|flannel.*\"}[5m])) * on(instance) group_left(nodename) node_uname_info", "legendFormat": "RX {{nodename}}", "refId": "A"},
-            {"expr": "sum by (instance) (rate(node_network_transmit_bytes_total{device!~\"lo|veth.*|cni.*|cilium.*|flannel.*\"}[5m])) * on(instance) group_left(nodename) node_uname_info", "legendFormat": "TX {{nodename}}", "refId": "B"}
+            {"expr": "sum by (instance) (rate(node_network_receive_bytes_total{device!~\"lo|veth.*|cni.*|cilium.*|flannel.*\"}[5m])) * on(instance) group_left(nodename) (max by(instance, nodename) (node_uname_info))", "legendFormat": "RX {{nodename}}", "refId": "A"},
+            {"expr": "sum by (instance) (rate(node_network_transmit_bytes_total{device!~\"lo|veth.*|cni.*|cilium.*|flannel.*\"}[5m])) * on(instance) group_left(nodename) (max by(instance, nodename) (node_uname_info))", "legendFormat": "TX {{nodename}}", "refId": "B"}
           ],
           "fieldConfig": {"defaults": {"unit": "Bps"}, "overrides": []},
           "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull"]}, "tooltip": {"mode": "multi", "sort": "desc"}}
@@ -248,7 +248,7 @@ data:
           "datasource": "$datasource",
           "targets": [
             {"expr": "100 * kepler_node_cpu_usage_ratio", "legendFormat": "kepler {{node_name}}", "refId": "A"},
-            {"expr": "100 * (1 - avg by (nodename) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m]) * on(instance) group_left(nodename) node_uname_info))", "legendFormat": "node-exporter {{nodename}}", "refId": "B"}
+            {"expr": "100 * (1 - avg by (nodename) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m]) * on(instance) group_left(nodename) (max by(instance, nodename) (node_uname_info))))", "legendFormat": "node-exporter {{nodename}}", "refId": "B"}
           ],
           "fieldConfig": {"defaults": {"unit": "percent", "min": 0, "max": 100}, "overrides": []},
           "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull"]}, "tooltip": {"mode": "multi", "sort": "desc"}}
