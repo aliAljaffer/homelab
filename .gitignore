@@ -31,3 +31,6 @@ talos/clusterconfig/*.yaml
 !talos/clusterconfig/*.sops.yaml
 !talos/clusterconfig/.gitkeep
 .pat
+
+# Session working notes - local only, never tracked
+/CONTEXT-*.md
