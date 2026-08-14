@@ -48,6 +48,37 @@ spec:
               port: 4001
             initialDelaySeconds: 5
             periodSeconds: 15
+          env:
+            # Overrides the stale DB_* keys in catus-locatus-secrets; env
+            # always wins over envFrom for the same key. Cuts the app over
+            # to the CNPG-managed cluster (see postgresql-cnpg-cluster.yaml).
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: catus-locatus-db-app
+                  key: host
+            - name: DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: catus-locatus-db-app
+                  key: port
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: catus-locatus-db-app
+                  key: dbname
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: catus-locatus-db-app
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: catus-locatus-db-app
+                  key: password
+            - name: DB_SSL
+              value: "false"
           envFrom:
             - secretRef:
                 name: catus-locatus-secrets
