@@ -1,5 +1,4 @@
 ---
-# Wave -2: CloudNativePG operator (Postgres). Needed before any Cluster CR (e.g. Keycloak's DB).
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

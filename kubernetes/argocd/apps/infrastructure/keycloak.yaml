@@ -1,6 +1,4 @@
 ---
-# Wave 1: Keycloak instance (HA, 3 pods) + its CloudNativePG-backed Postgres cluster.
-# Requires cloudnative-pg (wave -2) and keycloak-operator (wave -1) to be healthy first.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

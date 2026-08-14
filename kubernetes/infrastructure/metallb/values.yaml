@@ -18,10 +18,9 @@ speaker:
       cpu: 60m
       memory: 112Mi
 
-# frr-k8s is a real Helm dependency (not just a values passthrough) - its
-# keys use the subchart's own schema, nested one level deeper under the
-# "frr-k8s" alias (see charts/frr-k8s/values.yaml in the metallb chart for
-# the schema; metallb's own values.yaml only has `frrk8s.enabled`).
+# frr-k8s is a real Helm dependency, not a values passthrough. Its keys use
+# the subchart's own schema, nested one level deeper under the "frr-k8s"
+# alias (metallb's own values.yaml only has `frrk8s.enabled`).
 frr-k8s:
   frrk8s:
     resources:
@@ -76,9 +75,3 @@ prometheus:
     controller:
       additionalLabels:
         release: monitoring
-
-# frr-k8s's ServiceMonitor has no additionalLabels field in its chart schema
-# (checked v0.16.1), so it can't carry the release: monitoring label our
-# Prometheus instance requires (serviceMonitorSelector.matchLabels).
-# Left disabled; would need a separate ServiceMonitor manifest + label patch
-# to actually get scraped.

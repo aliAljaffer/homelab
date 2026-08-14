@@ -1,5 +1,4 @@
 ---
-# Wave -3: ClusterIssuer + Route53 SealedSecret (needs cert-manager CRDs from wave -4)
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

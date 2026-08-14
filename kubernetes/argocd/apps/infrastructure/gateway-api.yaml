@@ -1,5 +1,4 @@
 ---
-# Wave -5: Gateway API CRDs must exist before Cilium's Gateway controller starts
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

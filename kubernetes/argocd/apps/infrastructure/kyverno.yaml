@@ -1,6 +1,4 @@
 ---
-# Wave -2: Kyverno policy engine. Runs early so admission/mutation policies
-# are in force before workloads sync.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

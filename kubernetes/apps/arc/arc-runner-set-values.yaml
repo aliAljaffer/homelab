@@ -1,7 +1,5 @@
 githubConfigUrl: https://github.com/aliAljaffer/aliAljaffer.github.io
 
-# Reference the github-token SealedSecret (key: github_token) in arc-runners namespace.
-# Do not put the PAT inline. The SealedSecret is in kubernetes/apps/arc/github-token.sealed.yaml.
 githubConfigSecret: github-token
 
 template:

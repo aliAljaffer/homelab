@@ -9,9 +9,8 @@ proxy:
   tunnelTokenSecretRef:
     name: cloudflare-tunnel-token
   networkPolicy:
-    # Default policy only admits the controller's own namespace; without this,
-    # Prometheus (in `monitoring`) can't reach the config-API/metrics port and
-    # scrapes time out (TCP-level, not a 404).
+    # Without this, Prometheus (monitoring namespace) can't reach the metrics
+    # port and scrapes time out.
     ingress:
       from:
         - namespaceSelector:

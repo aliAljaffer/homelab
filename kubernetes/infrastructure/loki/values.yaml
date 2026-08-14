@@ -1,10 +1,4 @@
 ---
-# Loki single-binary mode with MinIO (S3) backend
-# 7-day log retention enforced by the compactor
-
-# Chart defaults to SimpleScalable; without this switch, read/write/backend
-# (explicitly disabled below) are the only serving components, leaving Loki
-# with zero ingest/query capacity despite singleBinary.replicas: 1.
 deploymentMode: SingleBinary
 
 loki:
@@ -19,9 +13,7 @@ loki:
       chunks: alialjaffer-homelab
       ruler: alialjaffer-homelab
       admin: alialjaffer-homelab
-    # Credentials mounted via singleBinary.extraVolumes/extraEnv below
-    # (this chart has no storage.secretName field; GOOGLE_APPLICATION_CREDENTIALS
-    # is how the GCS SDK picks up the mounted loki-gcs-credentials secret).
+    # Credentials mounted via singleBinary.extraEnv/extraVolumes below (chart has no storage.secretName field).
 
   schemaConfig:
     configs:
@@ -34,7 +26,7 @@ loki:
         period: 24h
 
   limits_config:
-    retention_period: 168h # 7 days
+    retention_period: 168h
     ingestion_rate_mb: 16
     ingestion_burst_size_mb: 32
     per_stream_rate_limit: 3MB
@@ -54,12 +46,11 @@ loki:
           enabled: true
           max_size_mb: 100
 
-# Single-binary deployment (1 replica, sufficient for homelab)
 singleBinary:
   replicas: 1
   persistence:
     storageClass: longhorn
-    size: 5Gi # WAL + temp storage; actual data is in MinIO
+    size: 5Gi # WAL + temp storage; actual data is in GCS
   resources:
     requests:
       cpu: 70m
@@ -67,9 +58,8 @@ singleBinary:
     limits:
       cpu: 210m
       memory: 1120Mi
-  # GCS credentials (chart has no storage.secretName field; the GCS SDK
-  # reads GOOGLE_APPLICATION_CREDENTIALS instead).
-  # Secret: loki-gcs-credentials SealedSecret, key: service_account.json
+  # Chart has no storage.secretName field; GCS SDK reads GOOGLE_APPLICATION_CREDENTIALS.
+  # Secret: loki-gcs-credentials SealedSecret, key service_account.json
   extraEnv:
     - name: GOOGLE_APPLICATION_CREDENTIALS
       value: /etc/loki/gcs-credentials/service_account.json
@@ -82,7 +72,6 @@ singleBinary:
       mountPath: /etc/loki/gcs-credentials
       readOnly: true
 
-# Disable microservice mode components
 backend:
   replicas: 0
 read:
@@ -90,7 +79,6 @@ read:
 write:
   replicas: 0
 
-# nginx gateway in front of the single-binary Loki
 gateway:
   resources:
     requests:
@@ -100,8 +88,7 @@ gateway:
       cpu: 30m
       memory: 48Mi
 
-# k8s-sidecar container that loads Loki alerting/recording rules from
-# ConfigMaps (container name: loki-sc-rules)
+# sidecar here is the k8s-sidecar container (loki-sc-rules) that loads alerting/recording rules from ConfigMaps
 sidecar:
   resources:
     requests:
@@ -111,13 +98,9 @@ sidecar:
       cpu: 45m
       memory: 208Mi
 
-# NOTE: `monitoring.lokiCanary.enabled: false` below does NOT disable the
-# canary - that's the wrong key (there's no monitoring.lokiCanary field in
-# this chart's schema; the real toggle is the top-level `lokiCanary.enabled`).
-# It's been running unintentionally the whole time. Left running rather
-# than silently disabling it as part of a resources-only change - if it's
-# genuinely unwanted, that's a separate one-line fix (top-level
-# `lokiCanary: {enabled: false}`).
+# monitoring.lokiCanary.enabled: false below is the wrong key and does nothing (no such field in
+# this chart's schema). Real toggle is top-level lokiCanary.enabled. Canary is running unintentionally;
+# to disable it, set lokiCanary: {enabled: false} at the top level.
 lokiCanary:
   resources:
     requests:
@@ -127,7 +110,7 @@ lokiCanary:
       cpu: 60m
       memory: 128Mi
 
-# Disable bundled Grafana agent (we use Alloy)
+# selfMonitoring off: Alloy handles this instead of the chart's bundled agent
 monitoring:
   selfMonitoring:
     enabled: false

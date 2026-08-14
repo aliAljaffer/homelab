@@ -1,5 +1,4 @@
 ---
-# Wave -4: cert-manager CRDs and controller
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

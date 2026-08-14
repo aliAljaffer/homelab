@@ -1,11 +1,4 @@
 ---
-# CNPG-managed Postgres cluster for catus-locatus, replacing the postgresql-db
-# StatefulSet. Bootstraps by importing the "catus_locatus" database from the
-# legacy StatefulSet (see externalClusters below) via pg_dump/pg_restore.
-#
-# The legacy postgresql-db StatefulSet/Service/Secret/PVC must stay in place
-# until this import finishes and the app has cut over to the new
-# "catus-locatus-db-app" Secret (see backend-deployment.yaml).
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:

@@ -5,5 +5,4 @@ metadata:
   namespace: pihole
 data:
   02-custom.conf: |
-    # Custom dnsmasq config
     cache-size=10000

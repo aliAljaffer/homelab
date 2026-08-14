@@ -1,7 +1,4 @@
 ---
-# Wave 0: Knative Serving core + net-gateway-api, wired to the existing
-# Cilium Gateway API stack (homelab-gateway) instead of a separate ingress
-# controller (Kourier/Istio/Contour).
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

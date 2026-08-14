@@ -49,9 +49,8 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 15
           env:
-            # Overrides the stale DB_* keys in catus-locatus-secrets; env
-            # always wins over envFrom for the same key. Cuts the app over
-            # to the CNPG-managed cluster (see postgresql-cnpg-cluster.yaml).
+            # env wins over envFrom, so this overrides the stale DB_* keys
+            # in catus-locatus-secrets. Points at the CNPG cluster instead.
             - name: DB_HOST
               valueFrom:
                 secretKeyRef:

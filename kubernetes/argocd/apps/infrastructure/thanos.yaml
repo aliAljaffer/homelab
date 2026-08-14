@@ -1,6 +1,4 @@
 ---
-# Wave 1: Thanos store-gateway + compactor + querier (long-term metrics, indefinite retention)
-# Thanos sidecar runs inside Prometheus (configured in monitoring/values.yaml)
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -14,10 +12,8 @@ spec:
   project: infrastructure
   sources:
   - repoURL: ghcr.io/thanos-community/helm-charts
-    # NOTE: no oci:// scheme. ArgoCD auto-detects OCI by the chart+registry form.
-    # With the oci:// prefix ArgoCD's token helper requests the wrong OAuth scope
-    # (repository:<org>/<repo> instead of repository:<org>/<repo>/<chart>) and ghcr
-    # returns 403; the Application sits at sync=Unknown with a ComparisonError.
+    # No oci:// scheme. With it, ArgoCD's token helper requests the wrong
+    # OAuth scope and ghcr returns 403 (Application stuck at sync=Unknown).
     chart: thanos
     targetRevision: 0.21.0
     helm:

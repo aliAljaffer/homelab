@@ -1,14 +1,8 @@
 ---
-# kube-prometheus-stack values
-# Long-term metrics: Prometheus keeps 2 days locally, Thanos sidecar uploads to GCS (forever)
-# Grafana data survives pod restarts on a Longhorn PVC
-
 fullnameOverride: kube-prometheus
 
-# --- Prometheus ---
 prometheus:
   prometheusSpec:
-    # Short local retention  -  historical data lives in Thanos/MinIO
     retention: 2d
     retentionSize: 15GB
     storageSpec:
@@ -20,12 +14,11 @@ prometheus:
             requests:
               storage: 20Gi
 
-    # Thanos sidecar  -  uploads TSDB blocks to MinIO continuously
     thanos:
       image: quay.io/thanos/thanos:v0.37.2
       objectStorageConfig:
         existingSecret:
-          name: thanos-objstore-secret   # SealedSecret: see bootstrap/README.md Step 6
+          name: thanos-objstore-secret
           key: objstore.yml
       # ThanosSpec.resources - passed straight through to the Prometheus CR,
       # not a chart-templated field, so it's absent from `helm show values`.
@@ -45,7 +38,6 @@ prometheus:
         cpu: 540m
         memory: 7632Mi
 
-    # Scrape all pods with prometheus.io/scrape=true
     additionalScrapeConfigs:
       - job_name: "catus-locatus-backend"
         static_configs:
@@ -60,19 +52,16 @@ prometheus:
         metrics_path: /metrics
         scrape_interval: 30s
 
-# --- Grafana ---
 grafana:
   enabled: true
   defaultDashboardsEnabled: true
   defaultDashboardsTimezone: Asia/Riyadh
 
-  # Static admin credentials via a self-managed SealedSecret. Without this,
-  # the chart auto-generates a random admin password on every render using
-  # Helm's `lookup` function to try to reuse the existing one - but ArgoCD's
-  # repo-server renders Helm charts without reliable live-cluster access, so
-  # `lookup` intermittently returns nothing and the password gets randomized
-  # again, silently invalidating whatever's actually set on the running
-  # Grafana instance (it only reads the password at first DB init).
+  # Without this, the chart auto-generates a random admin password on every
+  # render via Helm's `lookup`, which tries to reuse the existing one. ArgoCD's
+  # repo-server doesn't have reliable live-cluster access, so `lookup`
+  # intermittently comes back empty and re-randomizes the password, silently
+  # breaking login.
   admin:
     existingSecret: grafana-admin-credentials
     userKey: admin-user
@@ -82,14 +71,13 @@ grafana:
   deploymentStrategy:
     type: Recreate
 
-  # NOTE: "extraEnvFrom" is not a field this chart recognizes (silently
-  # ignored) - the correct key is envFromSecrets. Confirmed against
-  # charts/grafana/templates/_pod.tpl for chart 12.10.4.
+  # "extraEnvFrom" is not a field this chart recognizes and is silently
+  # ignored. The correct key is envFromSecrets.
   envFromSecrets:
     - name: grafana-discord-webhook
     - name: grafana-github-token
 
-  # user/password injected as GF_SMTP_USER / GF_SMTP_PASSWORD from the secret
+  # Injected as GF_SMTP_USER / GF_SMTP_PASSWORD.
   smtp:
     existingSecret: grafana-smtp-secret
 
@@ -121,10 +109,9 @@ grafana:
       from_name: Grafana
       startTLS_policy: MandatoryStartTLS
 
-  # sidecar.resources is shared by both grafana-sc-dashboard and
-  # grafana-sc-datasources (chart has one resources key for all k8s-sidecar
-  # containers, no per-type override) - sized to the larger of the two
-  # observed.
+  # sidecar.resources is shared by grafana-sc-dashboard and
+  # grafana-sc-datasources, the chart has one resources key for both. Sized
+  # to the larger of the two.
   sidecar:
     datasources:
       isDefaultDatasource: false
@@ -137,7 +124,6 @@ grafana:
         cpu: 75m
         memory: 272Mi
 
-  # Point Grafana at Thanos Query for long-term metrics
   additionalDataSources:
     - name: Thanos
       type: prometheus
@@ -165,8 +151,8 @@ grafana:
             matcherRegex: spanID=(\w+)
             url: $${__value.raw}
             datasourceUid: prometheus
-    # Alias so dashboards that hardcode a "prometheus" name/uid resolve.
-    # Points at Thanos Query (not raw Prometheus) for full retention.
+    # Alias so dashboards hardcoding a "prometheus" name/uid resolve. Points
+    # at Thanos Query, not raw Prometheus, for full retention.
     - name: Prometheus
       type: prometheus
       uid: prometheus
@@ -176,13 +162,9 @@ grafana:
       jsonData:
         httpMethod: POST
         timeInterval: 15s
-    # Re-added (see below and grafana.deleteDatasources). The earlier
-    # "Datasource provisioning error: data source not found" was never fatal
-    # to the pod - it was a name collision: an earlier attempt at this same
-    # datasource left a "GitHub" row in Grafana's DB with an auto-generated
-    # uid, and re-provisioning a differently-uid'd datasource with the same
-    # name can't reconcile against it. grafana.deleteDatasources clears that
-    # row before recreating it.
+    # deleteDatasources below clears a stale auto-uid "GitHub" row left by an
+    # earlier attempt at this datasource, a same-name/different-uid row can't
+    # be reconciled otherwise.
     - name: GitHub
       type: grafana-github-datasource
       uid: github
@@ -194,13 +176,10 @@ grafana:
       secureJsonData:
         accessToken: "${GITHUB_TOKEN}"  # Set via grafana.envFromSecrets
 
-  # Clears the stale auto-uid "GitHub" row before additionalDataSources
-  # recreates it with uid: github (see comment above).
   deleteDatasources:
     - name: GitHub
       orgId: 1
 
-  # Alerting provisioning (migrated from grafana-alerting-configmap.yaml)
   alerting:
     contactpoints.yaml:
       apiVersion: 1
@@ -330,7 +309,7 @@ grafana:
               notification_settings:
                 receiver: Discord Channel
 
-# --- Apiserver scrape: drop high-cardinality histograms with no homelab value ---
+# Drop high-cardinality apiserver histograms, no homelab value.
 kubeApiServer:
   serviceMonitor:
     metricRelabelings:
@@ -338,7 +317,6 @@ kubeApiServer:
         regex: 'apiserver_request_body_size_bytes_bucket|apiserver_response_sizes_bucket|apiserver_watch_cache_read_wait_seconds_bucket|apiserver_watch_events_sizes_bucket'
         action: drop
 
-# --- AlertManager ---
 alertmanager:
   enabled: true
   alertmanagerSpec:
@@ -350,7 +328,6 @@ alertmanager:
         cpu: 20m
         memory: 112Mi
 
-# --- Node Exporter ---
 nodeExporter:
   enabled: true
 
@@ -363,7 +340,6 @@ prometheus-node-exporter:
       cpu: 30m
       memory: 80Mi
 
-# --- kube-state-metrics ---
 kubeStateMetrics:
   enabled: true
 
@@ -376,7 +352,6 @@ kube-state-metrics:
       cpu: 75m
       memory: 208Mi
 
-# --- Prometheus Operator ---
 prometheusOperator:
   enabled: true
   resources:

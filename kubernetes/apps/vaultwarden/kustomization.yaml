@@ -9,3 +9,4 @@ resources:
   - httproute-vaultwarden.yaml
   - vaultwarden-secret.sealed.yaml
   - vaultwarden-smtp-secret.sealed.yaml
+  - networkpolicy.yaml

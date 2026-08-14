@@ -1,11 +1,4 @@
 ---
-# Neither ARC chart exposes a serviceMonitor toggle (confirmed via `helm
-# show values`, zero matches) - metrics itself is gated behind an
-# undocumented `metrics:` values block only visible in
-# templates/deployment.yaml, set in arc-controller-values.yaml. Once
-# enabled, both the controller and the listener pod it spawns expose a
-# plain-HTTP /metrics port (no TLS/auth, confirmed live), so a PodMonitor
-# works without any RBAC.
 apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
 metadata:

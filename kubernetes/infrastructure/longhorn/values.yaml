@@ -3,9 +3,9 @@ defaultSettings:
   defaultReplicaCount: "2"
   defaultDataLocality: best-effort
   storageReservedPercentageForDefaultDisk: "15"
-  # backupTarget and backupTargetCredentialSecret are managed via
-  # backup-target.yaml (BackupTarget CR) in this same kustomize path,
-  # not here — Longhorn ignores defaultSettings for an already-created BackupTarget.
+  # backupTarget and backupTargetCredentialSecret are set via the BackupTarget
+  # CR (backup-target.yaml), not here. Longhorn ignores defaultSettings for
+  # an already-created BackupTarget.
 
 persistence:
   defaultClass: true
@@ -15,21 +15,18 @@ persistence:
     enable: true
     jobList: '[{"name":"default","isGroup":true}]'
 
-# Exposed via Gateway API HTTPRoute (see cilium-config/httproute-longhorn.yaml)
+# Exposed via Gateway API HTTPRoute instead (see cilium-config/httproute-longhorn.yaml).
 ingress:
   enabled: false
 
 longhornUI:
   replicas: "1"
 
-# Only longhornManager exposes a resources key in this chart (v1.12.0).
-# csi.* sidecars, longhornDriver, longhornUI, the longhorn-csi-plugin
-# DaemonSet, and the per-version engine-image DaemonSets are unreachable
-# via values.yaml - longhorn-manager creates several of these dynamically
-# at runtime (engine-image is recreated per Longhorn upgrade), so even a
-# manual patch wouldn't stick. See the Kyverno mutate policy in
-# kubernetes/infrastructure/kyverno/policy-default-resources.yaml, which
-# covers these instead.
+# Only longhornManager exposes a resources key in this chart (v1.12.0). The
+# csi.* sidecars, longhornDriver, longhornUI, and per-version engine-image
+# DaemonSets are created dynamically at runtime and unreachable here, even a
+# manual patch wouldn't stick. Kyverno's policy-default-resources covers
+# those instead.
 longhornManager:
   resources:
     requests:

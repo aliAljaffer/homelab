@@ -1,19 +1,7 @@
-# Falco: eBPF-based runtime security / intrusion detection.
-#
-# driver.kind=modern_ebpf is the only viable driver on Talos - it's an
-# immutable OS with no kernel module loading, so `kmod` is a non-starter.
-# Modern eBPF needs kernel >= 5.8 with BTF, which Talos ships by default.
-#
-# There's a known Talos issue (falcosecurity/libs#2736) where secureboot
-# images default to `lockdown=confidentiality`, which breaks the
-# bpf_probe_read fallback modern_ebpf relies on. Verified via
-# `cat /sys/kernel/security/lockdown` on this cluster's nodes: lockdown mode
-# is "none", so that issue does not apply here.
 driver:
   kind: modern_ebpf
   modernEbpf:
-    # Run with specific capabilities (BPF, SYS_RESOURCE, PERFMON, SYS_PTRACE)
-    # instead of a fully privileged container.
+    # Runs with BPF/SYS_RESOURCE/PERFMON/SYS_PTRACE instead of a fully privileged container.
     leastPrivileged: true
 
 falco:
@@ -21,21 +9,18 @@ falco:
   webserver:
     prometheus_metrics_enabled: true
 
-# Falco's own engine-health metrics (event/drop counts, CPU/RSS, rule matches).
+# Falco's own engine-health metrics (event/drop counts, CPU/RSS, rule matches),
+# separate from serviceMonitor and falcosidekick's metrics below.
 metrics:
   enabled: true
 
-# Scraped by kube-prometheus-stack (Prometheus Operator watches ServiceMonitors
-# cluster-wide, matched via the release=monitoring label).
+# release: monitoring label matches Prometheus's serviceMonitorSelector.
 serviceMonitor:
   create: true
   labels:
     release: monitoring
 
-# Ship the chart's own dashboard straight into the monitoring namespace, same
-# place every other component's dashboard ConfigMap lives (see
-# infrastructure/monitoring/grafana-dashboard-*.yaml) so Grafana's sidecar
-# picks it up.
+# Dashboard ConfigMap lives in monitoring namespace (like other components) so Grafana's sidecar picks it up.
 grafana:
   dashboards:
     enabled: true
@@ -44,9 +29,7 @@ grafana:
         namespace: monitoring
         folder: Falco
 
-# falcosidekick: routes Falco alerts to outputs and exposes its own
-# Prometheus metrics (alert volume by rule/priority, output delivery
-# success/failure) - complementary to Falco's own engine-health metrics above.
+# Routes Falco alerts to outputs and exposes its own alert-volume/delivery metrics.
 falcosidekick:
   enabled: true
   serviceMonitor:

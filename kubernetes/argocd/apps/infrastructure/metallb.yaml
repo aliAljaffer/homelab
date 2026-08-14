@@ -1,5 +1,4 @@
 ---
-# Wave -3: MetalLB controller + speaker (LoadBalancer IP allocation)
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

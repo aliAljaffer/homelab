@@ -1,5 +1,4 @@
 ---
-# MinIO console (internal access)
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:

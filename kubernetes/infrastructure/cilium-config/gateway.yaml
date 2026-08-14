@@ -1,7 +1,4 @@
 ---
-# Shared Gateway for all HTTPS traffic in the cluster.
-# Cilium acts as the GatewayClass controller.
-# cert-manager provisions homelab-tls via the letsencrypt-prod ClusterIssuer.
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
@@ -30,7 +27,6 @@ spec:
           - name: homelab-tls
             namespace: kube-system
 ---
-# cert-manager Certificate for the wildcard domain
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
@@ -44,7 +40,6 @@ spec:
   dnsNames:
     - "*.alialjaffer.com"
 ---
-# Redirect HTTP → HTTPS
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:

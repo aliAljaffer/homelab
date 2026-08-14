@@ -1,8 +1,4 @@
 ---
-# CloudNativePG's Helm chart has no metrics/serviceMonitor toggle (checked
-# v0.29.0), and Cluster CRs don't create one either. The operator and every
-# Cluster instance pod already expose a "metrics" port on their own, so
-# PodMonitors (not ServiceMonitors, there's no backing Service) pick them up.
 apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
 metadata:

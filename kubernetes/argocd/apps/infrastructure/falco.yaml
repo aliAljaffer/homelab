@@ -1,6 +1,4 @@
 ---
-# Wave 1: Falco (eBPF runtime security/intrusion detection) + falcosidekick.
-# Needs monitoring (wave 0) synced first for the ServiceMonitor CRD.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

@@ -11,9 +11,9 @@ spec:
   sourceRepos:
   - git@github.com:aliAljaffer/homelab.git
   - https://github.com/aliAljaffer/homelab.git
-  - ghcr.io/thanos-community/helm-charts # OCI helm registry; no oci:// scheme (see apps/infrastructure/thanos.yaml)
-  - ghcr.io/lexfrei/charts # OCI helm registry; no oci:// scheme (see apps/infrastructure/cloudflare-tunnel-gateway-controller.yaml)
-  - quay.io/sustainable_computing_io/charts # OCI helm registry prefix for Kepler (no oci:// scheme); Argo appends chart name
+  - ghcr.io/thanos-community/helm-charts # OCI, no oci:// scheme (see apps/infrastructure/thanos.yaml)
+  - ghcr.io/lexfrei/charts # OCI, no oci:// scheme (see apps/infrastructure/cloudflare-tunnel-gateway-controller.yaml)
+  - quay.io/sustainable_computing_io/charts # OCI, no oci:// scheme; Argo appends the chart name (kepler)
   - https://helm.cilium.io/
   - https://charts.jetstack.io
   - https://metallb.github.io/metallb

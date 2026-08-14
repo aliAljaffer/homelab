@@ -1,0 +1,5 @@
+# metallb
+
+- `kustomization.yaml`: distinct from `kubernetes/infrastructure/metallb/config`, which is its own ArgoCD Application (`metallb-config`) for IPAddressPool/L2Advertisement. Don't confuse the two.
+- `frr-k8s-metrics-rbac.yaml`: dedicated ServiceAccount/ClusterRole for scraping frr-k8s metrics. Reusing Prometheus's own ServiceAccount doesn't work: its token Secret only auto-populates in the same namespace as the ServiceAccount, and Prometheus Operator only resolves a PodMonitor's credentials Secret in the same namespace as the PodMonitor. Prometheus lives in `monitoring`, this PodMonitor lives in `metallb-system`, so a second identity is needed.
+- `podmonitor-frr-k8s.yaml`: frr-k8s's ServiceMonitor template has no `additionalLabels` field (checked v0.16.1), so it can't carry the `release: monitoring` label our Prometheus requires. This PodMonitor scrapes the same pods directly instead. Both metrics ports are HTTPS + bearer-token (kube-rbac-proxy style, confirmed live). `bearerTokenFile` isn't in this cluster's PodMonitor CRD, auth goes through `authorization.credentials` referencing the token Secret from `frr-k8s-metrics-rbac.yaml`.

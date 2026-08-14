@@ -1,5 +1,4 @@
 ---
-# Wave -1: Gateway resource + HTTPRoute for Hubble UI (needs Cilium running + CRDs)
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
