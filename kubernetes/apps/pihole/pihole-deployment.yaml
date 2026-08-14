@@ -22,7 +22,7 @@ spec:
             requests:
               cpu: 100m
               memory: 128Mi
-          image: pihole/pihole:latest
+          image: pihole/pihole:2026.07.2
           ports:
             - containerPort: 80
               name: http

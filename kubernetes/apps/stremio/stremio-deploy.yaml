@@ -27,7 +27,7 @@ spec:
       - name: stremio-data
         emptyDir: {}  # hostPath not supported on Talos read-only filesystem
       containers:
-      - image: tsaridas/stremio-docker:latest
+      - image: tsaridas/stremio-docker:v1.3.9
         name: stremio-docker
         env:
         - name: NO_CORS

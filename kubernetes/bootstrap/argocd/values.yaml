@@ -53,6 +53,8 @@ notifications:
         release: monitoring
 
 dex:
+  image:
+    tag: v2.45.1-alpine
   metrics:
     enabled: true
     serviceMonitor:
@@ -63,6 +65,8 @@ dex:
 redis:
   exporter:
     enabled: true
+    image:
+      tag: v1.88.0-alpine
   metrics:
     enabled: true
     serviceMonitor:
