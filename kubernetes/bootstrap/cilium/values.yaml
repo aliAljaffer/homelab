@@ -65,12 +65,14 @@ hubble:
 
 operator:
   replicas: 1
+  # Gateway API reconciliation for the whole cluster stalls under this if
+  # starved (rate-limiter Wait() context-cancels mid-reconcile). Was 5m/20m.
   resources:
     requests:
-      cpu: 5m
+      cpu: 50m
       memory: 192Mi
     limits:
-      cpu: 20m
+      cpu: 500m
       memory: 384Mi
 
 # Talos handles cgroup auto-mount itself.
