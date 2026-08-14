@@ -6,6 +6,7 @@ resources:
   - postgresql-pvc.yaml
   - postgresql-statefulset.yaml
   - postgresql-svc.yaml
+  - postgresql-cnpg-cluster.yaml
   - minio-cm.yaml
   - minio-pvc.yaml
   - minio-statefulset.yaml
