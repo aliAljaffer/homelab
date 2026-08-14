@@ -60,6 +60,13 @@ singleBinary:
   persistence:
     storageClass: longhorn
     size: 5Gi # WAL + temp storage; actual data is in MinIO
+  resources:
+    requests:
+      cpu: 70m
+      memory: 560Mi
+    limits:
+      cpu: 210m
+      memory: 1120Mi
   # GCS credentials (chart has no storage.secretName field; the GCS SDK
   # reads GOOGLE_APPLICATION_CREDENTIALS instead).
   # Secret: loki-gcs-credentials SealedSecret, key: service_account.json
@@ -82,6 +89,43 @@ read:
   replicas: 0
 write:
   replicas: 0
+
+# nginx gateway in front of the single-binary Loki
+gateway:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 24Mi
+    limits:
+      cpu: 30m
+      memory: 48Mi
+
+# k8s-sidecar container that loads Loki alerting/recording rules from
+# ConfigMaps (container name: loki-sc-rules)
+sidecar:
+  resources:
+    requests:
+      cpu: 15m
+      memory: 104Mi
+    limits:
+      cpu: 45m
+      memory: 208Mi
+
+# NOTE: `monitoring.lokiCanary.enabled: false` below does NOT disable the
+# canary - that's the wrong key (there's no monitoring.lokiCanary field in
+# this chart's schema; the real toggle is the top-level `lokiCanary.enabled`).
+# It's been running unintentionally the whole time. Left running rather
+# than silently disabling it as part of a resources-only change - if it's
+# genuinely unwanted, that's a separate one-line fix (top-level
+# `lokiCanary: {enabled: false}`).
+lokiCanary:
+  resources:
+    requests:
+      cpu: 20m
+      memory: 64Mi
+    limits:
+      cpu: 60m
+      memory: 128Mi
 
 # Disable bundled Grafana agent (we use Alloy)
 monitoring:

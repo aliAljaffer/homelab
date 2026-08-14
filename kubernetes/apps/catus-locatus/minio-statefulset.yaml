@@ -9,7 +9,7 @@ spec:
       app: minio
   serviceName: "nginx"
   replicas: 1
-  minReadySeconds: 10 # by default is 0
+  minReadySeconds: 10
   template:
     metadata:
       labels:
@@ -45,6 +45,13 @@ spec:
                 name: minio-secret
             - secretRef:
                 name: catus-locatus-secrets
+          resources:
+            requests:
+              cpu: 5m
+              memory: 200Mi
+            limits:
+              cpu: 20m
+              memory: 400Mi
       volumes:
         - name: data
           persistentVolumeClaim:

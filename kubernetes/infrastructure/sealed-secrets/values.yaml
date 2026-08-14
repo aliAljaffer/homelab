@@ -1,2 +1,10 @@
 ---
 fullnameOverride: sealed-secrets-controller
+
+resources:
+  requests:
+    cpu: 5m
+    memory: 96Mi
+  limits:
+    cpu: 20m
+    memory: 192Mi

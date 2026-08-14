@@ -1,11 +1,10 @@
-# kubernetes/infrastructure/thanos/values.yaml
 ---
 global:
   objstore:
     createSecret: false
-    secretName: thanos-objstore-secret # SealedSecret: see bootstrap/README.md
-    secretKey: objstore.yml # confirm this matches the key inside your sealed secret
-  # Default ServiceMonitor for all enabled components (query, storegateway, compactor).
+    secretName: thanos-objstore-secret # sealed in bootstrap/README.md
+    secretKey: objstore.yml # must match the key in the sealed secret
+  # Applies to query, storegateway, and compactor
   serviceMonitor:
     enabled: true
     labels:
@@ -13,17 +12,31 @@ global:
 
 query:
   enabled: true
+  resources:
+    requests:
+      cpu: 10m
+      memory: 264Mi
+    limits:
+      cpu: 30m
+      memory: 528Mi
   replicaLabels:
   - prometheus_replica
   endpoints:
     autogen:
-      enabled: true # auto-wires the in-chart storegateway
+      enabled: true # wires up the in-chart storegateway automatically
     static:
     - prometheus-operated.monitoring.svc.cluster.local:10901
     - dnssrv+_grpc._tcp.kube-prometheus-kube-prome-thanos-discovery.monitoring.svc.cluster.local
 
 storegateway:
   enabled: true
+  resources:
+    requests:
+      cpu: 5m
+      memory: 640Mi
+    limits:
+      cpu: 20m
+      memory: 1280Mi
   persistence:
     enabled: true
     storageClass: longhorn
@@ -31,10 +44,17 @@ storegateway:
 
 compactor:
   enabled: true
+  resources:
+    requests:
+      cpu: 30m
+      memory: 2296Mi
+    limits:
+      cpu: 90m
+      memory: 4592Mi
   retention:
-    resolutionRaw: "" # keep raw metrics forever
-    resolution5m: "" # keep 5m downsampled forever
-    resolution1h: "" # keep 1h downsampled forever
+    resolutionRaw: "" # empty means keep forever
+    resolution5m: ""
+    resolution1h: ""
   persistence:
     enabled: true
     storageClass: longhorn

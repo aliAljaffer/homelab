@@ -1,16 +1,9 @@
 ---
-# ArgoCD bootstrap values
-# Install with:
-#   helm repo add argo https://argoproj.github.io/argo-helm
-#   helm install argocd argo/argo-cd --version 10.3.0 \
-#     --namespace argocd --create-namespace \
-#     --values kubernetes/bootstrap/argocd/values.yaml
-
 global:
   domain: argocd.alialjaffer.com
 
 server:
-  # TLS terminated at the Gateway
+  # --insecure is safe: TLS terminates at the Gateway, not here.
   extraArgs:
   - --insecure
   metrics:
@@ -19,6 +12,13 @@ server:
       enabled: true
       additionalLabels:
         release: monitoring
+  resources:
+    requests:
+      cpu: 5m
+      memory: 392Mi
+    limits:
+      cpu: 20m
+      memory: 784Mi
 
 controller:
   metrics:
@@ -27,6 +27,13 @@ controller:
       enabled: true
       additionalLabels:
         release: monitoring
+  resources:
+    requests:
+      cpu: 480m
+      memory: 1520Mi
+    limits:
+      cpu: 1440m
+      memory: 3040Mi
 
 repoServer:
   metrics:
@@ -35,6 +42,16 @@ repoServer:
       enabled: true
       additionalLabels:
         release: monitoring
+  # Wider margin than the standard 2.6x formula. repo-server memory spikes
+  # hard templating the heavy kube-prometheus-stack chart, and an OOMKill
+  # here stalls GitOps reconciliation cluster-wide.
+  resources:
+    requests:
+      cpu: 65m
+      memory: 384Mi
+    limits:
+      cpu: 195m
+      memory: 1229Mi
 
 applicationSet:
   metrics:
@@ -43,6 +60,13 @@ applicationSet:
       enabled: true
       additionalLabels:
         release: monitoring
+  resources:
+    requests:
+      cpu: 5m
+      memory: 80Mi
+    limits:
+      cpu: 20m
+      memory: 160Mi
 
 notifications:
   metrics:
@@ -51,6 +75,13 @@ notifications:
       enabled: true
       additionalLabels:
         release: monitoring
+  resources:
+    requests:
+      cpu: 5m
+      memory: 88Mi
+    limits:
+      cpu: 20m
+      memory: 176Mi
 
 dex:
   image:
@@ -61,24 +92,45 @@ dex:
       enabled: true
       additionalLabels:
         release: monitoring
+  resources:
+    requests:
+      cpu: 5m
+      memory: 48Mi
+    limits:
+      cpu: 20m
+      memory: 96Mi
 
 redis:
   exporter:
     enabled: true
     image:
       tag: v1.88.0-alpine
+    resources:
+      requests:
+        cpu: 5m
+        memory: 16Mi
+      limits:
+        cpu: 20m
+        memory: 32Mi
   metrics:
     enabled: true
     serviceMonitor:
       enabled: true
       additionalLabels:
         release: monitoring
+  resources:
+    requests:
+      cpu: 5m
+      memory: 120Mi
+    limits:
+      cpu: 20m
+      memory: 240Mi
 
 configs:
   params:
     server.insecure: "true"
   cm:
-    # Allow resources managed outside ArgoCD (e.g. Talos bootstrapped namespaces)
+    # Excludes CiliumIdentity: it's managed by Talos bootstrap, not ArgoCD.
     resource.exclusions: |
       - apiGroups:
           - cilium.io

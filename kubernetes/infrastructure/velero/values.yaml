@@ -33,6 +33,23 @@ configuration:
 
 deployNodeAgent: true
 
+resources:
+  requests:
+    cpu: 15m
+    memory: 392Mi
+  limits:
+    cpu: 45m
+    memory: 784Mi
+
+nodeAgent:
+  resources:
+    requests:
+      cpu: 15m
+      memory: 128Mi
+    limits:
+      cpu: 45m
+      memory: 256Mi
+
 metrics:
   enabled: true
   serviceMonitor:

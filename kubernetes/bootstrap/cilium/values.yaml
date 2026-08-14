@@ -1,40 +1,85 @@
 ---
-# Cilium bootstrap values for Talos Linux
-# Install with:
-#   helm install cilium cilium/cilium --version 1.17.3 \
-#     --namespace kube-system \
-#     --values kubernetes/bootstrap/cilium/values.yaml
-
-# Replace kube-proxy entirely
 kubeProxyReplacement: true
 k8sServiceHost: 192.168.8.99
 k8sServicePort: 6443
 
+# Logs policy drops without enforcing them, needed before default-deny
+# NetworkPolicies go live (see CONTEXT-networkpolicy-audit.md). Flip back
+# to false once enforce mode is confirmed safe.
+policyAuditMode: true
+
 ipam:
   mode: kubernetes
 
-# Enable Gateway API support (requires Gateway API CRDs installed first)
 gatewayAPI:
   enabled: true
 
-# Hubble observability
+# Wider margin than the standard 2.6x formula: a cilium-agent OOMKill
+# breaks node networking for every pod on that node.
+resources:
+  requests:
+    cpu: 125m
+    memory: 560Mi
+  limits:
+    cpu: 375m
+    memory: 1120Mi
+
+envoy:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 88Mi
+    limits:
+      cpu: 30m
+      memory: 176Mi
+
 hubble:
   enabled: true
   relay:
     enabled: true
+    resources:
+      requests:
+        cpu: 35m
+        memory: 40Mi
+      limits:
+        cpu: 105m
+        memory: 80Mi
   ui:
     enabled: true
+    backend:
+      resources:
+        requests:
+          cpu: 30m
+          memory: 72Mi
+        limits:
+          cpu: 90m
+          memory: 144Mi
+    frontend:
+      resources:
+        requests:
+          cpu: 5m
+          memory: 16Mi
+        limits:
+          cpu: 20m
+          memory: 32Mi
 
 operator:
   replicas: 1
+  resources:
+    requests:
+      cpu: 5m
+      memory: 192Mi
+    limits:
+      cpu: 20m
+      memory: 384Mi
 
-# Required for Talos Linux: cgroup auto-mount is handled by Talos
+# Talos handles cgroup auto-mount itself.
 cgroup:
   autoMount:
     enabled: false
   hostRoot: /sys/fs/cgroup
 
-# Required capabilities for Talos
+# Capabilities Talos requires for the Cilium agent.
 securityContext:
   capabilities:
     ciliumAgent:
