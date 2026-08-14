@@ -4,6 +4,4 @@ kind: Kustomization
 resources:
   - gateway.yaml
   - httproute-hubble.yaml
-  - httproute-longhorn.yaml
   - httproute-argocd.yaml
-  - refgrant-longhorn.yaml

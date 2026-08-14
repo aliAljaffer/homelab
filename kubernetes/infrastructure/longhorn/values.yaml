@@ -15,7 +15,7 @@ persistence:
     enable: true
     jobList: '[{"name":"default","isGroup":true}]'
 
-# Exposed via Gateway API HTTPRoute instead (see cilium-config/httproute-longhorn.yaml).
+# Exposed via the chart's native httproute block below instead.
 ingress:
   enabled: false
 
