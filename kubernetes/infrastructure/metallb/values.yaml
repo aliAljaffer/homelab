@@ -31,13 +31,6 @@ frr-k8s:
         cpu: 20m
         memory: 64Mi
     frr:
-      # This container runs 5 FRR sub-daemons (bgpd, staticd, bfdd, mgmtd,
-      # watchfrr). 20m/112Mi (the standard formula from idle p95/max
-      # observed) starved daemon startup badly enough that watchfrr's 90s
-      # startup timeout killed them before they finished initializing,
-      # producing a boot-loop (SIGTERM, exit 143) - not a steady-state
-      # sizing problem. Idle usage doesn't reflect the CPU burst multiple
-      # daemons need to actually start.
       resources:
         requests:
           cpu: 50m
