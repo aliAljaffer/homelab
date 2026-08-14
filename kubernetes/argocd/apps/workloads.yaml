@@ -1,6 +1,4 @@
 ---
-# Root App-of-Apps: manages all workload Applications.
-# Apply once during bootstrap: kubectl apply -f kubernetes/argocd/apps/workloads.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

@@ -13,7 +13,6 @@ data:
     no-autoupdate: true
 
     ingress:
-      # --- Remote cluster access (protected by Cloudflare Access ZT) ---
       # kubectl: cloudflared access tcp --hostname k.alialjaffer.com --url localhost:6443
       - hostname: k.alialjaffer.com
         service: tcp://192.168.8.99:6443
@@ -26,7 +25,6 @@ data:
         originRequest:
           noTLSVerify: true
 
-      # --- Application traffic ---
       - hostname: team4.tuwaiqtracker.com
         path: ^/api(/.*)?$
         service: http://catus-locatus-svc.catus-locatus.svc.cluster.local:4001

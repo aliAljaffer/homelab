@@ -28,6 +28,8 @@ under `kubernetes/infrastructure/`.
 
 Cilium and ArgoCD are bootstrap-installed imperatively (their Helm releases are not managed by ArgoCD). Values are tracked in `kubernetes/bootstrap/`. Everything else is fully ArgoCD-managed.
 
+To change a Cilium value after bootstrap (e.g. `policyAuditMode`), run the same `helm install` command from Step 3 with `helm upgrade` instead.
+
 ---
 
 ## Setup

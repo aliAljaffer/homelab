@@ -1,5 +1,4 @@
 ---
-# Wave 0: Grafana Loki (log storage with GCS backend, 7-day retention)
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

@@ -5,8 +5,7 @@ resources:
   - https://github.com/knative/serving/releases/download/knative-v1.23.0/serving-core.yaml
   - https://github.com/knative-extensions/net-gateway-api/releases/download/knative-v1.23.0/net-gateway-api.yaml
 
-# Route Knative through the existing Cilium GatewayClass / homelab-gateway
-# instead of Istio/Contour/Envoy Gateway.
+# Routes Knative through the existing Cilium GatewayClass / homelab-gateway instead of Istio/Contour/Envoy Gateway.
 patches:
   - target:
       kind: ConfigMap
@@ -40,8 +39,7 @@ patches:
         namespace: knative-serving
       data:
         ingress-class: gateway-api.ingress.networking.knative.dev
-        # Single-label subdomains so Knative routes fit the existing
-        # *.alialjaffer.com wildcard cert (which doesn't cover nested labels).
+        # Single-label subdomains: the *.alialjaffer.com wildcard cert doesn't cover nested labels.
         domain-template: "{{.Name}}-{{.Namespace}}.{{.Domain}}"
 
   - target:

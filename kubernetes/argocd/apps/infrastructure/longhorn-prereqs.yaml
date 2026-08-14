@@ -1,6 +1,4 @@
 ---
-# Wave -4: Pre-create Longhorn namespace + service account so the Helm pre-upgrade hook
-# can run on fresh installs (hook requires the SA from the main chart  -  circular dep).
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -21,7 +19,7 @@ spec:
     namespace: longhorn-system
   syncPolicy:
     automated:
-      prune: false # don't delete the SA  -  Longhorn needs it
+      prune: false # Longhorn needs this SA, don't prune it
       selfHeal: true
     syncOptions:
     - CreateNamespace=true

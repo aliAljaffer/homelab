@@ -1,8 +1,4 @@
 ---
-# Chart defaults are used. No ClusterPolicies are installed here; add
-# them under this directory and wire into a kustomization.yaml when
-# policies are defined.
-
 admissionController:
   serviceMonitor:
     enabled: true

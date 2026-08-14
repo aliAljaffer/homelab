@@ -1,7 +1,4 @@
 ---
-# Falco's driver needs BPF/SYS_RESOURCE/PERFMON/SYS_PTRACE capabilities, which
-# the cluster-wide PodSecurity default (baseline) does not allow. Namespace-level
-# labels override the cluster default (same pattern as monitoring/namespace.yaml).
 apiVersion: v1
 kind: Namespace
 metadata:

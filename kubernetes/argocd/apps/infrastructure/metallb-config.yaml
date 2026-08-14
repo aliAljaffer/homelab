@@ -1,5 +1,4 @@
 ---
-# Wave -2: IPAddressPool + L2Advertisement (needs MetalLB CRDs from wave -3)
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

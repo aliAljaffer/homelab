@@ -1,24 +1,11 @@
 ---
-# Kepler Helm values
-# Source: oci://quay.io/sustainable_computing_io/charts/kepler
-# Chart version pinned in the Argo CD Application (kubernetes/argocd/apps/infrastructure/kepler.yaml).
-#
-# Kepler reads RAPL powercap from /sys and CPU info from /proc via hostPath
-# volumes in its DaemonSet pod. On Talos a privileged pod with hostPath /sys
-# reaches the real host /sys directly, so no kubelet-level extraMounts is
-# needed. Do NOT add kubelet.extraMounts for /sys with ro+rshared: that
-# breaks cgroup creation in the kubelet container (CrashLoopBackOff with
-# "mkdir /sys/fs/cgroup/podruntime: no such file or directory"). See the
-# memory-store entry under kepler/ for the full incident.
-
 image:
   repository: quay.io/sustainable_computing_io/kepler
   pullPolicy: IfNotPresent
-  # Chart appVersion is v0.11.4. Pin the tag too for reproducibility.
   tag: v0.11.4
 
 namespace:
-  create: false   # Namespace is managed by namespace.yaml in this kustomize.
+  create: false   # namespace.yaml in this kustomization creates it
   name: kepler
 
 serviceAccount:
@@ -33,7 +20,6 @@ service:
   port: 28282
 
 daemonset:
-  # Toleration already present in chart defaults for control-plane.
   tolerations:
     - key: node-role.kubernetes.io/control-plane
       operator: Exists
@@ -42,9 +28,8 @@ daemonset:
       operator: Exists
       effect: NoSchedule
 
-  # Kepler 0.10+ needs read-only access to host /proc and /sys.
-  # Those paths are propagated into the kubelet mount namespace only because
-  # of the talosctl patch; the chart then bind-mounts them into the DaemonSet pod.
+  # Needs host /proc and /sys, reachable only via the talosctl mount patch.
+  # The chart bind-mounts them into the pod from there.
   hostPID: true
   hostUsers: true
   securityContext:
@@ -77,20 +62,16 @@ config:
   monitor:
     interval: 5s
     staleness: 500ms
-  # Do NOT set kube.enabled in the config file. The chart's DaemonSet
-  # template hardcodes the CLI args `--kube.enable --kube.node-name=$(NODE_NAME)`
-  # (the env NODE_NAME comes from the downward API). Setting kube.enabled in
-  # the ConfigMap triggers file validation that fails because nodeName is empty
-  # in the YAML. Leave kube defaults at enabled=false and let the CLI args turn
-  # it on at runtime.
+  # Do NOT set kube.enabled here. The chart hardcodes --kube.enable
+  # --kube.node-name=$(NODE_NAME) as CLI args on the DaemonSet. Setting it
+  # in the ConfigMap fails validation because nodeName is empty in the YAML.
   exporter:
     prometheus:
       enabled: true
       debugCollectors:
         - go
 
-# ServiceMonitor is created by the kube-prometheus-stack Prometheus Operator.
-# The release=monitoring label matches the Prometheus serviceMonitorSelector.
+# release: monitoring label is required to match Prometheus's serviceMonitorSelector.
 serviceMonitor:
   enabled: true
   interval: 5s

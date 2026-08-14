@@ -1,8 +1,4 @@
 ---
-# Extra resources deployed alongside the Kepler Helm release.
-# Referenced by kubernetes/argocd/apps/infrastructure/kepler.yaml.
-# The Grafana dashboard is intentionally placed in the monitoring namespace
-# so the kube-prometheus-stack Grafana dashboard sidecar picks it up.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:

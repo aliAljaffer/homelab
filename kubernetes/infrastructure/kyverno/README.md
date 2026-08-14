@@ -1,0 +1,3 @@
+# kyverno
+
+- `policy-default-resources.yaml`: adds CPU/memory requests+limits to containers with no reachable `resources` key in their chart's values.yaml (Longhorn's CSI sidecars, per-version engine-image DaemonSets recreated on every Longhorn upgrade) and to metrics-server, which isn't GitOps-managed at all. A mutate policy is the only mechanism that reaches these, now and after future upgrades. Mutate rules apply only at Pod admission (CREATE), not retroactively; already-running pods pick it up on their next natural recreation (node drain, chart upgrade, engine-image rotation), or force it with `kubectl rollout restart` / pod delete.

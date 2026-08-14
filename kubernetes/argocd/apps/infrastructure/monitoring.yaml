@@ -1,5 +1,4 @@
 ---
-# Wave 0: kube-prometheus-stack (Prometheus + Grafana + AlertManager + Thanos sidecar)
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

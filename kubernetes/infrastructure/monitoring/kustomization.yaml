@@ -1,6 +1,4 @@
 ---
-# Extra resources deployed alongside kube-prometheus-stack
-# (referenced by the monitoring ArgoCD Application multi-source)
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:

@@ -1,15 +1,4 @@
 ---
-# ARC: ArgoCD manages namespaces and the github-token SealedSecret.
-# The Helm releases (arc-controller, arc-runner-set) are installed via Helm CLI
-# because ArgoCD 2.14 does not support OCI Helm registries (ghcr.io).
-#
-# To upgrade ARC in the future:
-#   helm upgrade arc-controller \
-#     oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller \
-#     --version <new-version> --namespace arc-systems
-#   helm upgrade arc-runner-set \
-#     oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set \
-#     --version <new-version> --namespace arc-runners
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

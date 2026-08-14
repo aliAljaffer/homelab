@@ -1,5 +1,4 @@
 ---
-# Wave -1: Knative Serving CRDs must exist before the controller (wave 0).
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

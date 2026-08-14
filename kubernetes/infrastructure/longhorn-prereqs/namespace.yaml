@@ -1,6 +1,4 @@
 ---
-# Longhorn requires privileged containers (block storage needs raw device access).
-# Label the namespace to exempt it from PodSecurity baseline enforcement.
 apiVersion: v1
 kind: Namespace
 metadata:

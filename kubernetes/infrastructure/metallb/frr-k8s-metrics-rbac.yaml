@@ -1,16 +1,4 @@
 ---
-# Dedicated ServiceAccount + narrow ClusterRole for scraping frr-k8s's
-# HTTPS-only, kube-rbac-proxy-style metrics ports (see podmonitor-frr-k8s.yaml).
-#
-# Two same-namespace constraints turned out to conflict: Kubernetes only
-# auto-populates a legacy service-account-token Secret when it's in the
-# SAME namespace as its ServiceAccount, but Prometheus Operator only
-# resolves a PodMonitor's authorization.credentials Secret when it's in
-# the SAME namespace as the PodMonitor. Reusing Prometheus's own
-# ServiceAccount/token can't satisfy both (it lives in "monitoring", the
-# PodMonitor lives in "metallb-system"), so this creates a second,
-# metallb-system-local identity instead - scoped to nothing but the one
-# nonResourceURL it needs, not reusing Prometheus's broader ClusterRole.
 apiVersion: v1
 kind: ServiceAccount
 metadata:

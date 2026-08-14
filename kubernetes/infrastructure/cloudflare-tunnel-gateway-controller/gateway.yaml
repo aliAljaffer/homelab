@@ -1,7 +1,4 @@
 ---
-# Public Gateway backed by a dedicated Cloudflare Tunnel.
-# cloudflare-tunnel-gateway-controller takes exclusive ownership of this
-# tunnel's ingress config - never add manual routes to it in the dashboard.
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
