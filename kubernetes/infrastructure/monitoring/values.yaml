@@ -140,11 +140,29 @@ grafana:
       jsonData:
         httpMethod: POST
         timeInterval: 15s
-    # GitHub datasource temporarily removed - provisioning it crashes the
-    # whole Grafana pod ("Datasource provisioning error: data source not
-    # found", provisioning module failure is fatal). Plugin install itself
-    # works fine; root cause is inside Grafana's provisioning startup, not
-    # this config. Re-add once debugged in isolation.
+    # Re-added (see below and grafana.deleteDatasources). The earlier
+    # "Datasource provisioning error: data source not found" was never fatal
+    # to the pod - it was a name collision: an earlier attempt at this same
+    # datasource left a "GitHub" row in Grafana's DB with an auto-generated
+    # uid, and re-provisioning a differently-uid'd datasource with the same
+    # name can't reconcile against it. grafana.deleteDatasources clears that
+    # row before recreating it.
+    - name: GitHub
+      type: grafana-github-datasource
+      uid: github
+      access: proxy
+      isDefault: false
+      editable: false
+      jsonData:
+        selectedAuthType: personal-access-token
+      secureJsonData:
+        accessToken: "${GITHUB_TOKEN}"  # Set via grafana.envFromSecrets
+
+  # Clears the stale auto-uid "GitHub" row before additionalDataSources
+  # recreates it with uid: github (see comment above).
+  deleteDatasources:
+    - name: GitHub
+      orgId: 1
 
   # Alerting provisioning (migrated from grafana-alerting-configmap.yaml)
   alerting:
