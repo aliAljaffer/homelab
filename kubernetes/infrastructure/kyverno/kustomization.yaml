@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - grafana-dashboard.yaml
   - policy-default-resources.yaml
+  - policy-metallb-frr-probe-timeout.yaml
