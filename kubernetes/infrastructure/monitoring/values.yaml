@@ -130,16 +130,11 @@ grafana:
       jsonData:
         httpMethod: POST
         timeInterval: 15s
-    - name: GitHub
-      type: grafana-github-datasource
-      uid: github
-      access: proxy
-      isDefault: false
-      editable: false
-      jsonData:
-        selectedAuthType: personal-access-token
-      secureJsonData:
-        accessToken: "${GITHUB_TOKEN}"  # Set via grafana.extraEnvFrom
+    # GitHub datasource temporarily removed - provisioning it crashes the
+    # whole Grafana pod ("Datasource provisioning error: data source not
+    # found", provisioning module failure is fatal). Plugin install itself
+    # works fine; root cause is inside Grafana's provisioning startup, not
+    # this config. Re-add once debugged in isolation.
 
   # Alerting provisioning (migrated from grafana-alerting-configmap.yaml)
   alerting:
