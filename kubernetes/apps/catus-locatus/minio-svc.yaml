@@ -11,6 +11,10 @@ spec:
       port: 9000
       protocol: TCP
       targetPort: 9000
+    - name: 9001-9001
+      port: 9001
+      protocol: TCP
+      targetPort: 9001
   selector:
     app: minio
   type: ClusterIP
