@@ -47,10 +47,10 @@ repoServer:
   # here stalls GitOps reconciliation cluster-wide.
   resources:
     requests:
-      cpu: 65m
+      cpu: 250m
       memory: 384Mi
     limits:
-      cpu: 195m
+      cpu: 2000m
       memory: 1229Mi
 
 applicationSet:
