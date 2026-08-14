@@ -1668,7 +1668,11 @@ data:
             "type": "textbox"
           },
           {
-            "current": {},
+            "current": {
+              "selected": true,
+              "text": "homelab",
+              "value": "homelab"
+            },
             "datasource": {
               "type": "grafana-github-datasource",
               "uid": "github"
