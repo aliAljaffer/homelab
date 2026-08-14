@@ -4439,7 +4439,11 @@ data:
         "templating": {
           "list": [
             {
-              "current": null,
+              "current": {
+                "selected": false,
+                "text": "Thanos",
+                "value": "thanos"
+              },
               "hide": 0,
               "includeAll": false,
               "label": "datasource",
