@@ -1,0 +1,43 @@
+# Default-deny + explicit-allow for the vaultwarden namespace.
+# Matrix source: CONTEXT-networkpolicy-audit.md
+#
+# NOT yet wired into kustomization.yaml. Apply only after
+# kubernetes/bootstrap/cilium/values.yaml's policyAuditMode: true has been
+# rolled out and confirmed live (helm upgrade), so a mistake here logs
+# instead of dropping real traffic.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: vaultwarden-default
+  namespace: vaultwarden
+spec:
+  endpointSelector: {}
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": cloudflare-tunnel-system
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    # SES SMTP for invite emails (vaultwarden-deployment.yaml SMTP_HOST).
+    - toFQDNs:
+        - matchName: "email-smtp.us-east-1.amazonaws.com"
+      toPorts:
+        - ports:
+            - port: "587"
+              protocol: TCP

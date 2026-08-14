@@ -1,0 +1,137 @@
+# Default-deny + explicit-allow for the cloudflare-tunnel-system namespace.
+# Matrix source: CONTEXT-networkpolicy-audit.md, extended after live Hubble
+# capture (kubectl exec into the node-local cilium-agent's hubble socket -
+# the local `hubble` CLI is 1.19.4 vs. hubble-relay's 1.17.3, which breaks
+# relay queries with "invalid fieldmask").
+#
+# The chart already ships a plain NetworkPolicy for the proxy pods
+# (proxy.networkPolicy.ingress in values.yaml -> generates
+# cloudflare-tunnel-gateway-controller-proxy, policyTypes: [Ingress] only,
+# allows same-namespace + monitoring on :8081). Not duplicating that here -
+# this file only adds Egress (untouched by the chart) plus the controller
+# pod, which has no chart-shipped policy at all today.
+#
+# Confirmed live via Hubble on the proxy pod:
+# - Outbound QUIC to Cloudflare edge on UDP/7844 (observed IPs in
+#   198.41.192.0/24 and 198.41.200.0/24 - Cloudflare's anycast edge pool
+#   rotates, so this allows by protocol/port to `world` rather than pinning
+#   CIDRs that will drift).
+# - monitoring-grafana's Service is 80 -> targetPort "grafana" (3000);
+#   Cilium enforces on the real post-DNAT port, so the rule below is :3000,
+#   not :80 (same class of bug is now fixed in the monitoring and
+#   catus-locatus policy files - see their comments).
+# - argocd-server is 80/443 -> targetPort 8080 on both.
+#
+# Not observed live (assumption, flag for audit-mode confirmation): the
+# controller pod's egress to the Cloudflare API to reconcile tunnel config
+# didn't fire during this capture window (no Gateway/HTTPRoute change
+# happened). Assumed api.cloudflare.com:443 - standard Cloudflare API
+# hostname - confirm once a route changes and check audit-mode logs.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: cloudflare-tunnel-proxy-egress
+  namespace: cloudflare-tunnel-system
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/component: proxy
+      app.kubernetes.io/instance: cloudflare-tunnel-gateway-controller
+      app.kubernetes.io/name: cloudflare-tunnel-gateway-controller-proxy
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "7844"
+              protocol: UDP
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: argocd-server
+            "k8s:io.kubernetes.pod.namespace": argocd
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app: keycloak
+            app.kubernetes.io/managed-by: keycloak-operator
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: grafana
+      toPorts:
+        - ports:
+            - port: "3000"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app: vaultwarden
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app: pihole
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: cloudflare-tunnel-controller-default
+  namespace: cloudflare-tunnel-system
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: cloudflare-tunnel-gateway-controller
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": monitoring
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEntities:
+        - kube-apiserver
+    - toFQDNs:
+        - matchName: "api.cloudflare.com"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
