@@ -1,0 +1,736 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: prometheus-default
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      operator.prometheus.io/name: kube-prometheus-prometheus
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEntities:
+        - kube-apiserver
+    # kubelet/cAdvisor scrape (kube-prometheus-kubelet ServiceMonitor).
+    - toEntities:
+        - host
+        - remote-node
+      toPorts:
+        - ports:
+            - port: "10250"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: alertmanager
+      toPorts:
+        - ports:
+            - port: "9093"
+              protocol: TCP
+    # Thanos sidecar (same pod): upload TSDB blocks to GCS.
+    - toFQDNs:
+        - matchName: "storage.googleapis.com"
+        - matchName: "oauth2.googleapis.com"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": cnpg-system
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": longhorn-system
+      toPorts:
+        - ports:
+            - port: "9500"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": metallb-system
+      toPorts:
+        - ports:
+            - port: "9120"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kyverno
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": external-dns
+      toPorts:
+        - ports:
+            - port: "7979"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": velero
+      toPorts:
+        - ports:
+            - port: "8085"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kepler
+      toPorts:
+        - ports:
+            - port: "28282"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": cloudflare-tunnel-system
+      toPorts:
+        - ports:
+            - port: "8081"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": arc-systems
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": keycloak
+      toPorts:
+        - ports:
+            - port: "9187"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": catus-locatus
+      toPorts:
+        - ports:
+            - port: "4001"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": pihole
+      toPorts:
+        - ports:
+            - port: "9617"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "9153"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": argocd
+      toPorts:
+        - ports:
+            - port: "8082"
+              protocol: TCP
+            - port: "8080"
+              protocol: TCP
+            - port: "9001"
+              protocol: TCP
+            - port: "8084"
+              protocol: TCP
+            - port: "8083"
+              protocol: TCP
+            - port: "9121"
+              protocol: TCP
+            - port: "5558"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": cert-manager
+      toPorts:
+        - ports:
+            - port: "9402"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: thanos-query-default
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: thanos
+      app.kubernetes.io/component: query
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: grafana
+      toPorts:
+        - ports:
+            - port: "9090"
+              protocol: TCP
+    # kubelet liveness/readiness probe (httpGet :9090 /-/healthy, /-/ready).
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "9090"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEndpoints:
+        - matchLabels:
+            operator.prometheus.io/name: kube-prometheus-prometheus
+        - matchLabels:
+            app.kubernetes.io/name: thanos
+            app.kubernetes.io/component: storegateway
+      toPorts:
+        - ports:
+            - port: "10901"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: thanos-storegateway-default
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: thanos
+      app.kubernetes.io/component: storegateway
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: thanos
+            app.kubernetes.io/component: query
+      toPorts:
+        - ports:
+            - port: "10901"
+              protocol: TCP
+    # kubelet liveness/readiness probe (httpGet :10902 /-/healthy, /-/ready). No
+    # other consumer observed for this port.
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "10902"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toFQDNs:
+        - matchName: "storage.googleapis.com"
+        - matchName: "oauth2.googleapis.com"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: thanos-compactor-default
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: thanos
+      app.kubernetes.io/component: compactor
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toFQDNs:
+        - matchName: "storage.googleapis.com"
+        - matchName: "oauth2.googleapis.com"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: grafana-default
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: grafana
+  ingress:
+    # monitoring-grafana Service is 80 -> targetPort "grafana" (container port
+    # 3000). Cilium enforces on the post-DNAT (real) port, confirmed via
+    # Hubble: the tunnel proxy's actual flow lands on :3000, not :80.
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": cloudflare-tunnel-system
+      toPorts:
+        - ports:
+            - port: "3000"
+              protocol: TCP
+    # kubelet liveness/readiness probe (httpGet :3000 /api/health).
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "3000"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: thanos
+            app.kubernetes.io/component: query
+      toPorts:
+        - ports:
+            - port: "9090"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: loki
+            app.kubernetes.io/component: gateway
+      toPorts:
+        - ports:
+            # loki-gateway Service is 80 -> targetPort http-metrics (8080);
+            # Cilium enforces the post-DNAT port.
+            - port: "8080"
+              protocol: TCP
+    # SES SMTP for alert/invite emails (grafana.ini smtp.host).
+    - toFQDNs:
+        - matchName: "email-smtp.us-east-1.amazonaws.com"
+      toPorts:
+        - ports:
+            - port: "587"
+              protocol: TCP
+    # grafana-github-datasource plugin.
+    - toFQDNs:
+        - matchName: "api.github.com"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+    # Discord contact point (grafana-discord-webhook).
+    - toFQDNs:
+        - matchName: "discord.com"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: loki-gateway-default
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: gateway
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: grafana
+        - matchLabels:
+            app.kubernetes.io/name: alloy
+        - matchLabels:
+            app.kubernetes.io/name: loki
+            app.kubernetes.io/component: canary
+      toPorts:
+        - ports:
+            # loki-gateway Service is 80 -> targetPort http-metrics (8080);
+            # Cilium enforces the post-DNAT port.
+            - port: "8080"
+              protocol: TCP
+    # kubelet readiness probe (httpGet :8080 /).
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: loki
+            app.kubernetes.io/component: single-binary
+      toPorts:
+        - ports:
+            - port: "3100"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: loki-default
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: single-binary
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: loki
+            app.kubernetes.io/component: gateway
+        - matchLabels:
+            app.kubernetes.io/name: loki
+            app.kubernetes.io/component: canary
+      toPorts:
+        - ports:
+            - port: "3100"
+              protocol: TCP
+    # kubelet readiness probe (httpGet :3100 /ready).
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "3100"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toFQDNs:
+        - matchName: "storage.googleapis.com"
+        - matchName: "oauth2.googleapis.com"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/component: memcached-chunks-cache
+        - matchLabels:
+            app.kubernetes.io/component: memcached-results-cache
+      toPorts:
+        - ports:
+            - port: "11211"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: loki-canary-default
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: canary
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: loki
+            app.kubernetes.io/component: gateway
+      toPorts:
+        - ports:
+            # loki-gateway Service is 80 -> targetPort http-metrics (8080);
+            # Cilium enforces the post-DNAT port.
+            - port: "8080"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: loki
+            app.kubernetes.io/component: single-binary
+      toPorts:
+        - ports:
+            - port: "3100"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: loki-cache-default
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/component
+        operator: In
+        values:
+          - memcached-chunks-cache
+          - memcached-results-cache
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: loki
+            app.kubernetes.io/component: single-binary
+      toPorts:
+        - ports:
+            - port: "11211"
+              protocol: TCP
+    # kubelet liveness/readiness probes: memcached tcpSocket :11211,
+    # exporter httpGet :9150 /metrics.
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "11211"
+              protocol: TCP
+            - port: "9150"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: alloy-default
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: alloy
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    # loki.source.kubernetes reads pod logs via the apiserver's log subresource.
+    - toEntities:
+        - kube-apiserver
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: loki
+            app.kubernetes.io/component: gateway
+      toPorts:
+        - ports:
+            # loki-gateway Service is 80 -> targetPort http-metrics (8080);
+            # Cilium enforces the post-DNAT port.
+            - port: "8080"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: alertmanager-default
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: alertmanager
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            operator.prometheus.io/name: kube-prometheus-prometheus
+      toPorts:
+        - ports:
+            - port: "9093"
+              protocol: TCP
+    # kubelet liveness/readiness probe (httpGet :9093 /-/healthy, /-/ready).
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "9093"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: kube-prometheus-operator-default
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: kube-prometheus-stack-prometheus-operator
+  ingress:
+    # Webhook Service is 443 -> targetPort https (10250); Cilium enforces
+    # the post-DNAT port.
+    - fromEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "10250"
+              protocol: TCP
+    # kubelet liveness/readiness probe (httpGet :10250 /healthz).
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "10250"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEntities:
+        - kube-apiserver
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: kube-state-metrics-default
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: kube-state-metrics
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            operator.prometheus.io/name: kube-prometheus-prometheus
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+    # kubelet liveness probe (httpGet :8080 /livez) and readiness probe
+    # (httpGet :8081 /readyz).
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+            - port: "8081"
+              protocol: TCP
+  egress:
+    - toEntities:
+        - kube-apiserver
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: node-exporter-default
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus-node-exporter
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            operator.prometheus.io/name: kube-prometheus-prometheus
+      toPorts:
+        - ports:
+            - port: "9100"
+              protocol: TCP

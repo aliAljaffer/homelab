@@ -18,3 +18,4 @@ resources:
   - secrets.sealed.yaml
   - minio-secret.sealed.yaml
   - cloudflared/tunnel-credentials.sealed.yaml
+  - networkpolicy.yaml

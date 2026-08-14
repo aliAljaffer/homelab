@@ -1,0 +1,128 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: cloudflare-tunnel-proxy-egress
+  namespace: cloudflare-tunnel-system
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/component: proxy
+      app.kubernetes.io/instance: cloudflare-tunnel-gateway-controller
+      app.kubernetes.io/name: cloudflare-tunnel-gateway-controller-proxy
+  # Ingress on :8081 is otherwise governed by the chart's own plain
+  # NetworkPolicy (cloudflare-tunnel-system + monitoring namespaces). Cilium
+  # unions CiliumNetworkPolicy and plain NetworkPolicy ingress rules for the
+  # same endpoint, so this only adds the host entity on top of that, it
+  # doesn't replace it.
+  ingress:
+    # kubelet liveness/readiness probe (httpGet :8081 /healthz, /readyz).
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "8081"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "7844"
+              protocol: UDP
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: argocd-server
+            "k8s:io.kubernetes.pod.namespace": argocd
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app: keycloak
+            app.kubernetes.io/managed-by: keycloak-operator
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: grafana
+      toPorts:
+        - ports:
+            - port: "3000"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app: vaultwarden
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app: pihole
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: cloudflare-tunnel-controller-default
+  namespace: cloudflare-tunnel-system
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: cloudflare-tunnel-gateway-controller
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": monitoring
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+    # kubelet liveness/readiness probe (httpGet :8081 /healthz, /readyz).
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "8081"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEntities:
+        - kube-apiserver
+    - toFQDNs:
+        - matchName: "api.cloudflare.com"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
