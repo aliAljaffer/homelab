@@ -18,7 +18,7 @@ data:
       "title": "Cluster Health",
       "uid": "cluster-health",
       "version": 1,
-      "tags": ["cluster", "nodes", "power", "kepler"],
+      "tags": ["cluster", "nodes", "power", "kepler", "temperature"],
       "timezone": "browser",
       "time": {"from": "now-6h", "to": "now"},
       "refresh": "30s",
@@ -281,6 +281,42 @@ data:
           ],
           "fieldConfig": {"defaults": {"unit": "watt", "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}, {"color": "green", "value": 0}]}}, "overrides": [{"matcher": {"id": "byName", "options": "Kepler CPU %"}, "properties": [{"id": "unit", "value": "percent"}, {"id": "min", "value": 0}, {"id": "max", "value": 100}]}]},
           "options": {"showHeader": true, "footer": {"show": true, "reducer": ["sum"], "fields": ["Total W", "Active W", "Idle W"]}}
+        },
+        {
+          "type": "stat",
+          "title": "Max Node Temperature (°C)",
+          "description": "Highest reading across all hwmon sensors (CPU package/core, NVMe, board) on any node.",
+          "gridPos": {"x": 0, "y": 52, "w": 4, "h": 4},
+          "datasource": "$datasource",
+          "targets": [
+            {"expr": "max(node_hwmon_temp_celsius)", "refId": "A"}
+          ],
+          "fieldConfig": {"defaults": {"unit": "celsius", "decimals": 1, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 75}, {"color": "red", "value": 90}]}}, "overrides": []},
+          "options": {"colorMode": "value", "graphMode": "none", "textMode": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}}
+        },
+        {
+          "type": "timeseries",
+          "title": "Node Temperature (hwmon max sensor, °C)",
+          "description": "Per-node max across all hwmon sensors (CPU package/cores, NVMe composite, board sensors where present). A rising trend before a node's Rebooted event points to thermal shutdown.",
+          "gridPos": {"x": 4, "y": 52, "w": 20, "h": 8},
+          "datasource": "$datasource",
+          "targets": [
+            {"expr": "max by (nodename) (node_hwmon_temp_celsius * on(instance) group_left(nodename) (max by(instance, nodename) (node_uname_info)))", "legendFormat": "{{nodename}}", "refId": "A"}
+          ],
+          "fieldConfig": {"defaults": {"unit": "celsius", "custom": {"thresholdsStyle": {"mode": "line"}}, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 75}, {"color": "red", "value": 90}]}}, "overrides": []},
+          "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"]}, "tooltip": {"mode": "multi", "sort": "desc"}}
+        },
+        {
+          "type": "timeseries",
+          "title": "ACPI Thermal Zone Temperature per Node (°C)",
+          "description": "Fallback sensor path for nodes without hwmon coretemp/nct sensors (e.g. laptop hardware exposing only acpitz).",
+          "gridPos": {"x": 0, "y": 60, "w": 24, "h": 8},
+          "datasource": "$datasource",
+          "targets": [
+            {"expr": "node_thermal_zone_temp * on(instance) group_left(nodename) (max by(instance, nodename) (node_uname_info))", "legendFormat": "{{nodename}} zone{{zone}}", "refId": "A"}
+          ],
+          "fieldConfig": {"defaults": {"unit": "celsius", "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 75}, {"color": "red", "value": 90}]}}, "overrides": []},
+          "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"]}, "tooltip": {"mode": "multi", "sort": "desc"}}
         }
       ],
       "schemaVersion": 39,

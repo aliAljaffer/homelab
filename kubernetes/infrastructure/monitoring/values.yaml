@@ -309,6 +309,42 @@ grafana:
               notification_settings:
                 receiver: Discord Channel
 
+            # Covers all nodes, unlike "High Temperature > 80°C" above which only
+            # matches chip="platform_coretemp_0" and misses nodes without a coretemp
+            # sensor (e.g. cp0, which only exposes the acpitz thermal zone).
+            - uid: vgfo0a3aomfu7l
+              title: High Node Temperature (any sensor) > 90°C
+              condition: C
+              data:
+                - refId: A
+                  relativeTimeRange:
+                    from: 600
+                    to: 0
+                  datasourceUid: thanos
+                  model:
+                    expr: 'max by (nodename) (node_hwmon_temp_celsius * on(instance) group_left(nodename) (max by(instance, nodename) (node_uname_info))) or max by (nodename) (node_thermal_zone_temp * on(instance) group_left(nodename) (max by(instance, nodename) (node_uname_info)))'
+                    instant: true
+                    refId: A
+                - refId: C
+                  datasourceUid: __expr__
+                  model:
+                    conditions:
+                      - evaluator:
+                          params: [90]
+                          type: gt
+                        query:
+                          params: [C]
+                        reducer:
+                          type: last
+                    expression: A
+                    type: threshold
+                    refId: C
+              noDataState: NoData
+              execErrState: Error
+              for: 10m
+              notification_settings:
+                receiver: Discord Channel
+
 # Drop high-cardinality apiserver histograms, no homelab value.
 kubeApiServer:
   serviceMonitor:
