@@ -38,6 +38,11 @@ spec:
       # scrapes Loki itself.
       - key: app.kubernetes.io/component
         operator: DoesNotExist
+      # The chart also publishes a headless service (variant=headless) carrying
+      # the same base labels; its http-metrics port spans every loki pod type,
+      # which yields 404s. Only scrape the main ClusterIP service.
+      - key: variant
+        operator: DoesNotExist
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
