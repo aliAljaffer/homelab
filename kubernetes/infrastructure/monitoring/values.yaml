@@ -345,6 +345,141 @@ grafana:
               notification_settings:
                 receiver: Discord Channel
 
+            # Loki logging pipeline. These cover the "silent" failure modes:
+            # logs collected but never reaching Loki, and Loki querying broken
+            # even though pods report Running.
+            - uid: lg7a0af1byfaa
+              title: Loki Logs Being Dropped (Alloy)
+              condition: C
+              data:
+                - refId: A
+                  relativeTimeRange:
+                    from: 600
+                    to: 0
+                  datasourceUid: thanos
+                  model:
+                    expr: 'increase(loki_write_dropped_entries_total[5m])'
+                    instant: true
+                    refId: A
+                - refId: C
+                  datasourceUid: __expr__
+                  model:
+                    conditions:
+                      - evaluator:
+                          params: [0]
+                          type: gt
+                        query:
+                          params: [C]
+                        reducer:
+                          type: last
+                    expression: A
+                    type: threshold
+                    refId: C
+              noDataState: NoData
+              execErrState: Error
+              for: 2m
+              notification_settings:
+                receiver: Discord Channel
+
+            - uid: lg7a0af1byfbb
+              title: Loki Ingest Stalled
+              condition: C
+              data:
+                - refId: A
+                  relativeTimeRange:
+                    from: 600
+                    to: 0
+                  datasourceUid: thanos
+                  model:
+                    expr: 'sum(increase(loki_distributor_bytes_received_total[15m]))'
+                    instant: true
+                    refId: A
+                - refId: C
+                  datasourceUid: __expr__
+                  model:
+                    conditions:
+                      - evaluator:
+                          params: [1000]
+                          type: lt
+                        query:
+                          params: [C]
+                        reducer:
+                          type: last
+                    expression: A
+                    type: threshold
+                    refId: C
+              noDataState: NoData
+              execErrState: Error
+              for: 10m
+              notification_settings:
+                receiver: Discord Channel
+
+            - uid: lg7a0af1byfcc
+              title: Loki Canary Missing Entries
+              condition: C
+              data:
+                - refId: A
+                  relativeTimeRange:
+                    from: 600
+                    to: 0
+                  datasourceUid: thanos
+                  model:
+                    expr: 'increase(loki_canary_missing_entries_total[15m])'
+                    instant: true
+                    refId: A
+                - refId: C
+                  datasourceUid: __expr__
+                  model:
+                    conditions:
+                      - evaluator:
+                          params: [0]
+                          type: gt
+                        query:
+                          params: [C]
+                        reducer:
+                          type: last
+                    expression: A
+                    type: threshold
+                    refId: C
+              noDataState: NoData
+              execErrState: Error
+              for: 5m
+              notification_settings:
+                receiver: Discord Channel
+
+            - uid: lg7a0af1byfdd
+              title: Loki Canary Query Failures
+              condition: C
+              data:
+                - refId: A
+                  relativeTimeRange:
+                    from: 600
+                    to: 0
+                  datasourceUid: thanos
+                  model:
+                    expr: 'increase(loki_canary_cache_test_query_results_total{status="failure"}[15m])'
+                    instant: true
+                    refId: A
+                - refId: C
+                  datasourceUid: __expr__
+                  model:
+                    conditions:
+                      - evaluator:
+                          params: [0]
+                          type: gt
+                        query:
+                          params: [C]
+                        reducer:
+                          type: last
+                    expression: A
+                    type: threshold
+                    refId: C
+              noDataState: NoData
+              execErrState: Error
+              for: 5m
+              notification_settings:
+                receiver: Discord Channel
+
 # Drop high-cardinality apiserver histograms, no homelab value.
 kubeApiServer:
   serviceMonitor:
@@ -363,6 +498,58 @@ alertmanager:
       limits:
         cpu: 20m
         memory: 112Mi
+    # Mount the Discord webhook secret so discord_configs.webhook_url_file can
+    # reference it without the URL living in this repo in plaintext.
+    secrets:
+      - grafana-discord-webhook
+  # Replace the chart default (route everything to "null") so PrometheusRule
+  # alerts actually deliver to Discord. Without this, every default alert
+  # (Watchdog, KubernetesPodCrashLooping, TargetDown, ...) fires silently.
+  config:
+    global:
+      resolve_timeout: 5m
+    inhibit_rules:
+      - source_matchers:
+          - 'severity = critical'
+        target_matchers:
+          - 'severity =~ warning|info'
+        equal:
+          - 'namespace'
+          - 'alertname'
+      - source_matchers:
+          - 'severity = warning'
+        target_matchers:
+          - 'severity = info'
+        equal:
+          - 'namespace'
+          - 'alertname'
+      - source_matchers:
+          - 'alertname = InfoInhibitor'
+        target_matchers:
+          - 'severity = info'
+        equal:
+          - 'namespace'
+      - target_matchers:
+          - 'alertname = InfoInhibitor'
+    route:
+      group_by: ['namespace']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 12h
+      receiver: 'discord'
+      # The Watchdog alert fires continuously and is the deadman's switch: if
+      # these notifications stop, the alerting pipeline itself is broken.
+      routes:
+        - receiver: 'discord'
+          matchers:
+            - alertname = "Watchdog"
+    receivers:
+      - name: 'discord'
+        discord_configs:
+          - webhook_url_file: /etc/alertmanager/secrets/grafana-discord-webhook/DISCORD_WEBHOOK_URL
+            title: '{{ .GroupLabels.alertname }} {{ if eq .Status "firing" }}[FIRING]{{ else }}[RESOLVED]{{ end }}'
+            message: '{{ range .Alerts }}{{ .Annotations.summary }} (severity={{ .Labels.severity }}){{ end }}'
+      - name: 'null'
 
 nodeExporter:
   enabled: true

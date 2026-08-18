@@ -11,3 +11,4 @@ resources:
   - grafana-admin-credentials.sealed.yaml
   - grafana-smtp-secret.sealed.yaml
   - networkpolicy.yaml
+  - servicemonitors.yaml

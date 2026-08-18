@@ -19,6 +19,15 @@ spec:
       key: password
   http:
     httpEnabled: true
+  # Enable the /metrics endpoint on the management port (9000).
+  additionalOptions:
+    - name: metrics-enabled
+      value: "true"
+  # The operator generates a ServiceMonitor but without the release=monitoring
+  # label the monitoring Prometheus never selects it. We ship our own monitor
+  # in the monitoring app instead, so disable the generated one.
+  serviceMonitor:
+    enabled: false
   hostname:
     hostname: kc.alialjaffer.com
   ingress:

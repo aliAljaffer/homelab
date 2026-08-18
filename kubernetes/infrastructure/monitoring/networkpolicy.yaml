@@ -114,7 +114,7 @@ spec:
             "k8s:io.kubernetes.pod.namespace": keycloak
       toPorts:
         - ports:
-            - port: "9187"
+            - port: "9000"
               protocol: TCP
     - toEndpoints:
         - matchLabels:
@@ -129,6 +129,41 @@ spec:
       toPorts:
         - ports:
             - port: "9617"
+              protocol: TCP
+    # Log stack scrape targets (ServiceMonitors in servicemonitors.yaml).
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: alloy
+      toPorts:
+        - ports:
+            - port: "12345"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: loki
+            app.kubernetes.io/component: single-binary
+      toPorts:
+        - ports:
+            - port: "3100"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: loki
+            app.kubernetes.io/component: canary
+      toPorts:
+        - ports:
+            - port: "3500"
+              protocol: TCP
+    - toEndpoints:
+        - matchExpressions:
+            - key: app.kubernetes.io/component
+              operator: In
+              values:
+                - memcached-chunks-cache
+                - memcached-results-cache
+      toPorts:
+        - ports:
+            - port: "9150"
               protocol: TCP
     - toEndpoints:
         - matchLabels:
@@ -163,6 +198,32 @@ spec:
       toPorts:
         - ports:
             - port: "9402"
+              protocol: TCP
+    # Cilium agent + operator metrics (enabled in bootstrap/cilium/values.yaml).
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: cilium
+      toPorts:
+        - ports:
+            - port: "9962"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            app.kubernetes.io/name: cilium-operator
+      toPorts:
+        - ports:
+            - port: "9963"
+              protocol: TCP
+    # sealed-secrets controller metrics.
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            name: sealed-secrets-controller
+      toPorts:
+        - ports:
+            - port: "8081"
               protocol: TCP
 ---
 apiVersion: cilium.io/v2
@@ -454,6 +515,14 @@ spec:
         - ports:
             - port: "3100"
               protocol: TCP
+    # Prometheus scrape (ServiceMonitor monitoring-loki).
+    - fromEndpoints:
+        - matchLabels:
+            operator.prometheus.io/name: kube-prometheus-prometheus
+      toPorts:
+        - ports:
+            - port: "3100"
+              protocol: TCP
     # kubelet readiness probe (httpGet :3100 /ready).
     - fromEntities:
         - host
@@ -502,6 +571,15 @@ spec:
     matchLabels:
       app.kubernetes.io/name: loki
       app.kubernetes.io/component: canary
+  ingress:
+    # Prometheus scrape (ServiceMonitor monitoring-loki-canary).
+    - fromEndpoints:
+        - matchLabels:
+            operator.prometheus.io/name: kube-prometheus-prometheus
+      toPorts:
+        - ports:
+            - port: "3500"
+              protocol: TCP
   egress:
     - toEndpoints:
         - matchLabels:
@@ -557,6 +635,14 @@ spec:
         - ports:
             - port: "11211"
               protocol: TCP
+    # Prometheus scrape (ServiceMonitors monitoring-loki-*-cache).
+    - fromEndpoints:
+        - matchLabels:
+            operator.prometheus.io/name: kube-prometheus-prometheus
+      toPorts:
+        - ports:
+            - port: "9150"
+              protocol: TCP
     # kubelet liveness/readiness probes: memcached tcpSocket :11211,
     # exporter httpGet :9150 /metrics.
     - fromEntities:
@@ -577,6 +663,15 @@ spec:
   endpointSelector:
     matchLabels:
       app.kubernetes.io/name: alloy
+  ingress:
+    # Prometheus scrape (ServiceMonitor monitoring-alloy).
+    - fromEndpoints:
+        - matchLabels:
+            operator.prometheus.io/name: kube-prometheus-prometheus
+      toPorts:
+        - ports:
+            - port: "12345"
+              protocol: TCP
   egress:
     - toEndpoints:
         - matchLabels:
@@ -643,6 +738,13 @@ spec:
           rules:
             dns:
               - matchPattern: "*"
+    # Discord webhook receiver (alertmanager discord_configs).
+    - toFQDNs:
+        - matchName: "discord.com"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy

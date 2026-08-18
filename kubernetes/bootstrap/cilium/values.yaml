@@ -33,6 +33,16 @@ envoy:
       cpu: 30m
       memory: 176Mi
 
+# Agent + operator Prometheus metrics, with ServiceMonitors labeled for the
+# kube-prometheus-stack selector (release=monitoring). The ServiceMonitors land
+# in kube-system and are picked up by the monitoring Prometheus.
+prometheus:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    labels:
+      release: monitoring
+
 hubble:
   enabled: true
   relay:
@@ -65,6 +75,11 @@ hubble:
 
 operator:
   replicas: 1
+  prometheus:
+    serviceMonitor:
+      enabled: true
+      labels:
+        release: monitoring
   # Gateway API reconciliation for the whole cluster stalls under this if
   # starved (rate-limiter Wait() context-cancels mid-reconcile). Was 5m/20m.
   resources:
