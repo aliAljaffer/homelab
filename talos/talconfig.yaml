@@ -78,6 +78,15 @@ controlPlane:
           name: none
       proxy:
         disabled: true
+      # Bind controller-manager/scheduler to all interfaces so the
+      # kube-prometheus-stack can scrape :10257/:10259 (Talos defaults to
+      # loopback only). Applied live via `talosctl patch machineconfig`.
+      controllerManager:
+        extraArgs:
+          bind-address: 0.0.0.0
+      scheduler:
+        extraArgs:
+          bind-address: 0.0.0.0
     machine:
       kubelet:
         extraArgs:

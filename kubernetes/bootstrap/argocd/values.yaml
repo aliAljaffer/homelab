@@ -86,12 +86,13 @@ notifications:
 dex:
   image:
     tag: v2.45.1-alpine
+  # Dex 2.45 no longer serves Prometheus metrics, so the chart's metrics
+  # ServiceMonitor scrapes a dead port (5558). Disable it to stop the
+  # TargetDown alert.
   metrics:
-    enabled: true
+    enabled: false
     serviceMonitor:
-      enabled: true
-      additionalLabels:
-        release: monitoring
+      enabled: false
   resources:
     requests:
       cpu: 5m
