@@ -24,6 +24,8 @@ spec:
           env:
             - name: DATABASE_TYPE
               value: postgresql
+            - name: TRACKER_SCRIPT_NAME
+              value: assets/web.js
           envFrom:
             - secretRef:
                 name: umami-secret
