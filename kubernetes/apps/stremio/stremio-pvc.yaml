@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: stremio-data
+  namespace: stremio
+spec:
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 20Gi
+  accessModes: [ "ReadWriteOnce" ]
