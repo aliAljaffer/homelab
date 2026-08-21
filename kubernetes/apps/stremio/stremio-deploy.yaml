@@ -35,8 +35,6 @@ spec:
           value: "1"
         - name: AUTO_SERVER_URL
           value: "1"
-        - name: IPADDRESS
-          value: 192.168.8.200
         volumeMounts:
         - name: stremio-data
           mountPath: /root/.stremio-server
