@@ -13,7 +13,7 @@ metadata:
   name: stremio
   namespace: stremio
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: stremio
@@ -25,7 +25,8 @@ spec:
     spec:
       volumes:
       - name: stremio-data
-        emptyDir: {}  # hostPath not supported on Talos read-only filesystem
+        persistentVolumeClaim:
+          claimName: stremio-data
       containers:
       - image: tsaridas/stremio-docker:v1.3.9
         name: stremio-docker
@@ -49,4 +50,5 @@ spec:
           limits:
             cpu: "2"
             memory: 2Gi
+            gpu.intel.com/i915: 1
 status: {}
