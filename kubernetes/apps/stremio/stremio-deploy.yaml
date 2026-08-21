@@ -17,7 +17,8 @@ spec:
   selector:
     matchLabels:
       app: stremio
-  strategy: {}
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:
