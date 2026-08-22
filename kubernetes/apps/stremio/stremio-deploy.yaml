@@ -29,7 +29,7 @@ spec:
         persistentVolumeClaim:
           claimName: stremio-data
       containers:
-      - image: tsaridas/stremio-docker:v1.3.9
+      - image: tsaridas/stremio-docker:nightly
         name: stremio-docker
         env:
         - name: NO_CORS
