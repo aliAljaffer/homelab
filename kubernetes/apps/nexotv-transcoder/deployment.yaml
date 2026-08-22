@@ -15,30 +15,28 @@ spec:
       labels:
         app: nexotv-transcoder
     spec:
+      volumes:
+      - name: nexotv-transcoder-src
+        configMap:
+          name: nexotv-transcoder-src
       containers:
       - name: transcoder
-        image: docker.io/alialjaffer/nexotv-transcoder:latest
+        image: node:20-slim
+        command: ["sh", "-c", "npm install express && node /app/transcoder.js"]
+        workingDir: /app
         ports:
         - containerPort: 7001
         env:
         - name: PORT
           value: "7001"
-        - name: USE_HWACCEL
-          value: "true"
-        - name: VIDEO_CODEC
-          value: "h264"
-        - name: VIDEO_QUALITY
-          value: "28"
-        - name: AUDIO_CODEC
-          value: "aac"
-        - name: AUDIO_BITRATE
-          value: "128k"
+        volumeMounts:
+        - name: nexotv-transcoder-src
+          mountPath: /app/transcoder.js
+          subPath: transcoder.js
         resources:
           requests:
-            cpu: 500m
-            memory: 512Mi
-            gpu.intel.com/i915: "1"
+            cpu: 250m
+            memory: 256Mi
           limits:
-            cpu: "2"
-            memory: 2Gi
-            gpu.intel.com/i915: "1"
+            cpu: "1"
+            memory: 512Mi
