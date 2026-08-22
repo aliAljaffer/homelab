@@ -4,7 +4,6 @@ namespace: stremio
 resources:
 - deployment.yaml
 - service.yaml
-- httproute.yaml
 configMapGenerator:
 - name: nexotv-transcoder-src
   files:
