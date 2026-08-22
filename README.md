@@ -26,7 +26,7 @@ Four Lenovo M920q Tiny nodes. Fanless-ish, low power, surprisingly capable.
 | wrk2 | 192.168.8.103 | Ready |
 | wrk3 | 192.168.8.100 | Ready |
 
-All on Intel Core i5/i7 (8th/9th gen), 16-32GB DDR4, NVMe storage. The iGPU (Intel UHD 630) is exposed via the `i915` Talos extension for Quick Sync transcoding.
+All on Intel Core i5/i7 (8th/9th gen), 16-32GB DDR4, NVMe storage. The iGPU (Intel UHD 630) is exposed via the `i915` Talos extension for Quick Sync/VAAPI transcoding, scheduled cluster-wide as `gpu.intel.com/i915` via Node Feature Discovery + the Intel device plugin.
 
 ### GPU node (on-demand)
 
@@ -47,9 +47,10 @@ AMD Ryzen 7 7800X3D, 32GB RAM, RTX 4070 Ti Super, 3x 2TB NVMe, dual-boots Fedora
 | Storage | Longhorn (distributed, 2 replicas) |
 | Database | CloudNativePG (Postgres operator) |
 | Identity | Keycloak (HA, 3 instances, CloudNativePG-backed) |
-| GitOps | ArgoCD (App-of-Apps, 33 applications) |
+| GitOps | ArgoCD (App-of-Apps, 36 applications) |
 | Secrets (static) | Sealed Secrets + SOPS (age) |
 | Policy engine | Kyverno |
+| GPU scheduling | Node Feature Discovery + Intel device plugin (`gpu.intel.com/i915`) |
 | Metrics | kube-prometheus-stack + Thanos (indefinite retention via MinIO) |
 | Logs | Loki (90-day retention via MinIO) |
 | Log collector | Grafana Alloy |
@@ -67,11 +68,15 @@ AMD Ryzen 7 7800X3D, 32GB RAM, RTX 4070 Ti Super, 3x 2TB NVMe, dual-boots Fedora
 - **vaultwarden** - self-hosted Bitwarden-compatible password manager (SQLite on Longhorn)
 - **pihole** - DNS + ad-blocking for the home network (Longhorn-persisted, Prometheus metrics via exporter sidecar)
 - **tuwaiq-tracker** - CronJob hitting an external API every 12 hours
-- **stremio** - media server
+- **stremio** - self-hosted Stremio, GPU-transcoded. I'm running the `nightly` image because I needed a WASM build my LG TV's old webOS browser could actually run, and even then I ended up sideloading it onto the TV as a native app instead, the browser route just never worked out (see [docs/lg-tv-sideload.md](docs/lg-tv-sideload.md))
+- **nexotv** - Stremio addon I use for an IPTV catalog over Xtream Codes. It lives in the `stremio` namespace, I applied it manually for now, no ArgoCD Application yet
+- **umami** - self-hosted analytics (CNPG-backed Postgres)
 - **cloudflared** - Cloudflare Tunnel for public traffic
 - **arc** - GitHub Actions self-hosted runners
 - **velero** - scheduled cluster backups
 - **monitoring** - Grafana, Prometheus, Thanos, Loki, Alloy
+
+I tore down the Jellyfin/*arr media stack (Sonarr, Radarr, Prowlarr, Seerr, Decypharr, Dispatcharr) I used to run here, Stremio + NexoTV replaced it.
 
 ---
 
@@ -81,3 +86,4 @@ AMD Ryzen 7 7800X3D, 32GB RAM, RTX 4070 Ti Super, 3x 2TB NVMe, dual-boots Fedora
 - [Backup and restore](docs/backup-and-restore.md)
 - [Remote access](docs/remote-access.md)
 - [Talos on Intel Mac](docs/talos-intel-mac.md)
+- [LG webOS TV sideload](docs/lg-tv-sideload.md)
