@@ -65,6 +65,8 @@ app.get('/playlist.m3u8', async (req, res) => {
     return res.status(400).json({ error: 'Missing url parameter' });
   }
 
+  console.log(`[PLAYLIST] Request: ${streamUrl}`);
+
   try {
     const { body, finalUrl } = await fetchText(streamUrl);
     const selfBase = `${req.protocol}://${req.get('host')}`;
