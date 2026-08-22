@@ -9,24 +9,17 @@ spec:
   goTemplateOptions:
   - missingkey=error
   generators:
-  - merge:
-      mergeKeys:
-      - path.basename
-      generators:
-      - git:
-          repoURL: git@github.com:aliAljaffer/homelab.git
-          revision: main
-          directories:
-          - path: kubernetes/apps/*
-          - path: kubernetes/apps/.claude
-            exclude: true
-          - path: kubernetes/apps/arc
-            exclude: true
-      - list:
-          elements:
-          - path:
-              basename: nexotv
-            namespace: stremio
+  - git:
+      repoURL: git@github.com:aliAljaffer/homelab.git
+      revision: main
+      directories:
+      - path: kubernetes/apps/*
+      - path: kubernetes/apps/.claude
+        exclude: true
+      - path: kubernetes/apps/arc
+        exclude: true
+      - path: kubernetes/apps/nexotv
+        exclude: true
   template:
     metadata:
       name: '{{.path.basename}}'
@@ -41,7 +34,7 @@ spec:
         path: '{{.path.path}}'
       destination:
         server: https://kubernetes.default.svc
-        namespace: '{{coalesce .namespace .path.basename}}'
+        namespace: '{{.path.basename}}'
       syncPolicy:
         automated:
           prune: true
