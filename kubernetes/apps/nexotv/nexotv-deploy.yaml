@@ -49,6 +49,9 @@ spec:
         - name: nexotv-patches
           mountPath: /app/packages/backend/dist/src/addon/builder.js
           subPath: builder.js
+        - name: nexotv-patches
+          mountPath: /app/packages/backend/dist/src/routes/stremio.js
+          subPath: stremio.js
         ports:
         - containerPort: 7000
           protocol: TCP
