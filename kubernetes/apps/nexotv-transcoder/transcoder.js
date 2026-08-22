@@ -54,7 +54,7 @@ function parsePlaylist(text, baseUrl) {
     .map((line) => new URL(line, baseUrl).toString());
 }
 
-app.get('/transcode', async (req, res) => {
+app.get('/transcode.m3u8', async (req, res) => {
   const streamUrl = req.query.url;
 
   if (!streamUrl) {

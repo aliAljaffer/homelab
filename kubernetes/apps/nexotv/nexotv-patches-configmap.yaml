@@ -626,7 +626,7 @@ data:
                         for (const stream of streams) {
                             if (stream.url) {
                                 const originalUrl = stream.url;
-                                stream.url = `${transcoderUrl}/transcode?url=${encodeURIComponent(originalUrl)}`;
+                                stream.url = `${transcoderUrl}/transcode.m3u8?url=${encodeURIComponent(originalUrl)}`;
                             }
                         }
                     }
