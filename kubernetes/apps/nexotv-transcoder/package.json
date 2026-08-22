@@ -1,0 +1,9 @@
+{
+  "name": "nexotv-transcoder",
+  "version": "1.0.0",
+  "description": "Transcoding proxy for NexoTV with Intel QuickSync",
+  "main": "transcoder.js",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
