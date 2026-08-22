@@ -34,6 +34,8 @@ spec:
     jsonPointers:
     - /spec/persistentVolumeClaimRetentionPolicy
     - /spec/template/spec/containers/0/startupProbe/initialDelaySeconds
+    - /spec/volumeClaimTemplates/0/apiVersion
+    - /spec/volumeClaimTemplates/0/kind
   syncPolicy:
     automated:
       prune: true
