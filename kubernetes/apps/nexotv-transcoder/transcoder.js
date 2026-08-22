@@ -92,9 +92,7 @@ app.get('/transcode', async (req, res) => {
 
       ffmpegProcess.stderr.on('data', (data) => {
         const msg = data.toString();
-        if (msg.includes('Error') || msg.includes('error')) {
-          console.error(`[FFMPEG] ${msg.trim()}`);
-        }
+        console.error(`[FFMPEG] ${msg.trim()}`);
       });
 
       ffmpegProcess.on('close', (code) => {
