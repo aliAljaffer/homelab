@@ -1,0 +1,50 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: workloads
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions:
+  - missingkey=error
+  generators:
+  - merge:
+      mergeKeys:
+      - path.basename
+      generators:
+      - git:
+          repoURL: git@github.com:aliAljaffer/homelab.git
+          revision: main
+          directories:
+          - path: kubernetes/apps/*
+          - path: kubernetes/apps/.claude
+            exclude: true
+          - path: kubernetes/apps/arc
+            exclude: true
+      - list:
+          elements:
+          - path:
+              basename: nexotv
+            namespace: stremio
+  template:
+    metadata:
+      name: '{{.path.basename}}'
+      namespace: argocd
+      finalizers:
+      - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: workloads
+      source:
+        repoURL: git@github.com:aliAljaffer/homelab.git
+        targetRevision: main
+        path: '{{.path.path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{coalesce .namespace .path.basename}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
