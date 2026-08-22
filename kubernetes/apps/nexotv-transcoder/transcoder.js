@@ -7,7 +7,7 @@ const app = express();
 app.set('trust proxy', true);
 const PORT = process.env.PORT || 7001;
 const PLAYLIST_CACHE_TTL_MS = parseInt(process.env.PLAYLIST_CACHE_TTL_MS || '5000');
-const SEGMENT_PREFETCH_COUNT = parseInt(process.env.SEGMENT_PREFETCH_COUNT || '1');
+const SEGMENT_PREFETCH_COUNT = parseInt(process.env.SEGMENT_PREFETCH_COUNT || '2');
 const SEGMENT_BUFFER_TTL_MS = parseInt(process.env.SEGMENT_BUFFER_TTL_MS || '30000');
 
 const playlistCache = new Map();
@@ -63,9 +63,15 @@ function fetchBinary(url) {
 
 function prefetchSegment(url) {
   if (segmentBuffer.has(url)) return;
+  console.log(`[PREFETCH] ${url}`);
   const entry = { promise: fetchBinary(url), fetchedAt: Date.now() };
   segmentBuffer.set(url, entry);
-  entry.promise.catch(() => segmentBuffer.delete(url));
+  entry.promise
+    .then((data) => console.log(`[PREFETCH] Done: ${url} (${data.length} bytes)`))
+    .catch((err) => {
+      console.error(`[PREFETCH] Error: ${url} (${err.message})`);
+      segmentBuffer.delete(url);
+    });
 }
 
 function pruneSegmentBuffer() {
@@ -143,7 +149,10 @@ app.get('/segment.ts', async (req, res) => {
 
   try {
     const buffered = segmentBuffer.get(segmentUrl);
+    const source = buffered ? 'memory' : 'remote';
+    const start = Date.now();
     const data = buffered ? await buffered.promise : await fetchBinary(segmentUrl);
+    console.log(`[SEGMENT] ${source}: ${segmentUrl} (${data.length} bytes, ${Date.now() - start}ms)`);
     res.end(data);
   } catch (err) {
     segmentBuffer.delete(segmentUrl);
