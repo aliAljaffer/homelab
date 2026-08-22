@@ -8,6 +8,8 @@ spec:
   goTemplate: true
   goTemplateOptions:
   - missingkey=error
+  syncPolicy:
+    preserveResourcesOnDeletion: true
   generators:
   - git:
       repoURL: git@github.com:aliAljaffer/homelab.git
