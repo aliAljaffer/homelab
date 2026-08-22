@@ -31,10 +31,20 @@ spec:
     kind: CustomResourceDefinition
     jsonPointers:
     - /metadata/labels
+    - /metadata/annotations
     - /spec/conversion
     - /status
-    managedFieldsManagers:
-    - kube-apiserver
+  - group: kyverno.io
+    kind: ClusterPolicy
+    jsonPointers:
+    - /spec/admission
+    - /spec/emitWarning
+    - /spec/validationFailureAction
+    - /status
+  - group: kyverno.io
+    kind: ClusterPolicy
+    jqPathExpressions:
+    - .spec.rules[*].skipBackgroundRequests
   syncPolicy:
     automated:
       prune: true

@@ -26,6 +26,11 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: longhorn-system
+  ignoreDifferences:
+  - group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    jsonPointers:
+    - /status
   syncPolicy:
     automated:
       prune: true
