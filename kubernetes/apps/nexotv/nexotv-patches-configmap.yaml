@@ -878,8 +878,6 @@ data:
         const iface = req.addonInterface;
         if (!iface)
             return res.status(500).json({ error: 'Interface not ready' });
-        const baseUrl = `${req.protocol}://${req.get('host')}/${req.configToken}`;
-        builder_1.default.setProxyBaseUrl(baseUrl);
         const sdkRouter = (0, stremio_addon_sdk_1.getRouter)(iface);
         sdkRouter(req, res, (err) => {
             if (err) {
