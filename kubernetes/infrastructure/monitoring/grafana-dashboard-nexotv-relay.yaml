@@ -1,0 +1,162 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nexotv-relay-grafana-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_dashboard_folder: NexoTV
+data:
+  nexotv-relay.json: |-
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": { "type": "datasource", "uid": "grafana" },
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "links": [],
+      "panels": [
+        {
+          "datasource": { "uid": "$datasource" },
+          "fieldConfig": {
+            "defaults": { "unit": "reqps" },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+          "id": 1,
+          "options": {
+            "legend": { "displayMode": "list", "placement": "bottom" },
+            "tooltip": { "mode": "multi" }
+          },
+          "targets": [
+            {
+              "datasource": { "uid": "$datasource" },
+              "expr": "sum(rate(relay_playlist_requests_total[5m])) by (cache)",
+              "legendFormat": "{{cache}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Playlist requests (cache hit/miss)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": { "uid": "$datasource" },
+          "fieldConfig": {
+            "defaults": { "unit": "reqps" },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+          "id": 2,
+          "options": {
+            "legend": { "displayMode": "list", "placement": "bottom" },
+            "tooltip": { "mode": "multi" }
+          },
+          "targets": [
+            {
+              "datasource": { "uid": "$datasource" },
+              "expr": "sum(rate(relay_segment_requests_total[5m])) by (source)",
+              "legendFormat": "{{source}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Segment requests (memory vs remote)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": { "uid": "$datasource" },
+          "fieldConfig": {
+            "defaults": { "unit": "reqps" },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+          "id": 3,
+          "options": {
+            "legend": { "displayMode": "list", "placement": "bottom" },
+            "tooltip": { "mode": "multi" }
+          },
+          "targets": [
+            {
+              "datasource": { "uid": "$datasource" },
+              "expr": "sum(rate(relay_prefetch_total[5m])) by (outcome)",
+              "legendFormat": "{{outcome}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Segment prefetch outcomes",
+          "type": "timeseries"
+        },
+        {
+          "datasource": { "uid": "$datasource" },
+          "fieldConfig": {
+            "defaults": { "unit": "reqps" },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+          "id": 4,
+          "options": {
+            "legend": { "displayMode": "list", "placement": "bottom" },
+            "tooltip": { "mode": "multi" }
+          },
+          "targets": [
+            {
+              "datasource": { "uid": "$datasource" },
+              "expr": "sum(rate(relay_playlist_errors_total[5m]))",
+              "legendFormat": "playlist errors",
+              "refId": "A"
+            },
+            {
+              "datasource": { "uid": "$datasource" },
+              "expr": "sum(rate(relay_segment_errors_total[5m]))",
+              "legendFormat": "segment errors",
+              "refId": "B"
+            }
+          ],
+          "title": "Errors",
+          "type": "timeseries"
+        }
+      ],
+      "refresh": "30s",
+      "schemaVersion": 39,
+      "tags": ["nexotv"],
+      "templating": {
+        "list": [
+          {
+            "current": {
+              "selected": false,
+              "text": "Prometheus",
+              "value": "prometheus"
+            },
+            "hide": 0,
+            "includeAll": false,
+            "multi": false,
+            "name": "datasource",
+            "options": [],
+            "query": "prometheus",
+            "queryValue": "",
+            "refresh": 1,
+            "regex": "",
+            "type": "datasource"
+          }
+        ]
+      },
+      "time": { "from": "now-1h", "to": "now" },
+      "timepicker": {},
+      "timezone": "",
+      "title": "NexoTV Relay",
+      "uid": "nexotv-relay",
+      "version": 1,
+      "weekStart": ""
+    }
