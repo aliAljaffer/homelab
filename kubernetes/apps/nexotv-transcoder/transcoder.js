@@ -6,7 +6,7 @@ const { URL } = require('url');
 const app = express();
 app.set('trust proxy', true);
 const PORT = process.env.PORT || 7001;
-const PLAYLIST_CACHE_TTL_MS = parseInt(process.env.PLAYLIST_CACHE_TTL_MS || '2000');
+const PLAYLIST_CACHE_TTL_MS = parseInt(process.env.PLAYLIST_CACHE_TTL_MS || '5000');
 
 const playlistCache = new Map();
 
@@ -68,15 +68,16 @@ app.get('/playlist.m3u8', async (req, res) => {
     return res.status(400).json({ error: 'Missing url parameter' });
   }
 
-  console.log(`[PLAYLIST] Request: ${streamUrl}`);
-
   const selfBase = `${req.protocol}://${req.get('host')}`;
   const cacheKey = `${selfBase}|${streamUrl}`;
   const cached = playlistCache.get(cacheKey);
+  const isHit = cached && Date.now() - cached.fetchedAt < PLAYLIST_CACHE_TTL_MS;
+
+  console.log(`[PLAYLIST] Request: ${streamUrl} (${isHit ? 'cache hit' : 'cache miss'})`);
 
   try {
     let rewritten;
-    if (cached && Date.now() - cached.fetchedAt < PLAYLIST_CACHE_TTL_MS) {
+    if (isHit) {
       rewritten = await cached.promise;
     } else {
       const promise = fetchText(streamUrl).then(({ body, finalUrl }) => rewritePlaylist(body, finalUrl, selfBase));
