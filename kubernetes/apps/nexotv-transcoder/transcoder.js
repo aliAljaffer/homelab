@@ -6,17 +6,13 @@ const { URL } = require('url');
 const app = express();
 const PORT = process.env.PORT || 7001;
 
-const MAX_RECONNECTS = parseInt(process.env.MAX_RECONNECTS || '10');
-const RECONNECT_DELAY = parseInt(process.env.RECONNECT_DELAY || '2000');
-const PLAYLIST_REFRESH_INTERVAL = parseInt(process.env.PLAYLIST_REFRESH_INTERVAL || '4000');
-
-function fetch(url) {
+function fetchText(url) {
   return new Promise((resolve, reject) => {
     const client = url.startsWith('https:') ? https : http;
     client.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (upstreamRes) => {
       if (upstreamRes.statusCode >= 300 && upstreamRes.statusCode < 400 && upstreamRes.headers.location) {
         upstreamRes.resume();
-        return resolve(fetch(new URL(upstreamRes.headers.location, url).toString()));
+        return resolve(fetchText(new URL(upstreamRes.headers.location, url).toString()));
       }
       if (upstreamRes.statusCode !== 200) {
         upstreamRes.resume();
@@ -24,21 +20,25 @@ function fetch(url) {
       }
       const chunks = [];
       upstreamRes.on('data', (c) => chunks.push(c));
-      upstreamRes.on('end', () => resolve({ body: Buffer.concat(chunks), finalUrl: url }));
+      upstreamRes.on('end', () => resolve({ body: Buffer.concat(chunks).toString('utf8'), finalUrl: url }));
       upstreamRes.on('error', reject);
     }).on('error', reject);
   });
 }
 
-function pipeSegment(url, res) {
+function pipeBinary(url, res) {
   return new Promise((resolve, reject) => {
     const client = url.startsWith('https:') ? https : http;
     const req = client.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (upstreamRes) => {
+      if (upstreamRes.statusCode >= 300 && upstreamRes.statusCode < 400 && upstreamRes.headers.location) {
+        upstreamRes.resume();
+        return resolve(pipeBinary(new URL(upstreamRes.headers.location, url).toString(), res));
+      }
       if (upstreamRes.statusCode !== 200) {
         upstreamRes.resume();
-        return reject(new Error(`HTTP ${upstreamRes.statusCode} for segment ${url}`));
+        return reject(new Error(`HTTP ${upstreamRes.statusCode} for ${url}`));
       }
-      upstreamRes.on('data', (chunk) => res.write(chunk));
+      upstreamRes.pipe(res);
       upstreamRes.on('end', resolve);
       upstreamRes.on('error', reject);
     });
@@ -46,72 +46,63 @@ function pipeSegment(url, res) {
   });
 }
 
-function parsePlaylist(text, baseUrl) {
+function rewritePlaylist(text, baseUrl, selfBase) {
   return text
     .split('\n')
-    .map((line) => line.trim())
-    .filter((line) => line && !line.startsWith('#'))
-    .map((line) => new URL(line, baseUrl).toString());
+    .map((line) => {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) return line;
+      const absolute = new URL(trimmed, baseUrl).toString();
+      return `${selfBase}/segment.ts?url=${encodeURIComponent(absolute)}`;
+    })
+    .join('\n');
 }
 
-app.get('/transcode.m3u8', async (req, res) => {
+app.get('/playlist.m3u8', async (req, res) => {
   const streamUrl = req.query.url;
-
   if (!streamUrl) {
     return res.status(400).json({ error: 'Missing url parameter' });
   }
 
-  console.log(`[PROXY] Starting: ${streamUrl}`);
+  try {
+    const { body, finalUrl } = await fetchText(streamUrl);
+    const selfBase = `${req.protocol}://${req.get('host')}`;
+    const rewritten = rewritePlaylist(body, finalUrl, selfBase);
 
-  let reconnectAttempts = 0;
-  let closed = false;
-  const seenSegments = new Set();
+    res.set({
+      'Content-Type': 'application/vnd.apple.mpegurl',
+      'Cache-Control': 'no-cache',
+      'Access-Control-Allow-Origin': '*'
+    });
+    res.send(rewritten);
+  } catch (err) {
+    console.error(`[PLAYLIST] Error: ${err.message}`);
+    res.status(502).json({ error: err.message });
+  }
+});
 
-  res.on('close', () => {
-    console.log(`[CLIENT] Disconnected`);
-    closed = true;
-  });
+app.get('/segment.ts', async (req, res) => {
+  const segmentUrl = req.query.url;
+  if (!segmentUrl) {
+    return res.status(400).json({ error: 'Missing url parameter' });
+  }
 
-  res.writeHead(200, {
+  res.set({
     'Content-Type': 'video/mp2t',
-    'Transfer-Encoding': 'chunked',
     'Cache-Control': 'no-cache',
-    'Connection': 'keep-alive',
     'Access-Control-Allow-Origin': '*'
   });
 
-  while (!closed && reconnectAttempts <= MAX_RECONNECTS) {
-    try {
-      const { body, finalUrl } = await fetch(streamUrl);
-      const segments = parsePlaylist(body.toString('utf8'), finalUrl);
-      const newSegments = segments.filter((s) => !seenSegments.has(s));
-
-      for (const segment of newSegments) {
-        if (closed) break;
-        seenSegments.add(segment);
-        await pipeSegment(segment, res);
-      }
-
-      if (seenSegments.size > 500) {
-        const keep = segments.slice(-100);
-        seenSegments.clear();
-        keep.forEach((s) => seenSegments.add(s));
-      }
-
-      reconnectAttempts = 0;
-      await new Promise((r) => setTimeout(r, PLAYLIST_REFRESH_INTERVAL));
-    } catch (err) {
-      console.error(`[PROXY] Error: ${err.message}`);
-      reconnectAttempts++;
-      if (reconnectAttempts <= MAX_RECONNECTS) {
-        console.log(`[PROXY] Reconnecting (attempt ${reconnectAttempts})`);
-        await new Promise((r) => setTimeout(r, RECONNECT_DELAY));
-      }
+  try {
+    await pipeBinary(segmentUrl, res);
+  } catch (err) {
+    console.error(`[SEGMENT] Error: ${err.message}`);
+    if (!res.headersSent) {
+      res.status(502).json({ error: err.message });
+    } else {
+      res.end();
     }
   }
-
-  console.log(`[PROXY] Stopping: ${streamUrl}`);
-  res.end();
 });
 
 app.get('/health', (req, res) => {
@@ -120,5 +111,5 @@ app.get('/health', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`[TRANSCODER] Running on port ${PORT}`);
-  console.log(`[TRANSCODER] Mode: HLS passthrough proxy (no ffmpeg)`);
+  console.log(`[TRANSCODER] Mode: HLS proxy (playlist + segment rewrite, no ffmpeg)`);
 });
