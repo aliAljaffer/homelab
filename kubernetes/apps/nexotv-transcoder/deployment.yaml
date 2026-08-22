@@ -27,8 +27,8 @@ spec:
           value: "true"
         - name: VIDEO_CODEC
           value: "h264"
-        - name: VIDEO_BITRATE
-          value: "2M"
+        - name: VIDEO_QUALITY
+          value: "28"
         - name: AUDIO_CODEC
           value: "aac"
         - name: AUDIO_BITRATE
