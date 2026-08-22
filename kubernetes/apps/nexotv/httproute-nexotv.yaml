@@ -24,7 +24,7 @@ spec:
         type: PathPrefix
         value: /segment.ts
     backendRefs:
-    - name: nexotv-transcoder
+    - name: nexotv-relay
       port: 7001
   - backendRefs:
     - name: nexotv
