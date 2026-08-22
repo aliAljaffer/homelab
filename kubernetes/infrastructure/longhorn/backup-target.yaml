@@ -5,6 +5,8 @@ metadata:
   name: default
   namespace: longhorn-system
 spec:
-  backupTargetURL: "s3://alialjaffer-longhorn@eu-north-1/"
+  # GCS via Longhorn's S3-compatible client. The HMAC credentials in
+  # longhorn-backup-secret carry AWS_ENDPOINTS pointing at storage.googleapis.com.
+  backupTargetURL: "s3://alialjaffer-homelab@europe-west4/longhorn/"
   credentialSecret: longhorn-backup-secret
   pollInterval: 5m0s
