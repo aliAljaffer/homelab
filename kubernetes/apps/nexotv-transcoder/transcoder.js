@@ -4,6 +4,7 @@ const https = require('https');
 const { URL } = require('url');
 
 const app = express();
+app.set('trust proxy', true);
 const PORT = process.env.PORT || 7001;
 
 function fetchText(url) {
