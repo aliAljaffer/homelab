@@ -44,7 +44,7 @@ spec:
   - group: kyverno.io
     kind: ClusterPolicy
     jqPathExpressions:
-    - .spec.rules[*].skipBackgroundRequests
+    - .spec.rules[].skipBackgroundRequests
   syncPolicy:
     automated:
       prune: true

@@ -33,10 +33,7 @@ spec:
     kind: StatefulSet
     jsonPointers:
     - /spec/persistentVolumeClaimRetentionPolicy
-  - group: apps
-    kind: StatefulSet
-    jqPathExpressions:
-    - .spec.template.spec.containers[*].startupProbe.initialDelaySeconds
+    - /spec/template/spec/containers/0/startupProbe/initialDelaySeconds
   syncPolicy:
     automated:
       prune: true
