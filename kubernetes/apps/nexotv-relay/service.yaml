@@ -3,6 +3,8 @@ kind: Service
 metadata:
   name: nexotv-relay
   namespace: stremio
+  labels:
+    app: nexotv-relay
 spec:
   selector:
     app: nexotv-relay
