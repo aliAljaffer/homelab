@@ -38,7 +38,7 @@ spec:
               name: nexotv-secrets
               key: CONFIG_SECRET
         - name: FAVORITES
-          value: "8k: bein,sa: bein,uk: sky sports premier league,uk: sky sports main event,uk: sky sports football,vip: sky sports premier league,vip: sky sports main event,vip: sky sports football,now: sky sports premier league,now: sky sports main event,now: sky sports football,uk: tnt sport,vip: tnt sport,now: tnt sport,4k: tnt,premier sport,-france,-rugby"
+          value: "8k: bein,sa: bein,uk: sky sports premier league,uk: sky sports main event,uk: sky sports football,uk: tnt sport,uk: premier sport,-france,-rugby"
         volumeMounts:
         - name: nexotv-data
           mountPath: /app/data
