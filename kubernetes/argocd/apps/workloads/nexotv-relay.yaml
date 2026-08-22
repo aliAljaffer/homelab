@@ -2,14 +2,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: nexotv-transcoder
+  name: nexotv-relay
   namespace: argocd
 spec:
   project: workloads
   source:
     repoURL: git@github.com:aliAljaffer/homelab.git
     targetRevision: main
-    path: kubernetes/apps/nexotv-transcoder
+    path: kubernetes/apps/nexotv-relay
   destination:
     server: https://kubernetes.default.svc
     namespace: stremio

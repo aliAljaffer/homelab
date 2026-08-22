@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: nexotv-transcoder
+  name: nexotv-relay
   namespace: stremio
 spec:
   selector:
-    app: nexotv-transcoder
+    app: nexotv-relay
   ports:
   - port: 7001
     targetPort: 7001

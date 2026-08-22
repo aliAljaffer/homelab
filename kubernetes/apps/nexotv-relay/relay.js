@@ -170,6 +170,6 @@ app.get('/health', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`[TRANSCODER] Running on port ${PORT}`);
-  console.log(`[TRANSCODER] Mode: HLS proxy (playlist + segment rewrite, no ffmpeg)`);
+  console.log(`[RELAY] Running on port ${PORT}`);
+  console.log(`[RELAY] Mode: HLS proxy (playlist + segment rewrite, no ffmpeg)`);
 });

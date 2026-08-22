@@ -1,28 +1,28 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nexotv-transcoder
+  name: nexotv-relay
   namespace: stremio
   labels:
-    app: nexotv-transcoder
+    app: nexotv-relay
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: nexotv-transcoder
+      app: nexotv-relay
   template:
     metadata:
       labels:
-        app: nexotv-transcoder
+        app: nexotv-relay
     spec:
       volumes:
-      - name: nexotv-transcoder-src
+      - name: nexotv-relay-src
         configMap:
-          name: nexotv-transcoder-src
+          name: nexotv-relay-src
       containers:
-      - name: transcoder
+      - name: relay
         image: node:20-slim
-        command: ["sh", "-c", "npm install express && node /app/transcoder.js"]
+        command: ["sh", "-c", "npm install express && node /app/relay.js"]
         workingDir: /app
         ports:
         - containerPort: 7001
@@ -30,9 +30,9 @@ spec:
         - name: PORT
           value: "7001"
         volumeMounts:
-        - name: nexotv-transcoder-src
-          mountPath: /app/transcoder.js
-          subPath: transcoder.js
+        - name: nexotv-relay-src
+          mountPath: /app/relay.js
+          subPath: relay.js
         resources:
           requests:
             cpu: 250m
