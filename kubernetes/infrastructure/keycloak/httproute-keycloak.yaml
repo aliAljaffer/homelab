@@ -5,11 +5,13 @@ metadata:
   name: keycloak
   namespace: keycloak
   annotations:
-    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
 spec:
   parentRefs:
-  - name: cloudflare-tunnel
-    namespace: cloudflare-tunnel-system
+  - group: gateway.networking.k8s.io
+    kind: Gateway
+    name: homelab-gateway
+    namespace: kube-system
     sectionName: https
   hostnames:
   - kc.alialjaffer.com
