@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nexotv
+  name: nexotv
+  namespace: stremio
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: nexotv
+  template:
+    metadata:
+      labels:
+        app: nexotv
+    spec:
+      volumes:
+      - name: nexotv-data
+        persistentVolumeClaim:
+          claimName: nexotv-data
+      containers:
+      - image: savibrabo/nexotv:2.1.0
+        name: nexotv
+        env:
+        - name: PORT
+          value: "7000"
+        - name: CONFIG_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: nexotv-secrets
+              key: CONFIG_SECRET
+        volumeMounts:
+        - name: nexotv-data
+          mountPath: /app/data
+        ports:
+        - containerPort: 7000
+          protocol: TCP
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: "1"
+            memory: 512Mi
