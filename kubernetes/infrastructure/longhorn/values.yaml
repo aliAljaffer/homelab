@@ -11,6 +11,7 @@ persistence:
   defaultClass: true
   defaultClassReplicaCount: "2"
   defaultFsType: ext4
+  reclaimPolicy: Retain
   recurringJobSelector:
     enable: true
     jobList: '[{"name":"default","isGroup":true}]'
