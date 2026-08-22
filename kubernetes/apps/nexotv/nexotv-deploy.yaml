@@ -38,7 +38,7 @@ spec:
               name: nexotv-secrets
               key: CONFIG_SECRET
         - name: FAVORITES
-          value: "uk: sky sports football,uk: sky sports main event,uk: sky sports premier league,uk: tnt sport 1 raw,uk: tnt sport 2 raw,uk: tnt sport 3 raw,uk: tnt sport 4 raw,uk: tnt sports 1 raw,uk: tnt sports 2 raw,uk: tnt sports 3 raw,uk: tnt sports 4 raw,uk: tnt sports 1 hevc 4k,uk: tnt sports 2 hevc 4k,uk: tnt sports 3 hevc 4k,uk: tnt sports 4 hevc 4k,uk: itv 1 4k,uk: itv 2 4k,uk: itv 3 4k,uk: itv 4 4k,uk: itv 1 hevc 4k,uk: itv 2 hevc 4k,uk: itv 3 hevc 4k,uk: itv 4 hevc 4k"
+          value: "uk: sky sports football,uk: sky sports main event,uk: sky sports premier league,uk: tnt sport 1 raw,uk: tnt sport 2 raw,uk: tnt sport 3 raw,uk: tnt sport 4 raw,uk: tnt sports 1 raw,uk: tnt sports 2 raw,uk: tnt sports 3 raw,uk: tnt sports 4 raw,uk: tnt sports 1 hevc 4k,uk: tnt sports 2 hevc 4k,uk: tnt sports 3 hevc 4k,uk: tnt sports 4 hevc 4k,uk: itv 1 4k,uk: itv 2 4k,uk: itv 3 4k,uk: itv 4 4k,uk: itv 1 hevc 4k,uk: itv 2 hevc 4k,uk: itv 3 hevc 4k,uk: itv 4 hevc 4k,8k: bein&raw,sa: bein&raw,8k: bein&4k,sa: bein&4k,8k: bein&uhd,sa: bein&uhd,-france"
         volumeMounts:
         - name: nexotv-data
           mountPath: /app/data
