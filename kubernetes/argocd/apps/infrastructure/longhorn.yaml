@@ -31,6 +31,9 @@ spec:
     kind: HTTPRoute
     jsonPointers:
     - /status
+    - /spec/rules/0/backendRefs/0/group
+    - /spec/rules/0/backendRefs/0/kind
+    - /spec/rules/0/backendRefs/0/weight
   syncPolicy:
     automated:
       prune: true
