@@ -22,10 +22,11 @@ spec:
       containers:
       - name: relay
         image: node:20-slim
-        command: ["sh", "-c", "npm install express && node /app/relay.js"]
+        command: ["sh", "-c", "npm install express prom-client && node /app/relay.js"]
         workingDir: /app
         ports:
-        - containerPort: 7001
+        - name: http
+          containerPort: 7001
         env:
         - name: PORT
           value: "7001"

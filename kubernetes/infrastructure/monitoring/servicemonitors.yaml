@@ -131,3 +131,22 @@ spec:
     matchLabels:
       app.kubernetes.io/name: loki
       app.kubernetes.io/component: memcached-results-cache
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: nexotv-relay
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+  selector:
+    matchLabels:
+      app: nexotv-relay
+  namespaceSelector:
+    matchNames:
+      - stremio
