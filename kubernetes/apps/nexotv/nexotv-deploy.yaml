@@ -30,6 +30,8 @@ spec:
         env:
         - name: PORT
           value: "7000"
+        - name: TRANSCODER_URL
+          value: "http://nexotv-transcoder.stremio.svc.cluster.local:7001"
         - name: CONFIG_SECRET
           valueFrom:
             secretKeyRef:

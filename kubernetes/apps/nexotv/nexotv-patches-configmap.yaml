@@ -582,6 +582,7 @@ data:
                                     return false;
                                 return favPatterns.some(p => name.includes(p));
                             });
+                            items = items.filter((i) => !/[0-9]{2,}/.test(i.name || ''));
                             const favLowQuality = (n) => /\b(sd|lq)\b/i.test(n || '') ? 1 : 0;
                             items.sort((a, b) => (favLowQuality(a.name) - favLowQuality(b.name)) ||
                                 String(a.name || '').localeCompare(String(b.name || '')));
@@ -619,6 +620,17 @@ data:
                     const streams = await addonInstance.getStreams(id);
                     if (!streams || streams.length === 0)
                         return { streams: [] };
+                    
+                    const transcoderUrl = process.env.TRANSCODER_URL;
+                    if (transcoderUrl) {
+                        for (const stream of streams) {
+                            if (stream.url) {
+                                const originalUrl = stream.url;
+                                stream.url = `${transcoderUrl}/transcode?url=${encodeURIComponent(originalUrl)}`;
+                            }
+                        }
+                    }
+                    
                     if (env_1.default.DEBUG) {
                         console.log('[DEBUG] Stream request', { id, count: streams.length });
                     }
@@ -657,4 +669,226 @@ data:
         }
     }
     exports.default = createAddon;
-  stremio.js: "\"use strict\";\nvar __importDefault = (this && this.__importDefault) || function (mod) {\n    return (mod && mod.__esModule) ? mod : { \"default\": mod };\n};\nObject.defineProperty(exports, \"__esModule\", { value: true });\nconst express_1 = require(\"express\");\nconst stremio_addon_sdk_1 = require(\"stremio-addon-sdk\");\nconst rateLimiter_1 = require(\"../middleware/rateLimiter\");\nconst crypto_1 = __importDefault(require(\"crypto\"));\nconst cryptoConfig_1 = require(\"../utils/cryptoConfig\");\nconst builder_1 = __importDefault(require(\"../addon/builder\"));\nconst env_1 = __importDefault(require(\"../config/env\"));\nconst logger_1 = require(\"../utils/logger\");\nconst lruCache_1 = __importDefault(require(\"../utils/lruCache\"));\nconst http_1 = __importDefault(require(\"http\"));\nconst https_1 = __importDefault(require(\"https\"));\nconst url_1 = require(\"url\");\nconst log = (0, logger_1.makeLogger)();\nconst router = (0, express_1.Router)();\nconst INTERFACE_TTL_MS = env_1.default.CACHE_TTL_MS;\nconst interfaceCache = new lruCache_1.default({ max: env_1.default.MAX_CACHE_ENTRIES, ttl: INTERFACE_TTL_MS });\nconst CACHE_ENABLED = env_1.default.CACHE_ENABLED;\nconst tokenHashCache = new Map();\nfunction maybeDecryptConfig(token) {\n    return (0, cryptoConfig_1.tryParseConfigToken)(token);\n}\nconst STATIC_PREFIXES = new Set(['css', 'js', 'html', 'logo', 'images', 'fonts', 'assets']);\nfunction isConfigToken(token) {\n    if (!token)\n        return false;\n    if (STATIC_PREFIXES.has(token.toLowerCase()))\n        return false;\n    if (token.startsWith('enc:'))\n        return true;\n    if (token.length < 4)\n        return false;\n    return true;\n}\nrouter.use('/:token', async (req, res, next) => {\n    const { token } = req.params;\n    if (!isConfigToken(token))\n        return next('route');\n    if (req.path.startsWith('/configure'))\n        return next();\n    let config;\n    try {\n        config = maybeDecryptConfig(token);\n    }\n    catch (e) {\n        const tokenHash = crypto_1.default.createHash('sha256').update(token).digest('hex').slice(0, 8);\n        log.debug('Config parse failed', `[token:${tokenHash}…]`, e.message);\n        return res.status(400).json({ error: 'Invalid configuration token' });\n    }\n    config.provider = config.provider || 'xtream';\n    let ifaceKey = tokenHashCache.get(token);\n    if (!ifaceKey) {\n        ifaceKey = 'iface:' + crypto_1.default.createHash('md5').update(token).digest('hex');\n        if (tokenHashCache.size < env_1.default.MAX_CACHE_ENTRIES)\n            tokenHashCache.set(token, ifaceKey);\n    }\n    let iface = CACHE_ENABLED ? interfaceCache.get(ifaceKey) : null;\n    if (!iface) {\n        try {\n            log.debug('Building addon interface (cache miss)', ifaceKey);\n            iface = await (0, builder_1.default)(config);\n            if (CACHE_ENABLED) {\n                interfaceCache.set(ifaceKey, iface);\n            }\n        }\n        catch (e) {\n            console.error('[SERVER] Addon build failed:', e);\n            return res.status(500).json({ error: 'Addon build error' });\n        }\n    }\n    else {\n        log.debug('Interface cache hit', ifaceKey);\n    }\n    req.addonInterface = iface;\n    req.configToken = token;\n    req.userConfig = config;\n    next();\n});\nconst logo_1 = __importDefault(require(\"./logo\"));\nrouter.use(logo_1.default);\nrouter.get('/:token/manifest.json', rateLimiter_1.tokenLimiter, (req, res) => {\n    const iface = req.addonInterface;\n    if (!iface)\n        return res.status(500).json({ error: 'Interface not ready' });\n    if (!iface._cleanManifest) {\n        const m = JSON.parse(JSON.stringify(iface.manifest));\n        if (m.behaviorHints) {\n            delete m.behaviorHints.configurationRequired;\n        }\n        iface._cleanManifest = m;\n    }\n    const manifest = JSON.parse(JSON.stringify(iface._cleanManifest));\n    const baseUrl = `${req.protocol}://${req.get('host')}`;\n    if (manifest.behaviorHints) {\n        manifest.behaviorHints.configureUrl = `${baseUrl}/${req.configToken}/configure`;\n    }\n    res.setHeader('Content-Type', 'application/json; charset=utf-8');\n    res.setHeader('Access-Control-Allow-Origin', '*');\n    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');\n    res.setHeader('Pragma', 'no-cache');\n    res.setHeader('Expires', '0');\n    res.end(JSON.stringify(manifest));\n});\nrouter.get('/:token/proxy/:streamId', async (req, res) => {\n    const iface = req.addonInterface;\n    const config = req.userConfig;\n    if (!iface || !config) {\n        return res.status(500).json({ error: 'Interface not ready' });\n    }\n    const { streamId } = req.params;\n    const addonInstance = iface.addonInstance;\n    if (!addonInstance) {\n        return res.status(500).json({ error: 'Addon instance not available' });\n    }\n    await addonInstance.ensureDataLoaded();\n    const channel = addonInstance.channelMap.get(streamId);\n    if (!channel) {\n        return res.status(404).json({ error: 'Channel not found' });\n    }\n    const streamUrl = channel.url;\n    if (!streamUrl) {\n        return res.status(404).json({ error: 'No stream URL for channel' });\n    }\n    log.debug('Proxying stream', { streamId, url: streamUrl });\n    const parsedUrl = new url_1.URL(streamUrl);\n    const isHttps = parsedUrl.protocol === 'https:';\n    const httpModule = isHttps ? https_1.default : http_1.default;\n    let reconnectAttempts = 0;\n    const maxReconnects = 10;\n    const reconnectDelay = 2000;\n    let headersSent = false;\n    function connectToStream() {\n        const proxyReq = httpModule.request({\n            hostname: parsedUrl.hostname,\n            port: parsedUrl.port || (isHttps ? 443 : 80),\n            path: parsedUrl.pathname + parsedUrl.search,\n            method: 'GET',\n            headers: {\n                'User-Agent': 'Mozilla/5.0',\n                'Connection': 'keep-alive'\n            }\n        }, (proxyRes) => {\n            if (!headersSent) {\n                headersSent = true;\n                res.writeHead(proxyRes.statusCode || 200, {\n                    'Content-Type': proxyRes.headers['content-type'] || 'video/mp2t',\n                    'Transfer-Encoding': 'chunked',\n                    'Cache-Control': 'no-cache',\n                    'Connection': 'keep-alive',\n                    'Access-Control-Allow-Origin': '*'\n                });\n            }\n            proxyRes.on('data', (chunk) => {\n                if (!res.write(chunk)) {\n                    proxyReq.pause();\n                }\n            });\n            res.on('drain', () => {\n                proxyReq.resume();\n            });\n            proxyRes.on('end', () => {\n                if (reconnectAttempts < maxReconnects) {\n                    reconnectAttempts++;\n                    log.debug('Stream ended, reconnecting', { attempt: reconnectAttempts, streamId });\n                    setTimeout(connectToStream, reconnectDelay);\n                } else {\n                    log.debug('Max reconnects reached', { streamId });\n                    res.end();\n                }\n            });\n            proxyRes.on('error', (err) => {\n                log.error('Stream response error', { err: err.message, streamId });\n                if (reconnectAttempts < maxReconnects) {\n                    reconnectAttempts++;\n                    setTimeout(connectToStream, reconnectDelay);\n                } else {\n                    res.end();\n                }\n            });\n        });\n        proxyReq.on('error', (err) => {\n            log.error('Proxy request error', { err: err.message, streamId });\n            if (reconnectAttempts < maxReconnects) {\n                reconnectAttempts++;\n                setTimeout(connectToStream, reconnectDelay);\n            } else {\n                if (!headersSent) {\n                    res.status(502).json({ error: 'Proxy error' });\n                } else {\n                    res.end();\n                }\n            }\n        });\n        proxyReq.end();\n    }\n    res.on('close', () => {\n        log.debug('Client disconnected', { streamId });\n    });\n    connectToStream();\n});\nrouter.use('/:token', rateLimiter_1.tokenLimiter, (req, res, next) => {\n    const iface = req.addonInterface;\n    if (!iface)\n        return res.status(500).json({ error: 'Interface not ready' });\n    const baseUrl = `${req.protocol}://${req.get('host')}/${req.configToken}`;\n    builder_1.default.setProxyBaseUrl(baseUrl);\n    const sdkRouter = (0, stremio_addon_sdk_1.getRouter)(iface);\n    sdkRouter(req, res, (err) => {\n        if (err) {\n            console.error('[SERVER] Router error:', err);\n            res.status(500).json({ error: 'Addon error' });\n        }\n        else {\n            res.status(404).json({ error: 'Not found' });\n        }\n    });\n});\nexports.default = router;\n"
+  stremio.js: |
+    "use strict";
+    var __importDefault = (this && this.__importDefault) || function (mod) {
+        return (mod && mod.__esModule) ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports, "__esModule", { value: true });
+    const express_1 = require("express");
+    const stremio_addon_sdk_1 = require("stremio-addon-sdk");
+    const rateLimiter_1 = require("../middleware/rateLimiter");
+    const crypto_1 = __importDefault(require("crypto"));
+    const cryptoConfig_1 = require("../utils/cryptoConfig");
+    const builder_1 = __importDefault(require("../addon/builder"));
+    const env_1 = __importDefault(require("../config/env"));
+    const logger_1 = require("../utils/logger");
+    const lruCache_1 = __importDefault(require("../utils/lruCache"));
+    const http_1 = __importDefault(require("http"));
+    const https_1 = __importDefault(require("https"));
+    const url_1 = require("url");
+    const log = (0, logger_1.makeLogger)();
+    const router = (0, express_1.Router)();
+    const INTERFACE_TTL_MS = env_1.default.CACHE_TTL_MS;
+    const interfaceCache = new lruCache_1.default({ max: env_1.default.MAX_CACHE_ENTRIES, ttl: INTERFACE_TTL_MS });
+    const CACHE_ENABLED = env_1.default.CACHE_ENABLED;
+    const tokenHashCache = new Map();
+    function maybeDecryptConfig(token) {
+        return (0, cryptoConfig_1.tryParseConfigToken)(token);
+    }
+    const STATIC_PREFIXES = new Set(['css', 'js', 'html', 'logo', 'images', 'fonts', 'assets']);
+    function isConfigToken(token) {
+        if (!token)
+            return false;
+        if (STATIC_PREFIXES.has(token.toLowerCase()))
+            return false;
+        if (token.startsWith('enc:'))
+            return true;
+        if (token.length < 4)
+            return false;
+        return true;
+    }
+    router.use('/:token', async (req, res, next) => {
+        const { token } = req.params;
+        if (!isConfigToken(token))
+            return next('route');
+        if (req.path.startsWith('/configure'))
+            return next();
+        let config;
+        try {
+            config = maybeDecryptConfig(token);
+        }
+        catch (e) {
+            const tokenHash = crypto_1.default.createHash('sha256').update(token).digest('hex').slice(0, 8);
+            log.debug('Config parse failed', `[token:${tokenHash}…]`, e.message);
+            return res.status(400).json({ error: 'Invalid configuration token' });
+        }
+        config.provider = config.provider || 'xtream';
+        let ifaceKey = tokenHashCache.get(token);
+        if (!ifaceKey) {
+            ifaceKey = 'iface:' + crypto_1.default.createHash('md5').update(token).digest('hex');
+            if (tokenHashCache.size < env_1.default.MAX_CACHE_ENTRIES)
+                tokenHashCache.set(token, ifaceKey);
+        }
+        let iface = CACHE_ENABLED ? interfaceCache.get(ifaceKey) : null;
+        if (!iface) {
+            try {
+                log.debug('Building addon interface (cache miss)', ifaceKey);
+                iface = await (0, builder_1.default)(config);
+                if (CACHE_ENABLED) {
+                    interfaceCache.set(ifaceKey, iface);
+                }
+            }
+            catch (e) {
+                console.error('[SERVER] Addon build failed:', e);
+                return res.status(500).json({ error: 'Addon build error' });
+            }
+        }
+        else {
+            log.debug('Interface cache hit', ifaceKey);
+        }
+        req.addonInterface = iface;
+        req.configToken = token;
+        req.userConfig = config;
+        next();
+    });
+    const logo_1 = __importDefault(require("./logo"));
+    router.use(logo_1.default);
+    router.get('/:token/manifest.json', rateLimiter_1.tokenLimiter, (req, res) => {
+        const iface = req.addonInterface;
+        if (!iface)
+            return res.status(500).json({ error: 'Interface not ready' });
+        if (!iface._cleanManifest) {
+            const m = JSON.parse(JSON.stringify(iface.manifest));
+            if (m.behaviorHints) {
+                delete m.behaviorHints.configurationRequired;
+            }
+            iface._cleanManifest = m;
+        }
+        const manifest = JSON.parse(JSON.stringify(iface._cleanManifest));
+        const baseUrl = `${req.protocol}://${req.get('host')}`;
+        if (manifest.behaviorHints) {
+            manifest.behaviorHints.configureUrl = `${baseUrl}/${req.configToken}/configure`;
+        }
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+        res.end(JSON.stringify(manifest));
+    });
+    router.get('/:token/proxy/:streamId', async (req, res) => {
+        const iface = req.addonInterface;
+        const config = req.userConfig;
+        if (!iface || !config) {
+            return res.status(500).json({ error: 'Interface not ready' });
+        }
+        const { streamId } = req.params;
+        const addonInstance = iface.addonInstance;
+        if (!addonInstance) {
+            return res.status(500).json({ error: 'Addon instance not available' });
+        }
+        await addonInstance.ensureDataLoaded();
+        const channel = addonInstance.channelMap.get(streamId);
+        if (!channel) {
+            return res.status(404).json({ error: 'Channel not found' });
+        }
+        const streamUrl = channel.url;
+        if (!streamUrl) {
+            return res.status(404).json({ error: 'No stream URL for channel' });
+        }
+        log.debug('Proxying stream', { streamId, url: streamUrl });
+        const parsedUrl = new url_1.URL(streamUrl);
+        const isHttps = parsedUrl.protocol === 'https:';
+        const httpModule = isHttps ? https_1.default : http_1.default;
+        let reconnectAttempts = 0;
+        const maxReconnects = 10;
+        const reconnectDelay = 2000;
+        let headersSent = false;
+        function connectToStream() {
+            const proxyReq = httpModule.request({
+                hostname: parsedUrl.hostname,
+                port: parsedUrl.port || (isHttps ? 443 : 80),
+                path: parsedUrl.pathname + parsedUrl.search,
+                method: 'GET',
+                headers: {
+                    'User-Agent': 'Mozilla/5.0',
+                    'Connection': 'keep-alive'
+                }
+            }, (proxyRes) => {
+                if (!headersSent) {
+                    headersSent = true;
+                    res.writeHead(proxyRes.statusCode || 200, {
+                        'Content-Type': proxyRes.headers['content-type'] || 'video/mp2t',
+                        'Transfer-Encoding': 'chunked',
+                        'Cache-Control': 'no-cache',
+                        'Connection': 'keep-alive',
+                        'Access-Control-Allow-Origin': '*'
+                    });
+                }
+                proxyRes.on('data', (chunk) => {
+                    if (!res.write(chunk)) {
+                        proxyReq.pause();
+                    }
+                });
+                res.on('drain', () => {
+                    proxyReq.resume();
+                });
+                proxyRes.on('end', () => {
+                    if (reconnectAttempts < maxReconnects) {
+                        reconnectAttempts++;
+                        log.debug('Stream ended, reconnecting', { attempt: reconnectAttempts, streamId });
+                        setTimeout(connectToStream, reconnectDelay);
+                    } else {
+                        log.debug('Max reconnects reached', { streamId });
+                        res.end();
+                    }
+                });
+                proxyRes.on('error', (err) => {
+                    log.error('Stream response error', { err: err.message, streamId });
+                    if (reconnectAttempts < maxReconnects) {
+                        reconnectAttempts++;
+                        setTimeout(connectToStream, reconnectDelay);
+                    } else {
+                        res.end();
+                    }
+                });
+            });
+            proxyReq.on('error', (err) => {
+                log.error('Proxy request error', { err: err.message, streamId });
+                if (reconnectAttempts < maxReconnects) {
+                    reconnectAttempts++;
+                    setTimeout(connectToStream, reconnectDelay);
+                } else {
+                    if (!headersSent) {
+                        res.status(502).json({ error: 'Proxy error' });
+                    } else {
+                        res.end();
+                    }
+                }
+            });
+            proxyReq.end();
+        }
+        res.on('close', () => {
+            log.debug('Client disconnected', { streamId });
+        });
+        connectToStream();
+    });
+    router.use('/:token', rateLimiter_1.tokenLimiter, (req, res, next) => {
+        const iface = req.addonInterface;
+        if (!iface)
+            return res.status(500).json({ error: 'Interface not ready' });
+        const baseUrl = `${req.protocol}://${req.get('host')}/${req.configToken}`;
+        builder_1.default.setProxyBaseUrl(baseUrl);
+        const sdkRouter = (0, stremio_addon_sdk_1.getRouter)(iface);
+        sdkRouter(req, res, (err) => {
+            if (err) {
+                console.error('[SERVER] Router error:', err);
+                res.status(500).json({ error: 'Addon error' });
+            }
+            else {
+                res.status(404).json({ error: 'Not found' });
+            }
+        });
+    });
+    exports.default = router;
