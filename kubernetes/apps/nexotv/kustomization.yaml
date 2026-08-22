@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
 - nexotv-pvc.yaml
 - nexotv-secrets.sealed.yaml
+- nexotv-patches-configmap.yaml
 - nexotv-deploy.yaml
 - nexotv-svc.yaml
 - httproute-nexotv.yaml

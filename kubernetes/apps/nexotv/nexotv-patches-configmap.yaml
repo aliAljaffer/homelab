@@ -1,0 +1,655 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nexotv-patches
+  namespace: stremio
+data:
+  env.js: |
+    "use strict";
+    var __importDefault = (this && this.__importDefault) || function (mod) {
+        return (mod && mod.__esModule) ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.repoRoot = void 0;
+    const dotenv_1 = __importDefault(require("dotenv"));
+    const path_1 = __importDefault(require("path"));
+    const fs_1 = __importDefault(require("fs"));
+    // Walk up from __dirname until we find pnpm-workspace.yaml (monorepo root).
+    // Works for both tsx (src/config/) and compiled (dist/src/config/) contexts.
+    function findRepoRoot(startDir) {
+        let dir = startDir;
+        while (true) {
+            if (fs_1.default.existsSync(path_1.default.join(dir, 'pnpm-workspace.yaml')))
+                return dir;
+            const parent = path_1.default.dirname(dir);
+            if (parent === dir)
+                return startDir; // filesystem root — fallback
+            dir = parent;
+        }
+    }
+    const repoRoot = findRepoRoot(__dirname);
+    exports.repoRoot = repoRoot;
+    dotenv_1.default.config({ path: path_1.default.join(repoRoot, '.env') });
+    const env = {
+        PORT: parseInt(process.env.PORT || '7000', 10),
+        DEBUG: (process.env.DEBUG_MODE || '').toLowerCase() === 'true',
+        CACHE_ENABLED: (process.env.CACHE_ENABLED || 'true').toLowerCase() !== 'false',
+        CACHE_TTL_MS: parseInt(process.env.CACHE_TTL_MS || '86400000', 10),
+        MAX_CACHE_ENTRIES: parseInt(process.env.MAX_CACHE_ENTRIES || '300', 10),
+        PREFETCH_ENABLED: (process.env.PREFETCH_ENABLED || 'true').toLowerCase() !== 'false',
+        PREFETCH_MAX_BYTES: parseInt(process.env.PREFETCH_MAX_BYTES || '150000000', 10),
+        ADDON_NAME: process.env.ADDON_NAME || 'NexoTV',
+        ADDON_DESCRIPTION: process.env.ADDON_DESCRIPTION || 'Stream your IPTV channels in Stremio',
+        ADDON_LOGO_URL: process.env.ADDON_LOGO_URL || 'https://raw.githubusercontent.com/joaosavi/nexotv/refs/heads/main/public/assets/logo.png',
+        ADDON_BACKGROUND_URL: process.env.ADDON_BACKGROUND_URL || 'https://raw.githubusercontent.com/joaosavi/nexotv/refs/heads/main/public/assets/background.png',
+        LOGO_CACHE_ENABLED: (process.env.LOGO_CACHE_ENABLED || 'true').toLowerCase() !== 'false',
+        CONFIG_SECRET: process.env.CONFIG_SECRET || null,
+        IP_RATE_LIMIT_ENABLED: (process.env.IP_RATE_LIMIT_ENABLED || 'true').toLowerCase() !== 'false',
+        IP_RATE_LIMIT_WINDOW_MS: parseInt(process.env.IP_RATE_LIMIT_WINDOW_MS || '300000', 10),
+        IP_RATE_LIMIT_MAX: parseInt(process.env.IP_RATE_LIMIT_MAX || '300', 10),
+        TOKEN_RATE_LIMIT_ENABLED: (process.env.TOKEN_RATE_LIMIT_ENABLED || 'true').toLowerCase() !== 'false',
+        TOKEN_RATE_LIMIT_WINDOW_MS: parseInt(process.env.TOKEN_RATE_LIMIT_WINDOW_MS || '60000', 10),
+        TOKEN_RATE_LIMIT_MAX: parseInt(process.env.TOKEN_RATE_LIMIT_MAX || '60', 10),
+        SQLITE_PATH: process.env.SQLITE_PATH || null,
+        SQLITE_GC_INTERVAL_MS: parseInt(process.env.SQLITE_GC_INTERVAL_MS || '21600000', 10),
+        SQLITE_VACUUM_INTERVAL_MS: parseInt(process.env.SQLITE_VACUUM_INTERVAL_MS || '604800000', 10),
+        IPTV_ORG_CACHE_TTL_MS: parseInt(process.env.IPTV_ORG_CACHE_TTL_MS || '') || 86400000,
+        M3U_CACHE_TTL_MS: parseInt(process.env.M3U_CACHE_TTL_MS || '') || 86400000,
+        ALLOW_LOCAL_URLS: (process.env.ALLOW_LOCAL_URLS || 'false').toLowerCase() === 'true',
+        DATA_MEMORY_TTL_MS: parseInt(process.env.DATA_MEMORY_TTL_MS || '300000', 10),
+        UPDATE_INTERVAL_MS: parseInt(process.env.UPDATE_INTERVAL_MS || '14400000', 10),
+        MIN_UPDATE_INTERVAL_MS: parseInt(process.env.MIN_UPDATE_INTERVAL_MS || '1800000', 10),
+        EPG_UPDATE_INTERVAL_MS: parseInt(process.env.EPG_UPDATE_INTERVAL_MS || '') || 28800000,
+        EPG_MAX_BYTES: parseInt(process.env.EPG_MAX_BYTES || '104857600', 10),
+        CATALOG_PAGE_SIZE: parseInt(process.env.CATALOG_PAGE_SIZE || '100', 10),
+        FETCH_TIMEOUT_MS: parseInt(process.env.FETCH_TIMEOUT_MS || '30000', 10),
+        EPG_FETCH_TIMEOUT_MS: parseInt(process.env.EPG_FETCH_TIMEOUT_MS || '60000', 10),
+        PREFETCH_TIMEOUT_MS: parseInt(process.env.PREFETCH_TIMEOUT_MS || '45000', 10),
+        LOGO_TIMEOUT_MS: parseInt(process.env.LOGO_TIMEOUT_MS || '10000', 10),
+        FAVORITES: (process.env.FAVORITES || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean),
+    };
+    exports.default = env;
+    
+  M3UEPGAddon.js: |
+    "use strict";
+    var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+        if (k2 === undefined) k2 = k;
+        var desc = Object.getOwnPropertyDescriptor(m, k);
+        if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+          desc = { enumerable: true, get: function() { return m[k]; } };
+        }
+        Object.defineProperty(o, k2, desc);
+    }) : (function(o, m, k, k2) {
+        if (k2 === undefined) k2 = k;
+        o[k2] = m[k];
+    }));
+    var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+        Object.defineProperty(o, "default", { enumerable: true, value: v });
+    }) : function(o, v) {
+        o["default"] = v;
+    });
+    var __importStar = (this && this.__importStar) || (function () {
+        var ownKeys = function(o) {
+            ownKeys = Object.getOwnPropertyNames || function (o) {
+                var ar = [];
+                for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+                return ar;
+            };
+            return ownKeys(o);
+        };
+        return function (mod) {
+            if (mod && mod.__esModule) return mod;
+            var result = {};
+            if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+            __setModuleDefault(result, mod);
+            return result;
+        };
+    })();
+    var __importDefault = (this && this.__importDefault) || function (mod) {
+        return (mod && mod.__esModule) ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.CACHE_ENABLED = exports.M3UEPGAddon = exports.buildPromiseCache = void 0;
+    exports.createCacheKey = createCacheKey;
+    const crypto_1 = __importDefault(require("crypto"));
+    const lruCache_1 = __importDefault(require("../utils/lruCache"));
+    const sqliteCache = __importStar(require("../utils/sqliteCache"));
+    const logger_1 = require("../utils/logger");
+    const epgParser_1 = require("../parsers/epgParser");
+    const env_1 = __importDefault(require("../config/env"));
+    const xtreamProvider = __importStar(require("../providers/xtreamProvider"));
+    const iptvOrgProvider = __importStar(require("../providers/iptvOrgProvider"));
+    const m3uProvider = __importStar(require("../providers/m3uProvider"));
+    const CACHE_ENABLED = env_1.default.CACHE_ENABLED;
+    exports.CACHE_ENABLED = CACHE_ENABLED;
+    const CACHE_TTL_MS = env_1.default.CACHE_TTL_MS;
+    const MAX_CACHE_ENTRIES = env_1.default.MAX_CACHE_ENTRIES;
+    if (CACHE_ENABLED) {
+        sqliteCache.init(env_1.default.SQLITE_PATH);
+    }
+    exports.buildPromiseCache = new lruCache_1.default({ max: MAX_CACHE_ENTRIES, ttl: CACHE_TTL_MS });
+    const PROVIDER_MAP = {
+        'xtream': xtreamProvider,
+        'iptv-org': iptvOrgProvider,
+        'm3u': m3uProvider,
+    };
+    function stableStringify(obj) {
+        return JSON.stringify(obj, Object.keys(obj).sort());
+    }
+    function createCacheKey(config) {
+        const provider = config.provider || 'xtream';
+        let minimal;
+        if (provider === 'iptv-org') {
+            minimal = {
+                provider,
+                iptvOrgCountry: config.iptvOrgCountry || null,
+                iptvOrgCategory: config.iptvOrgCategory || null,
+            };
+        }
+        else if (provider === 'm3u') {
+            minimal = {
+                provider,
+                m3uUrl: config.m3uUrl || null,
+                enableEpg: !!config.enableEpg,
+                epgUrl: config.epgUrl || null,
+                epgOffsetHours: config.epgOffsetHours,
+                reformatLogos: !!config.reformatLogos,
+            };
+        }
+        else {
+            minimal = {
+                provider: 'xtream',
+                epgUrl: config.epgUrl,
+                enableEpg: !!config.enableEpg,
+                xtreamUrl: config.xtreamUrl,
+                xtreamUsername: config.xtreamUsername,
+                epgOffsetHours: config.epgOffsetHours,
+                reformatLogos: !!config.reformatLogos
+            };
+        }
+        return crypto_1.default.createHash('md5').update(stableStringify(minimal)).digest('hex');
+    }
+    class M3UEPGAddon {
+        constructor(config = {}, manifestRef) {
+            this.providerName = config.provider || 'xtream';
+            this.config = config;
+            this.manifestRef = manifestRef;
+            this.cacheKey = createCacheKey(config);
+            this.idPrefix = this.cacheKey.slice(0, 8);
+            this.updateInterval = env_1.default.UPDATE_INTERVAL_MS;
+            this.channels = [];
+            this.channelMap = new Map();
+            this.epgData = {};
+            this.lastUpdate = 0;
+            this.m3uEtag = null;
+            this.m3uLastModified = null;
+            this.iptvOrgEtag = null;
+            this.xtreamEtag = null;
+            this.lastEpgUpdate = null;
+            this._evictTimer = null;
+            this._updateTimer = null;
+            this._loadPromise = null;
+            this.firstCatalogRefreshDone = false;
+            this.firstCatalogRefreshPromise = null;
+            const TTL_MAP = {
+                'iptv-org': env_1.default.IPTV_ORG_CACHE_TTL_MS,
+                'm3u': env_1.default.M3U_CACHE_TTL_MS,
+            };
+            this.cacheTtl = TTL_MAP[this.providerName] ?? CACHE_TTL_MS;
+            this.log = (0, logger_1.makeLogger)();
+            if (typeof this.config.epgOffsetHours === 'string') {
+                const n = parseFloat(this.config.epgOffsetHours);
+                if (!isNaN(n))
+                    this.config.epgOffsetHours = n;
+            }
+            if (typeof this.config.epgOffsetHours !== 'number' || !isFinite(this.config.epgOffsetHours))
+                this.config.epgOffsetHours = 0;
+            if (Math.abs(this.config.epgOffsetHours) > 48)
+                this.config.epgOffsetHours = 0;
+            if (this.providerName === 'iptv-org' || this.providerName === 'm3u') {
+                this.config.reformatLogos = true;
+            }
+            this.log.debug('Addon instance created', {
+                provider: this.providerName,
+                cacheKey: this.cacheKey,
+                epgOffsetHours: this.config.epgOffsetHours
+            });
+        }
+        async saveChannelsToCache() {
+            if (!CACHE_ENABLED)
+                return;
+            sqliteCache.setRaw('addon:channels:' + this.cacheKey, {
+                channels: this.channels,
+                lastUpdate: this.lastUpdate,
+                m3uEtag: this.m3uEtag ?? null,
+                m3uLastModified: this.m3uLastModified ?? null,
+                iptvOrgEtag: this.iptvOrgEtag ?? null,
+                xtreamEtag: this.xtreamEtag ?? null,
+                lastEpgUpdate: this.lastEpgUpdate ?? null,
+            }, this.cacheTtl);
+            this.log.debug('Channels saved to cache', { count: this.channels.length });
+        }
+        async loadChannelsFromCache() {
+            if (!CACHE_ENABLED)
+                return;
+            const cached = sqliteCache.getRaw('addon:channels:' + this.cacheKey);
+            if (cached) {
+                this.channels = cached.channels || [];
+                this.channelMap = new Map(this.channels.map(c => [c.id, c]));
+                this.lastUpdate = cached.lastUpdate || 0;
+                this.m3uEtag = cached.m3uEtag ?? null;
+                this.m3uLastModified = cached.m3uLastModified ?? null;
+                this.iptvOrgEtag = cached.iptvOrgEtag ?? null;
+                this.xtreamEtag = cached.xtreamEtag ?? null;
+                this.lastEpgUpdate = cached.lastEpgUpdate ?? null;
+                this.log.debug('Channels loaded from cache', { count: this.channels.length });
+            }
+        }
+        async saveEpgToCache() {
+            if (!CACHE_ENABLED)
+                return;
+            if (!this.epgData || Object.keys(this.epgData).length === 0)
+                return;
+            sqliteCache.set('addon:epg:' + this.cacheKey, { epgData: this.epgData }, this.cacheTtl);
+            this.log.debug('EPG saved to cache', { channels: Object.keys(this.epgData).length });
+        }
+        async loadEpgFromCache() {
+            if (!CACHE_ENABLED)
+                return;
+            const cached = sqliteCache.get('addon:epg:' + this.cacheKey);
+            if (cached) {
+                this.epgData = cached.epgData || {};
+                this.log.debug('EPG loaded from cache', { channels: Object.keys(this.epgData).length });
+            }
+        }
+        async ensureEpgLoaded() {
+            if (this.epgData && Object.keys(this.epgData).length > 0)
+                return;
+            if (!CACHE_ENABLED)
+                return;
+            await this.loadEpgFromCache();
+        }
+        buildGenresInManifest() {
+            if (!this.manifestRef)
+                return;
+            const tvCatalog = this.manifestRef.catalogs.find((c) => c.id === 'iptv_channels');
+            if (tvCatalog) {
+                const groups = [
+                    ...new Set(this.channels
+                        .map(c => c.category || c.attributes?.['group-title'])
+                        .filter(Boolean)
+                        .map((s) => s.trim()))
+                ].sort((a, b) => a.localeCompare(b));
+                if (!groups.includes('All Channels'))
+                    groups.unshift('All Channels');
+                if (env_1.default.FAVORITES && env_1.default.FAVORITES.length > 0 && !groups.includes('!Favorites')) {
+                    groups.unshift('!Favorites');
+                }
+                tvCatalog.genres = groups;
+                const genreExtra = tvCatalog.extra.find((e) => e.name === 'genre');
+                if (genreExtra) {
+                    genreExtra.options = groups;
+                }
+            }
+            this.log.debug('Catalog genres built', { tvGenres: tvCatalog?.genres?.length || 0 });
+        }
+        async updateData(force = false) {
+            const now = Date.now();
+            if (!force && CACHE_ENABLED) {
+                if (this.lastUpdate && now - this.lastUpdate < this.updateInterval) {
+                    this.log.debug('Skip update (global interval)');
+                    return;
+                }
+                if (this.channels.length && now - this.lastUpdate < env_1.default.MIN_UPDATE_INTERVAL_MS) {
+                    this.log.debug('Skip update (recent minor interval)');
+                    return;
+                }
+            }
+            try {
+                const start = Date.now();
+                const providerModule = PROVIDER_MAP[this.providerName];
+                if (!providerModule)
+                    throw new Error(`Unknown provider: ${this.providerName}`);
+                const epgUpdateTimeBefore = this.lastEpgUpdate;
+                await providerModule.fetchData(this);
+                this.channelMap = new Map(this.channels.map(c => [c.id, c]));
+                this.lastUpdate = Date.now();
+                if (CACHE_ENABLED) {
+                    await this.saveChannelsToCache();
+                    if (this.lastEpgUpdate !== epgUpdateTimeBefore) {
+                        await this.saveEpgToCache();
+                    }
+                }
+                this.buildGenresInManifest();
+                this.log.debug('Data update complete', {
+                    channels: this.channels.length,
+                    ms: Date.now() - start
+                });
+            }
+            catch (e) {
+                this.log.error('[UPDATE] Failed:', e.message);
+                throw e;
+            }
+        }
+        async refreshOnFirstCatalogRequest() {
+            if (this.firstCatalogRefreshDone)
+                return;
+            if (this.firstCatalogRefreshPromise) {
+                await this.firstCatalogRefreshPromise;
+                return;
+            }
+            const JUST_FETCHED_MS = 2 * 60 * 1000;
+            if (this.lastUpdate && (Date.now() - this.lastUpdate < JUST_FETCHED_MS)) {
+                this.firstCatalogRefreshDone = true;
+                return;
+            }
+            this.firstCatalogRefreshPromise = (async () => {
+                if (CACHE_ENABLED) {
+                    sqliteCache.del('addon:channels:' + this.cacheKey);
+                    sqliteCache.del('addon:epg:' + this.cacheKey);
+                }
+                await this.updateData(true);
+                this.firstCatalogRefreshDone = true;
+                this.log.debug('Bootstrap catalog refresh completed', {
+                    cacheKey: this.cacheKey,
+                    channels: this.channels.length
+                });
+            })();
+            try {
+                await this.firstCatalogRefreshPromise;
+            }
+            finally {
+                this.firstCatalogRefreshPromise = null;
+            }
+        }
+        deriveFallbackLogoUrl(item) {
+            let finalUrl;
+            const logoAttr = item.attributes?.['tvg-logo'] || item.logo;
+            if (logoAttr && logoAttr.trim()) {
+                finalUrl = logoAttr;
+            }
+            else {
+                finalUrl = `https://placehold.co/250x375/2b2b2b/FFFFFF.png?text=${encodeURIComponent(item.name || 'TV')}`;
+            }
+            if (this.config.reformatLogos && finalUrl.startsWith('http') && !finalUrl.includes('wsrv.nl') && !finalUrl.includes('placehold.co')) {
+                if (finalUrl.includes('imgur.com')) {
+                    finalUrl = `https://proxy.duckduckgo.com/iu/?u=${encodeURIComponent(finalUrl)}`;
+                }
+                return `https://wsrv.nl/?url=${encodeURIComponent(finalUrl)}&w=250&h=375&fit=contain&we&bg=2b2b2b`;
+            }
+            return finalUrl;
+        }
+        generateMetaPreview(item) {
+            const logoUrl = this.deriveFallbackLogoUrl(item);
+            return {
+                id: item.id,
+                type: 'tv',
+                name: item.name,
+                description: '📡 Live Channel',
+                poster: logoUrl,
+                background: logoUrl,
+                posterShape: 'poster',
+                genres: item.category
+                    ? [item.category]
+                    : (item.attributes?.['group-title'] ? [item.attributes['group-title']] : ['Live TV']),
+                runtime: 'Live'
+            };
+        }
+        async getStreams(id) {
+            await this.ensureDataLoaded();
+            const item = this.channelMap.get(id);
+            if (!item)
+                return [];
+            const reqHeaders = {};
+            if (item.userAgent)
+                reqHeaders['User-Agent'] = item.userAgent;
+            if (item.referrer)
+                reqHeaders['Referer'] = item.referrer;
+            const behaviorHints = Object.keys(reqHeaders).length
+                ? { notWebReady: true, proxyHeaders: { request: reqHeaders } }
+                : { notWebReady: true };
+            if (item.urls && item.urls.length > 0) {
+                return item.urls.map((url, index) => ({
+                    url,
+                    title: item.urls.length > 1 ? `${item.name} - Link ${index + 1}` : `${item.name} - Live`,
+                    behaviorHints,
+                }));
+            }
+            const streams = [{ url: item.url, title: `${item.name} - Live`, behaviorHints }];
+            const xtreamRe = /^https?:\/\/[^/]+\/[^/]+\/[^/]+\/(\d+)$/;
+            if (xtreamRe.test(item.url)) {
+                streams.unshift({
+                    url: item.url + '.m3u8',
+                    title: `${item.name} - HLS`,
+                    behaviorHints,
+                });
+            }
+            return streams;
+        }
+        async getDetailedMeta(id) {
+            await this.ensureDataLoaded();
+            await this.ensureEpgLoaded();
+            const item = this.channelMap.get(id);
+            if (!item)
+                return null;
+            const epgId = item.attributes?.['tvg-id'] || item.attributes?.['tvg-name'];
+            const current = (0, epgParser_1.getCurrentProgram)(this.epgData, epgId, this.config.epgOffsetHours);
+            const upcoming = (0, epgParser_1.getUpcomingPrograms)(this.epgData, epgId, 3, this.config.epgOffsetHours);
+            let description = `📺 CHANNEL: ${item.name}`;
+            if (current) {
+                const start = current.startTime?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || '';
+                const end = current.stopTime?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || '';
+                description += `\n\n📡 NOW: ${current.title}${start && end ? ` (${start}-${end})` : ''}`;
+                if (current.description)
+                    description += `\n\n${current.description}`;
+            }
+            if (upcoming.length) {
+                description += '\n\n📅 UPCOMING:\n';
+                for (const p of upcoming) {
+                    description += `${p.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${p.title}\n`;
+                }
+            }
+            const logoUrl = this.deriveFallbackLogoUrl(item);
+            return {
+                id: item.id,
+                type: 'tv',
+                name: item.name,
+                poster: logoUrl,
+                background: logoUrl,
+                posterShape: 'poster',
+                description,
+                genres: item.category
+                    ? [item.category]
+                    : (item.attributes?.['group-title'] ? [item.attributes['group-title']] : ['Live TV']),
+                runtime: 'Live'
+            };
+        }
+        _resetEvictTimer() {
+            clearTimeout(this._evictTimer);
+            this._evictTimer = setTimeout(() => this._evictFromMemory(), env_1.default.DATA_MEMORY_TTL_MS);
+        }
+        _startUpdateTimer() {
+            if (this._updateTimer !== null)
+                return; // already running — guard against double-start
+            this._updateTimer = setInterval(() => {
+                this.updateData().catch((e) => {
+                    this.log.error('[TIMER] Background update failed:', e.message);
+                });
+            }, env_1.default.UPDATE_INTERVAL_MS);
+            // unref: don't prevent Node.js process exit if this is the only active handle
+            if (typeof this._updateTimer.unref === 'function') {
+                this._updateTimer.unref();
+            }
+        }
+        _evictFromMemory() {
+            clearTimeout(this._evictTimer);
+            clearInterval(this._updateTimer); // kill update timer
+            this._updateTimer = null; // allow GC and re-start check
+            this._evictTimer = null;
+            this.channels = [];
+            this.channelMap = new Map();
+            this.epgData = {};
+            this.log.debug('Data evicted from RAM', { cacheKey: this.cacheKey });
+        }
+        async ensureDataLoaded() {
+            if (this.channels.length > 0) {
+                this._resetEvictTimer();
+                return;
+            }
+            if (!CACHE_ENABLED)
+                return;
+            if (this._loadPromise) {
+                await this._loadPromise;
+                return;
+            }
+            this._loadPromise = this.loadChannelsFromCache().finally(() => { this._loadPromise = null; });
+            await this._loadPromise;
+            this._resetEvictTimer();
+            this._startUpdateTimer(); // start/resume background updates
+        }
+        async getChannelsForCatalog() {
+            await this.ensureDataLoaded();
+            return this.channels;
+        }
+    }
+    exports.M3UEPGAddon = M3UEPGAddon;
+    
+  builder.js: |
+    "use strict";
+    var __importDefault = (this && this.__importDefault) || function (mod) {
+        return (mod && mod.__esModule) ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports, "__esModule", { value: true });
+    const env_1 = __importDefault(require("../config/env"));
+    const stremio_addon_sdk_1 = require("stremio-addon-sdk");
+    const crypto_1 = __importDefault(require("crypto"));
+    const manifest_1 = require("./manifest");
+    const M3UEPGAddon_1 = require("./M3UEPGAddon");
+    async function createAddon(config) {
+        config.instanceId = config.instanceId ||
+            (crypto_1.default.randomUUID ? crypto_1.default.randomUUID() : crypto_1.default.randomBytes(8).toString('hex'));
+        const cacheKey = (0, M3UEPGAddon_1.createCacheKey)(config);
+        const idPrefix = cacheKey.slice(0, 8);
+        const manifest = (0, manifest_1.createManifest)(idPrefix);
+        const debugFlag = !!env_1.default.DEBUG;
+        if (debugFlag) {
+            console.log('[DEBUG] createAddon start', { cacheKey, provider: config.provider || 'xtream' });
+        }
+        else {
+            console.log(`[ADDON] Cache ${M3UEPGAddon_1.CACHE_ENABLED ? 'ENABLED' : 'DISABLED'} for config ${cacheKey}`);
+        }
+        if (M3UEPGAddon_1.CACHE_ENABLED && M3UEPGAddon_1.buildPromiseCache.has(cacheKey)) {
+            if (debugFlag)
+                console.log('[DEBUG] Reusing build promise', cacheKey);
+            return M3UEPGAddon_1.buildPromiseCache.get(cacheKey);
+        }
+        const buildPromise = (async () => {
+            const builder = new stremio_addon_sdk_1.addonBuilder(manifest);
+            const addonInstance = new M3UEPGAddon_1.M3UEPGAddon(config, manifest);
+            await addonInstance.loadChannelsFromCache();
+            try {
+                if (!addonInstance.lastUpdate || (Date.now() - addonInstance.lastUpdate > addonInstance.updateInterval)) {
+                    await addonInstance.updateData(true);
+                }
+            }
+            catch (e) {
+                console.error('[ADDON] Initial update failed:', e.message);
+            }
+            addonInstance.buildGenresInManifest();
+            if (M3UEPGAddon_1.CACHE_ENABLED)
+                addonInstance._evictFromMemory();
+            let iface;
+            const _origBuildGenres = addonInstance.buildGenresInManifest.bind(addonInstance);
+            addonInstance.buildGenresInManifest = () => {
+                _origBuildGenres();
+                if (iface)
+                    iface._cleanManifest = null;
+            };
+            builder.defineCatalogHandler(async (args) => {
+                const start = Date.now();
+                try {
+                    await addonInstance.refreshOnFirstCatalogRequest();
+                    const catalogIds = ['iptv_channels', 'iptv_org'];
+                    const channels = await addonInstance.getChannelsForCatalog();
+                    let items = args.type === 'tv' && catalogIds.includes(args.id) ? channels : [];
+                    const extra = args.extra || {};
+                    if (extra.genre && extra.genre !== 'All Channels') {
+                        if (extra.genre === '!Favorites' && env_1.default.FAVORITES && env_1.default.FAVORITES.length > 0) {
+                            const favPatterns = env_1.default.FAVORITES;
+                            items = items.filter((i) => {
+                                const name = (i.name || '').toLowerCase();
+                                return favPatterns.some(p => name.includes(p));
+                            });
+                        }
+                        else {
+                            items = items.filter((i) => (i.category && i.category === extra.genre) ||
+                                (i.attributes && i.attributes['group-title'] === extra.genre));
+                        }
+                    }
+                    if (extra.search) {
+                        const q = extra.search.toLowerCase();
+                        items = items.filter((i) => i.name.toLowerCase().includes(q));
+                    }
+                    const PAGE_SIZE = env_1.default.CATALOG_PAGE_SIZE;
+                    const skip = parseInt(extra.skip || '0', 10) || 0;
+                    const metas = items.slice(skip, skip + PAGE_SIZE).map((i) => addonInstance.generateMetaPreview(i));
+                    if (env_1.default.DEBUG) {
+                        console.log('[DEBUG] Catalog handler', {
+                            type: args.type,
+                            id: args.id,
+                            totalItems: items.length,
+                            returned: metas.length,
+                            ms: Date.now() - start
+                        });
+                    }
+                    return { metas };
+                }
+                catch (e) {
+                    console.error('[CATALOG] Error', e);
+                    return { metas: [] };
+                }
+            });
+            builder.defineStreamHandler(async ({ type, id }) => {
+                try {
+                    const streams = await addonInstance.getStreams(id);
+                    if (!streams || streams.length === 0)
+                        return { streams: [] };
+                    if (env_1.default.DEBUG) {
+                        console.log('[DEBUG] Stream request', { id, count: streams.length });
+                    }
+                    return { streams };
+                }
+                catch (e) {
+                    console.error('[STREAM] Error', e);
+                    return { streams: [] };
+                }
+            });
+            builder.defineMetaHandler(async ({ type, id }) => {
+                try {
+                    const meta = await addonInstance.getDetailedMeta(id);
+                    if (env_1.default.DEBUG) {
+                        console.log('[DEBUG] Meta request', { id, type });
+                    }
+                    return { meta };
+                }
+                catch (e) {
+                    console.error('[META] Error', e);
+                    return { meta: null };
+                }
+            });
+            iface = builder.getInterface();
+            iface.addonInstance = addonInstance;
+            return iface;
+        })();
+        if (M3UEPGAddon_1.CACHE_ENABLED)
+            M3UEPGAddon_1.buildPromiseCache.set(cacheKey, buildPromise);
+        try {
+            const iface = await buildPromise;
+            return iface;
+        }
+        finally {
+            // Keep promise cached
+        }
+    }
+    exports.default = createAddon;
+    
