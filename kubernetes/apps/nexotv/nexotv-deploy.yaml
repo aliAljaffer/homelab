@@ -21,6 +21,9 @@ spec:
       - name: nexotv-data
         persistentVolumeClaim:
           claimName: nexotv-data
+      - name: nexotv-patches
+        configMap:
+          name: nexotv-patches
       containers:
       - image: savibrabo/nexotv:2.1.0
         name: nexotv
@@ -32,9 +35,20 @@ spec:
             secretKeyRef:
               name: nexotv-secrets
               key: CONFIG_SECRET
+        - name: FAVORITES
+          value: "8k: bein,uk: sky sports,uk: tnt sport,uk: itv"
         volumeMounts:
         - name: nexotv-data
           mountPath: /app/data
+        - name: nexotv-patches
+          mountPath: /app/packages/backend/dist/src/config/env.js
+          subPath: env.js
+        - name: nexotv-patches
+          mountPath: /app/packages/backend/dist/src/addon/M3UEPGAddon.js
+          subPath: M3UEPGAddon.js
+        - name: nexotv-patches
+          mountPath: /app/packages/backend/dist/src/addon/builder.js
+          subPath: builder.js
         ports:
         - containerPort: 7000
           protocol: TCP
