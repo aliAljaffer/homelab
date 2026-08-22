@@ -28,6 +28,15 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
+  ignoreDifferences:
+  - group: apps
+    kind: StatefulSet
+    jsonPointers:
+    - /spec/persistentVolumeClaimRetentionPolicy
+  - group: apps
+    kind: StatefulSet
+    jqPathExpressions:
+    - .spec.template.spec.containers[*].startupProbe.initialDelaySeconds
   syncPolicy:
     automated:
       prune: true
