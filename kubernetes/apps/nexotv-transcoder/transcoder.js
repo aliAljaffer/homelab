@@ -6,6 +6,9 @@ const { URL } = require('url');
 const app = express();
 app.set('trust proxy', true);
 const PORT = process.env.PORT || 7001;
+const PLAYLIST_CACHE_TTL_MS = parseInt(process.env.PLAYLIST_CACHE_TTL_MS || '2000');
+
+const playlistCache = new Map();
 
 function fetchText(url) {
   return new Promise((resolve, reject) => {
@@ -67,10 +70,19 @@ app.get('/playlist.m3u8', async (req, res) => {
 
   console.log(`[PLAYLIST] Request: ${streamUrl}`);
 
+  const selfBase = `${req.protocol}://${req.get('host')}`;
+  const cacheKey = `${selfBase}|${streamUrl}`;
+  const cached = playlistCache.get(cacheKey);
+
   try {
-    const { body, finalUrl } = await fetchText(streamUrl);
-    const selfBase = `${req.protocol}://${req.get('host')}`;
-    const rewritten = rewritePlaylist(body, finalUrl, selfBase);
+    let rewritten;
+    if (cached && Date.now() - cached.fetchedAt < PLAYLIST_CACHE_TTL_MS) {
+      rewritten = await cached.promise;
+    } else {
+      const promise = fetchText(streamUrl).then(({ body, finalUrl }) => rewritePlaylist(body, finalUrl, selfBase));
+      playlistCache.set(cacheKey, { promise, fetchedAt: Date.now() });
+      rewritten = await promise;
+    }
 
     res.set({
       'Content-Type': 'application/vnd.apple.mpegurl',
@@ -79,6 +91,7 @@ app.get('/playlist.m3u8', async (req, res) => {
     });
     res.send(rewritten);
   } catch (err) {
+    playlistCache.delete(cacheKey);
     console.error(`[PLAYLIST] Error: ${err.message}`);
     res.status(502).json({ error: err.message });
   }
