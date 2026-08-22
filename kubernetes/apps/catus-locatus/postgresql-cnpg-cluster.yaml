@@ -14,19 +14,3 @@ spec:
     initdb:
       database: catus_locatus
       owner: catus_locatus_user
-      import:
-        type: microservice
-        databases:
-          - catus_locatus
-        source:
-          externalCluster: catus-locatus-legacy
-  externalClusters:
-    - name: catus-locatus-legacy
-      connectionParameters:
-        host: postgresql-svc.catus-locatus.svc.cluster.local
-        user: catus_locatus_user
-        dbname: catus_locatus
-        sslmode: prefer
-      password:
-        name: postgresql-secret
-        key: POSTGRES_PASSWORD
