@@ -7,13 +7,24 @@ const app = express();
 app.set('trust proxy', true);
 const PORT = process.env.PORT || 7001;
 const PLAYLIST_CACHE_TTL_MS = parseInt(process.env.PLAYLIST_CACHE_TTL_MS || '5000');
+const SEGMENT_PREFETCH_COUNT = parseInt(process.env.SEGMENT_PREFETCH_COUNT || '1');
+const SEGMENT_BUFFER_TTL_MS = parseInt(process.env.SEGMENT_BUFFER_TTL_MS || '30000');
 
 const playlistCache = new Map();
+const segmentBuffer = new Map();
+
+const agentOpts = { keepAlive: true, keepAliveMsecs: 10000, maxSockets: 32 };
+const httpAgent = new http.Agent(agentOpts);
+const httpsAgent = new https.Agent(agentOpts);
+
+function agentFor(url) {
+  return url.startsWith('https:') ? httpsAgent : httpAgent;
+}
 
 function fetchText(url) {
   return new Promise((resolve, reject) => {
     const client = url.startsWith('https:') ? https : http;
-    client.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (upstreamRes) => {
+    client.get(url, { agent: agentFor(url), headers: { 'User-Agent': 'Mozilla/5.0' } }, (upstreamRes) => {
       if (upstreamRes.statusCode >= 300 && upstreamRes.statusCode < 400 && upstreamRes.headers.location) {
         upstreamRes.resume();
         return resolve(fetchText(new URL(upstreamRes.headers.location, url).toString()));
@@ -30,36 +41,53 @@ function fetchText(url) {
   });
 }
 
-function pipeBinary(url, res) {
+function fetchBinary(url) {
   return new Promise((resolve, reject) => {
     const client = url.startsWith('https:') ? https : http;
-    const req = client.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (upstreamRes) => {
+    client.get(url, { agent: agentFor(url), headers: { 'User-Agent': 'Mozilla/5.0' } }, (upstreamRes) => {
       if (upstreamRes.statusCode >= 300 && upstreamRes.statusCode < 400 && upstreamRes.headers.location) {
         upstreamRes.resume();
-        return resolve(pipeBinary(new URL(upstreamRes.headers.location, url).toString(), res));
+        return resolve(fetchBinary(new URL(upstreamRes.headers.location, url).toString()));
       }
       if (upstreamRes.statusCode !== 200) {
         upstreamRes.resume();
         return reject(new Error(`HTTP ${upstreamRes.statusCode} for ${url}`));
       }
-      upstreamRes.pipe(res);
-      upstreamRes.on('end', resolve);
+      const chunks = [];
+      upstreamRes.on('data', (c) => chunks.push(c));
+      upstreamRes.on('end', () => resolve(Buffer.concat(chunks)));
       upstreamRes.on('error', reject);
-    });
-    req.on('error', reject);
+    }).on('error', reject);
   });
 }
 
+function prefetchSegment(url) {
+  if (segmentBuffer.has(url)) return;
+  const entry = { promise: fetchBinary(url), fetchedAt: Date.now() };
+  segmentBuffer.set(url, entry);
+  entry.promise.catch(() => segmentBuffer.delete(url));
+}
+
+function pruneSegmentBuffer() {
+  const now = Date.now();
+  for (const [url, entry] of segmentBuffer) {
+    if (now - entry.fetchedAt > SEGMENT_BUFFER_TTL_MS) segmentBuffer.delete(url);
+  }
+}
+
 function rewritePlaylist(text, baseUrl, selfBase) {
-  return text
+  const segmentUrls = [];
+  const rewritten = text
     .split('\n')
     .map((line) => {
       const trimmed = line.trim();
       if (!trimmed || trimmed.startsWith('#')) return line;
       const absolute = new URL(trimmed, baseUrl).toString();
+      segmentUrls.push(absolute);
       return `${selfBase}/segment.ts?url=${encodeURIComponent(absolute)}`;
     })
     .join('\n');
+  return { rewritten, segmentUrls };
 }
 
 app.get('/playlist.m3u8', async (req, res) => {
@@ -76,21 +104,24 @@ app.get('/playlist.m3u8', async (req, res) => {
   console.log(`[PLAYLIST] Request: ${streamUrl} (${isHit ? 'cache hit' : 'cache miss'})`);
 
   try {
-    let rewritten;
+    let result;
     if (isHit) {
-      rewritten = await cached.promise;
+      result = await cached.promise;
     } else {
       const promise = fetchText(streamUrl).then(({ body, finalUrl }) => rewritePlaylist(body, finalUrl, selfBase));
       playlistCache.set(cacheKey, { promise, fetchedAt: Date.now() });
-      rewritten = await promise;
+      result = await promise;
     }
+
+    pruneSegmentBuffer();
+    result.segmentUrls.slice(-SEGMENT_PREFETCH_COUNT).forEach(prefetchSegment);
 
     res.set({
       'Content-Type': 'application/vnd.apple.mpegurl',
       'Cache-Control': 'no-cache',
       'Access-Control-Allow-Origin': '*'
     });
-    res.send(rewritten);
+    res.send(result.rewritten);
   } catch (err) {
     playlistCache.delete(cacheKey);
     console.error(`[PLAYLIST] Error: ${err.message}`);
@@ -111,8 +142,11 @@ app.get('/segment.ts', async (req, res) => {
   });
 
   try {
-    await pipeBinary(segmentUrl, res);
+    const buffered = segmentBuffer.get(segmentUrl);
+    const data = buffered ? await buffered.promise : await fetchBinary(segmentUrl);
+    res.end(data);
   } catch (err) {
+    segmentBuffer.delete(segmentUrl);
     console.error(`[SEGMENT] Error: ${err.message}`);
     if (!res.headersSent) {
       res.status(502).json({ error: err.message });
