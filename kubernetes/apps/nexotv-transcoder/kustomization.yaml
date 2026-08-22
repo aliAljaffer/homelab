@@ -5,4 +5,7 @@ resources:
 - deployment.yaml
 - service.yaml
 - httproute.yaml
-- transcoder-configmap.yaml
+configMapGenerator:
+- name: nexotv-transcoder-src
+  files:
+  - transcoder.js
