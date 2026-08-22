@@ -24,7 +24,7 @@ function fetch(url) {
       }
       const chunks = [];
       upstreamRes.on('data', (c) => chunks.push(c));
-      upstreamRes.on('end', () => resolve(Buffer.concat(chunks)));
+      upstreamRes.on('end', () => resolve({ body: Buffer.concat(chunks), finalUrl: url }));
       upstreamRes.on('error', reject);
     }).on('error', reject);
   });
@@ -82,8 +82,8 @@ app.get('/transcode', async (req, res) => {
 
   while (!closed && reconnectAttempts <= MAX_RECONNECTS) {
     try {
-      const playlistBody = await fetch(streamUrl);
-      const segments = parsePlaylist(playlistBody.toString('utf8'), streamUrl);
+      const { body, finalUrl } = await fetch(streamUrl);
+      const segments = parsePlaylist(body.toString('utf8'), finalUrl);
       const newSegments = segments.filter((s) => !seenSegments.has(s));
 
       for (const segment of newSegments) {
