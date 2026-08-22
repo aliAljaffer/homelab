@@ -2,9 +2,36 @@ const express = require('express');
 const http = require('http');
 const https = require('https');
 const { URL } = require('url');
+const client = require('prom-client');
 
 const app = express();
 app.set('trust proxy', true);
+
+client.collectDefaultMetrics();
+
+const playlistRequestsTotal = new client.Counter({
+  name: 'relay_playlist_requests_total',
+  help: 'Playlist requests by cache result',
+  labelNames: ['cache']
+});
+const playlistErrorsTotal = new client.Counter({
+  name: 'relay_playlist_errors_total',
+  help: 'Playlist fetch errors'
+});
+const segmentRequestsTotal = new client.Counter({
+  name: 'relay_segment_requests_total',
+  help: 'Segment requests by source',
+  labelNames: ['source']
+});
+const segmentErrorsTotal = new client.Counter({
+  name: 'relay_segment_errors_total',
+  help: 'Segment fetch errors'
+});
+const prefetchTotal = new client.Counter({
+  name: 'relay_prefetch_total',
+  help: 'Segment prefetches by outcome',
+  labelNames: ['outcome']
+});
 const PORT = process.env.PORT || 7001;
 const PLAYLIST_CACHE_TTL_MS = parseInt(process.env.PLAYLIST_CACHE_TTL_MS || '5000');
 const SEGMENT_PREFETCH_COUNT = parseInt(process.env.SEGMENT_PREFETCH_COUNT || '2');
@@ -67,9 +94,13 @@ function prefetchSegment(url) {
   const entry = { promise: fetchBinary(url), fetchedAt: Date.now() };
   segmentBuffer.set(url, entry);
   entry.promise
-    .then((data) => console.log(`[PREFETCH] Done: ${url} (${data.length} bytes)`))
+    .then((data) => {
+      console.log(`[PREFETCH] Done: ${url} (${data.length} bytes)`);
+      prefetchTotal.inc({ outcome: 'success' });
+    })
     .catch((err) => {
       console.error(`[PREFETCH] Error: ${url} (${err.message})`);
+      prefetchTotal.inc({ outcome: 'error' });
       segmentBuffer.delete(url);
     });
 }
@@ -108,6 +139,7 @@ app.get('/playlist.m3u8', async (req, res) => {
   const isHit = cached && Date.now() - cached.fetchedAt < PLAYLIST_CACHE_TTL_MS;
 
   console.log(`[PLAYLIST] Request: ${streamUrl} (${isHit ? 'cache hit' : 'cache miss'})`);
+  playlistRequestsTotal.inc({ cache: isHit ? 'hit' : 'miss' });
 
   try {
     let result;
@@ -131,6 +163,7 @@ app.get('/playlist.m3u8', async (req, res) => {
   } catch (err) {
     playlistCache.delete(cacheKey);
     console.error(`[PLAYLIST] Error: ${err.message}`);
+    playlistErrorsTotal.inc();
     res.status(502).json({ error: err.message });
   }
 });
@@ -153,10 +186,12 @@ app.get('/segment.ts', async (req, res) => {
     const start = Date.now();
     const data = buffered ? await buffered.promise : await fetchBinary(segmentUrl);
     console.log(`[SEGMENT] ${source}: ${segmentUrl} (${data.length} bytes, ${Date.now() - start}ms)`);
+    segmentRequestsTotal.inc({ source });
     res.end(data);
   } catch (err) {
     segmentBuffer.delete(segmentUrl);
     console.error(`[SEGMENT] Error: ${err.message}`);
+    segmentErrorsTotal.inc();
     if (!res.headersSent) {
       res.status(502).json({ error: err.message });
     } else {
@@ -167,6 +202,11 @@ app.get('/segment.ts', async (req, res) => {
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
+});
+
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', client.register.contentType);
+  res.end(await client.register.metrics());
 });
 
 app.listen(PORT, () => {

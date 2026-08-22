@@ -7,5 +7,6 @@ spec:
   selector:
     app: nexotv-relay
   ports:
-  - port: 7001
+  - name: http
+    port: 7001
     targetPort: 7001
