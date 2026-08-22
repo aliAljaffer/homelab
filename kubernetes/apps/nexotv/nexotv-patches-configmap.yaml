@@ -627,6 +627,7 @@ data:
                             if (stream.url) {
                                 const originalUrl = stream.url;
                                 stream.url = `${transcoderUrl}/transcode.m3u8?url=${encodeURIComponent(originalUrl)}`;
+                                delete stream.behaviorHints;
                             }
                         }
                     }
