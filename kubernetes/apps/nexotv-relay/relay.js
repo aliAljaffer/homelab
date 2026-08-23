@@ -39,8 +39,16 @@ const SEGMENT_BUFFER_TTL_MS = parseInt(process.env.SEGMENT_BUFFER_TTL_MS || '300
 const PLAYLIST_ERROR_BACKOFF_MS = parseInt(process.env.PLAYLIST_ERROR_BACKOFF_MS || '8000');
 
 const playlistCache = new Map();
+const lastGoodPlaylist = new Map();
 const playlistErrorBackoff = new Map();
 const segmentBuffer = new Map();
+
+const SEGMENT_ID_RE = /(\d+_\d+)\.ts$/;
+
+function segmentIdFor(url) {
+  const match = url.match(SEGMENT_ID_RE);
+  return match ? match[1] : url;
+}
 
 const agentOpts = { keepAlive: true, keepAliveMsecs: 10000, maxSockets: 32 };
 const httpAgent = new http.Agent(agentOpts);
@@ -91,10 +99,11 @@ function fetchBinary(url) {
 }
 
 function prefetchSegment(url) {
-  if (segmentBuffer.has(url)) return;
+  const id = segmentIdFor(url);
+  if (segmentBuffer.has(id)) return;
   console.log(`[PREFETCH] ${url}`);
   const entry = { promise: fetchBinary(url), fetchedAt: Date.now() };
-  segmentBuffer.set(url, entry);
+  segmentBuffer.set(id, entry);
   entry.promise
     .then((data) => {
       console.log(`[PREFETCH] Done: ${url} (${data.length} bytes)`);
@@ -103,14 +112,14 @@ function prefetchSegment(url) {
     .catch((err) => {
       console.error(`[PREFETCH] Error: ${url} (${err.message})`);
       prefetchTotal.inc({ outcome: 'error' });
-      segmentBuffer.delete(url);
+      segmentBuffer.delete(id);
     });
 }
 
 function pruneSegmentBuffer() {
   const now = Date.now();
-  for (const [url, entry] of segmentBuffer) {
-    if (now - entry.fetchedAt > SEGMENT_BUFFER_TTL_MS) segmentBuffer.delete(url);
+  for (const [id, entry] of segmentBuffer) {
+    if (now - entry.fetchedAt > SEGMENT_BUFFER_TTL_MS) segmentBuffer.delete(id);
   }
 }
 
@@ -142,8 +151,18 @@ app.get('/playlist.m3u8', async (req, res) => {
 
   const backoffUntil = playlistErrorBackoff.get(cacheKey);
   if (backoffUntil && Date.now() < backoffUntil && !isHit) {
-    console.log(`[PLAYLIST] Backing off: ${streamUrl} (${Math.ceil((backoffUntil - Date.now()) / 1000)}s remaining)`);
     playlistErrorsTotal.inc();
+    const stale = lastGoodPlaylist.get(cacheKey);
+    if (stale) {
+      console.log(`[PLAYLIST] Backing off, serving stale: ${streamUrl} (${Math.ceil((backoffUntil - Date.now()) / 1000)}s remaining)`);
+      res.set({
+        'Content-Type': 'application/vnd.apple.mpegurl',
+        'Cache-Control': 'no-cache',
+        'Access-Control-Allow-Origin': '*'
+      });
+      return res.send(stale);
+    }
+    console.log(`[PLAYLIST] Backing off, no cache available: ${streamUrl} (${Math.ceil((backoffUntil - Date.now()) / 1000)}s remaining)`);
     return res.status(502).json({ error: 'Upstream backoff active' });
   }
 
@@ -161,6 +180,7 @@ app.get('/playlist.m3u8', async (req, res) => {
     }
 
     playlistErrorBackoff.delete(cacheKey);
+    lastGoodPlaylist.set(cacheKey, result.rewritten);
     pruneSegmentBuffer();
     result.segmentUrls.slice(-SEGMENT_PREFETCH_COUNT).forEach(prefetchSegment);
 
@@ -175,6 +195,16 @@ app.get('/playlist.m3u8', async (req, res) => {
     playlistErrorBackoff.set(cacheKey, Date.now() + PLAYLIST_ERROR_BACKOFF_MS);
     console.error(`[PLAYLIST] Error: ${err.message}`);
     playlistErrorsTotal.inc();
+    const stale = lastGoodPlaylist.get(cacheKey);
+    if (stale) {
+      console.log(`[PLAYLIST] Fetch failed, serving stale: ${streamUrl}`);
+      res.set({
+        'Content-Type': 'application/vnd.apple.mpegurl',
+        'Cache-Control': 'no-cache',
+        'Access-Control-Allow-Origin': '*'
+      });
+      return res.send(stale);
+    }
     res.status(502).json({ error: err.message });
   }
 });
@@ -191,8 +221,9 @@ app.get('/segment.ts', async (req, res) => {
     'Access-Control-Allow-Origin': '*'
   });
 
+  const id = segmentIdFor(segmentUrl);
   try {
-    const buffered = segmentBuffer.get(segmentUrl);
+    const buffered = segmentBuffer.get(id);
     const source = buffered ? 'memory' : 'remote';
     const start = Date.now();
     const data = buffered ? await buffered.promise : await fetchBinary(segmentUrl);
@@ -200,7 +231,7 @@ app.get('/segment.ts', async (req, res) => {
     segmentRequestsTotal.inc({ source });
     res.end(data);
   } catch (err) {
-    segmentBuffer.delete(segmentUrl);
+    segmentBuffer.delete(id);
     console.error(`[SEGMENT] Error: ${err.message}`);
     segmentErrorsTotal.inc();
     if (!res.headersSent) {
