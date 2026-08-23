@@ -30,6 +30,8 @@ spec:
         env:
         - name: PORT
           value: "7001"
+        - name: PLAYLIST_CACHE_TTL_MS
+          value: "8000"
         volumeMounts:
         - name: nexotv-relay-src
           mountPath: /app/relay.js
