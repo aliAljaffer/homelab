@@ -31,7 +31,7 @@ spec:
         - name: PORT
           value: "7001"
         - name: PLAYLIST_CACHE_TTL_MS
-          value: "8000"
+          value: "11000"
         - name: SEGMENT_PREFETCH_COUNT
           value: "2"
         volumeMounts:
