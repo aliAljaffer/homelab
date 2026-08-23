@@ -34,10 +34,12 @@ const prefetchTotal = new client.Counter({
 });
 const PORT = process.env.PORT || 7001;
 const PLAYLIST_CACHE_TTL_MS = parseInt(process.env.PLAYLIST_CACHE_TTL_MS || '5000');
-const SEGMENT_PREFETCH_COUNT = parseInt(process.env.SEGMENT_PREFETCH_COUNT || '2');
+const SEGMENT_PREFETCH_COUNT = parseInt(process.env.SEGMENT_PREFETCH_COUNT || '1');
 const SEGMENT_BUFFER_TTL_MS = parseInt(process.env.SEGMENT_BUFFER_TTL_MS || '30000');
+const PLAYLIST_ERROR_BACKOFF_MS = parseInt(process.env.PLAYLIST_ERROR_BACKOFF_MS || '8000');
 
 const playlistCache = new Map();
+const playlistErrorBackoff = new Map();
 const segmentBuffer = new Map();
 
 const agentOpts = { keepAlive: true, keepAliveMsecs: 10000, maxSockets: 32 };
@@ -138,6 +140,13 @@ app.get('/playlist.m3u8', async (req, res) => {
   const cached = playlistCache.get(cacheKey);
   const isHit = cached && Date.now() - cached.fetchedAt < PLAYLIST_CACHE_TTL_MS;
 
+  const backoffUntil = playlistErrorBackoff.get(cacheKey);
+  if (backoffUntil && Date.now() < backoffUntil && !isHit) {
+    console.log(`[PLAYLIST] Backing off: ${streamUrl} (${Math.ceil((backoffUntil - Date.now()) / 1000)}s remaining)`);
+    playlistErrorsTotal.inc();
+    return res.status(502).json({ error: 'Upstream backoff active' });
+  }
+
   console.log(`[PLAYLIST] Request: ${streamUrl} (${isHit ? 'cache hit' : 'cache miss'})`);
   playlistRequestsTotal.inc({ cache: isHit ? 'hit' : 'miss' });
 
@@ -151,6 +160,7 @@ app.get('/playlist.m3u8', async (req, res) => {
       result = await promise;
     }
 
+    playlistErrorBackoff.delete(cacheKey);
     pruneSegmentBuffer();
     result.segmentUrls.slice(-SEGMENT_PREFETCH_COUNT).forEach(prefetchSegment);
 
@@ -162,6 +172,7 @@ app.get('/playlist.m3u8', async (req, res) => {
     res.send(result.rewritten);
   } catch (err) {
     playlistCache.delete(cacheKey);
+    playlistErrorBackoff.set(cacheKey, Date.now() + PLAYLIST_ERROR_BACKOFF_MS);
     console.error(`[PLAYLIST] Error: ${err.message}`);
     playlistErrorsTotal.inc();
     res.status(502).json({ error: err.message });
