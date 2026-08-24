@@ -39,7 +39,6 @@ const SEGMENT_BUFFER_TTL_MS = parseInt(process.env.SEGMENT_BUFFER_TTL_MS || '300
 const PLAYLIST_ERROR_BACKOFF_MS = parseInt(process.env.PLAYLIST_ERROR_BACKOFF_MS || '8000');
 
 const playlistCache = new Map();
-const lastGoodPlaylist = new Map();
 const playlistErrorBackoff = new Map();
 const segmentBuffer = new Map();
 
@@ -151,18 +150,8 @@ app.get('/playlist.m3u8', async (req, res) => {
 
   const backoffUntil = playlistErrorBackoff.get(cacheKey);
   if (backoffUntil && Date.now() < backoffUntil && !isHit) {
+    console.log(`[PLAYLIST] Backing off: ${streamUrl} (${Math.ceil((backoffUntil - Date.now()) / 1000)}s remaining)`);
     playlistErrorsTotal.inc();
-    const stale = lastGoodPlaylist.get(cacheKey);
-    if (stale) {
-      console.log(`[PLAYLIST] Backing off, serving stale: ${streamUrl} (${Math.ceil((backoffUntil - Date.now()) / 1000)}s remaining)`);
-      res.set({
-        'Content-Type': 'application/vnd.apple.mpegurl',
-        'Cache-Control': 'no-cache',
-        'Access-Control-Allow-Origin': '*'
-      });
-      return res.send(stale);
-    }
-    console.log(`[PLAYLIST] Backing off, no cache available: ${streamUrl} (${Math.ceil((backoffUntil - Date.now()) / 1000)}s remaining)`);
     return res.status(502).json({ error: 'Upstream backoff active' });
   }
 
@@ -180,7 +169,6 @@ app.get('/playlist.m3u8', async (req, res) => {
     }
 
     playlistErrorBackoff.delete(cacheKey);
-    lastGoodPlaylist.set(cacheKey, result.rewritten);
     pruneSegmentBuffer();
     result.segmentUrls.slice(-SEGMENT_PREFETCH_COUNT).forEach(prefetchSegment);
 
@@ -193,19 +181,9 @@ app.get('/playlist.m3u8', async (req, res) => {
   } catch (err) {
     playlistCache.delete(cacheKey);
     playlistErrorBackoff.set(cacheKey, Date.now() + PLAYLIST_ERROR_BACKOFF_MS);
-    console.error(`[PLAYLIST] Error: ${err.message}`);
+    console.error(`[PLAYLIST] Error: ${err.message || err.code || err}`);
     playlistErrorsTotal.inc();
-    const stale = lastGoodPlaylist.get(cacheKey);
-    if (stale) {
-      console.log(`[PLAYLIST] Fetch failed, serving stale: ${streamUrl}`);
-      res.set({
-        'Content-Type': 'application/vnd.apple.mpegurl',
-        'Cache-Control': 'no-cache',
-        'Access-Control-Allow-Origin': '*'
-      });
-      return res.send(stale);
-    }
-    res.status(502).json({ error: err.message });
+    res.status(502).json({ error: err.message || err.code || 'Unknown error' });
   }
 });
 
