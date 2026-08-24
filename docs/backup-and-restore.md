@@ -68,39 +68,17 @@ That's it!
 
 ---
 
-### Application data (Velero)
+### Application data (Longhorn)
 
-Run this daily, or at minimum before upgrading any stateful app. Velero covers `catus-locatus` and `obsidian-sync`. The `monitoring` namespace is excluded because Thanos already stores metrics permanently in MinIO.
+The `daily-backup` RecurringJob backs up every PV to GCS at 02:00 (14 retained). Run a manual one before upgrading any stateful app.
 
-Make sure Velero is installed and the `velero` MinIO bucket exists before you start.
+1. Open the Longhorn UI at `https://lh.alialjaffer.com`.
 
-1. Set the kubeconfig.
+2. Go to **Backup**, confirm today's backup exists for each volume you care about.
 
-   ```bash
-   export KUBECONFIG=~/.kube/homelab-talos
-   ```
+3. For an on-demand backup, go to **Volume**, click **Create Backup** on the volume, wait for it to show as completed under **Backup**.
 
-2. Start a backup.
-
-   ```bash
-   velero backup create homelab-$(date +%Y%m%d) \
-     --include-namespaces catus-locatus \
-     --wait
-   ```
-
-3. Confirm the status is `Completed`.
-
-   ```bash
-   velero backup get
-   ```
-
-4. If it shows `PartiallyFailed` or `Failed`, check why.
-
-   ```bash
-   velero backup describe homelab-$(date +%Y%m%d) --details
-   ```
-
-The backup lands in the `velero` MinIO bucket.
+Backups land in `s3://alialjaffer-homelab@europe-west4/longhorn/`.
 
 ---
 
@@ -212,11 +190,11 @@ Machine configs applied. No plaintext written to disk.
 
 ---
 
-### Restore application data from Velero
+### Restore application data from Longhorn
 
-Use this when a namespace loses data and you need to restore from backup.
+Use this when a PV loses data and you need to restore from a backup.
 
-**CAUTION:** Restoring into an existing namespace overwrites current data. Scale down the application deployments first.
+**CAUTION:** Restoring overwrites current data. Scale down the application first.
 
 Make sure the target namespace exists and the Longhorn storage class is available.
 
@@ -227,26 +205,11 @@ Make sure the target namespace exists and the Longhorn storage class is availabl
    kubectl scale statefulset --all -n <namespace> --replicas=0
    ```
 
-2. List the available backups.
+2. Open the Longhorn UI, go to **Backup**, and find the backup for the volume.
 
-   ```bash
-   velero backup get
-   ```
+3. Click **Restore Latest Backup** (or pick an older one), set the target name and namespace.
 
-3. Start the restore from the backup you want.
-
-   ```bash
-   velero restore create \
-     --from-backup <backup-name> \
-     --include-namespaces <namespace> \
-     --wait
-   ```
-
-4. Confirm the status is `Completed`.
-
-   ```bash
-   velero restore get
-   ```
+4. Wait for the new volume to show `Detached`, then attach it as `rwx`/`rwo` matching the original workload claim. Easiest path: restore into a new PVC, then point the app's volume at it.
 
 5. Scale deployments back up.
 
@@ -290,7 +253,7 @@ Before you start, you need all of these:
    kubectl get applications -n argocd -w
    ```
 
-6. Restore application data from Velero using the procedure above.
+6. Restore application data from Longhorn using the procedure above.
 
 7. Confirm all services are accessible.
 

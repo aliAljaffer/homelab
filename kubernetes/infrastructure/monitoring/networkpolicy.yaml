@@ -83,13 +83,6 @@ spec:
               protocol: TCP
     - toEndpoints:
         - matchLabels:
-            "k8s:io.kubernetes.pod.namespace": velero
-      toPorts:
-        - ports:
-            - port: "8085"
-              protocol: TCP
-    - toEndpoints:
-        - matchLabels:
             "k8s:io.kubernetes.pod.namespace": kepler
       toPorts:
         - ports:

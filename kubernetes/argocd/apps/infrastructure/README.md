@@ -15,10 +15,6 @@ these bullets capture the *why* behind that ordering.
 - `keycloak-operator.yaml`: must exist before the `keycloak` Application (wave 1).
 - `keycloak.yaml`: needs `cloudnative-pg` (wave -2) and `keycloak-operator`
   (wave -1) healthy first.
-- `knative-serving-crds.yaml`: CRDs must exist before the `knative-serving`
-  controller (wave 0).
-- `knative-serving.yaml`: wired to the existing Cilium Gateway API stack
-  (`homelab-gateway`), not a separate ingress controller.
 - `kyverno.yaml`: runs early (wave -2) so policies are in force before workloads sync.
 - `longhorn.yaml`: first install uses `helm install --no-hooks` during bootstrap
   to avoid a circular dependency on the pre-upgrade hook's service account. See

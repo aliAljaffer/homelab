@@ -5,4 +5,3 @@ resources:
   - longhorn-backup-secret.sealed.yaml
   - backup-target.yaml
   - recurring-job-daily-backup.yaml
-  - grafana-dashboard.yaml

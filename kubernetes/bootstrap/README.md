@@ -22,8 +22,8 @@ All Helm chart values are committed to Git alongside their ArgoCD Applications. 
 | CloudNativePG | `kubernetes/infrastructure/cloudnative-pg/values.yaml` |
 | Kyverno | `kubernetes/infrastructure/kyverno/values.yaml` |
 
-Keycloak (operator + CR) and Knative Serving (CRDs + core + net-gateway-api) are installed from
-upstream raw/kustomize-remote manifests, not Helm charts. See their `kustomization.yaml` files
+Keycloak (operator + CR) is installed from
+upstream raw/kustomize-remote manifests, not Helm charts. See its `kustomization.yaml`
 under `kubernetes/infrastructure/`.
 
 Cilium and ArgoCD are bootstrap-installed imperatively (their Helm releases are not managed by ArgoCD). Values are tracked in `kubernetes/bootstrap/`. Everything else is fully ArgoCD-managed.
@@ -227,8 +227,7 @@ kubectl run mc --image=minio/mc --rm -it --restart=Never -- \
   /bin/sh -c "
     mc alias set minio http://minio.catus-locatus.svc.cluster.local:9000 \$MINIO_ROOT_USER \$MINIO_ROOT_PASSWORD && \
     mc mb minio/thanos && \
-    mc mb minio/loki && \
-    mc mb minio/velero
+    mc mb minio/loki
   "
 ```
 
