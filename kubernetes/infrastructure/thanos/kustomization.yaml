@@ -1,7 +1,0 @@
----
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-  - grafana-dashboard-query.yaml
-  - grafana-dashboard-compact.yaml
-  - grafana-dashboard-store.yaml
