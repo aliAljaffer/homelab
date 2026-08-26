@@ -458,7 +458,8 @@ grafana:
                     expression: A
                     type: threshold
                     refId: C
-              noDataState: NoData
+              # Absence of distributor metrics IS the stall condition; NoData must page.
+              noDataState: Alerting
               execErrState: Error
               for: 10m
               notification_settings:
@@ -507,7 +508,7 @@ grafana:
                     to: 0
                   datasourceUid: thanos
                   model:
-                    expr: 'increase(loki_canary_cache_test_query_results_total{status="failure"}[15m])'
+                    expr: 'sum(increase(loki_canary_cache_test_query_results_total{status="failure"}[30m]))'
                     instant: true
                     refId: A
                 - refId: C
@@ -515,7 +516,7 @@ grafana:
                   model:
                     conditions:
                       - evaluator:
-                          params: [0]
+                          params: [3]
                           type: gt
                         query:
                           params: [C]
