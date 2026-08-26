@@ -358,7 +358,7 @@ grafana:
                     to: 0
                   datasourceUid: thanos
                   model:
-                    expr: 'increase(loki_write_dropped_entries_total[5m])'
+                    expr: 'sum(increase(loki_write_dropped_entries_total[30m]))'
                     instant: true
                     refId: A
                 - refId: C
@@ -366,7 +366,7 @@ grafana:
                   model:
                     conditions:
                       - evaluator:
-                          params: [0]
+                          params: [500]
                           type: gt
                         query:
                           params: [C]
@@ -377,7 +377,7 @@ grafana:
                     refId: C
               noDataState: NoData
               execErrState: Error
-              for: 2m
+              for: 10m
               notification_settings:
                 receiver: Discord Channel
 
