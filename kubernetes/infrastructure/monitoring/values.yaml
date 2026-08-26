@@ -84,6 +84,56 @@ grafana:
   plugins:
     - grafana-github-datasource
 
+  # Dashboards pulled by the download-dashboards initContainer instead of
+  # vendored ConfigMaps. gnetId pins grafana.com revisions, url pins release
+  # branches for dashboards the projects only publish in their repos. Bump a
+  # revision/ref to update.
+  downloadDashboards: true
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: infrastructure
+          orgId: 1
+          folder: Infrastructure
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/infrastructure
+  dashboards:
+    infrastructure:
+      cert-manager:
+        gnetId: 20340
+        revision: 1
+        datasource: Prometheus
+      cloudnative-pg:
+        gnetId: 20417
+        revision: 4
+        datasource: Prometheus
+      external-dns:
+        gnetId: 23969
+        revision: 1
+        datasource: Prometheus
+      metallb:
+        gnetId: 20162
+        revision: 6
+        datasource: Prometheus
+      longhorn:
+        gnetId: 16888
+        revision: 14
+        datasource: Prometheus
+      kyverno:
+        url: https://raw.githubusercontent.com/kyverno/grafana-dashboard/master/grafana/dashboard.json
+      argocd:
+        url: https://raw.githubusercontent.com/argoproj/argo-cd/master/examples/dashboard.json
+      thanos-compact:
+        url: https://raw.githubusercontent.com/thanos-io/thanos/v0.37.2/examples/dashboards/compact.json
+      thanos-query:
+        url: https://raw.githubusercontent.com/thanos-io/thanos/v0.37.2/examples/dashboards/query.json
+      thanos-store:
+        url: https://raw.githubusercontent.com/thanos-io/thanos/v0.37.2/examples/dashboards/store.json
+
   persistence:
     enabled: true
     storageClassName: longhorn
