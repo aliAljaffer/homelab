@@ -88,7 +88,6 @@ grafana:
   # vendored ConfigMaps. gnetId pins grafana.com revisions, url pins release
   # branches for dashboards the projects only publish in their repos. Bump a
   # revision/ref to update.
-  downloadDashboards: true
   dashboardProviders:
     dashboardproviders.yaml:
       apiVersion: 1
