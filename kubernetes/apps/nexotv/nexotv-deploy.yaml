@@ -30,8 +30,6 @@ spec:
         env:
         - name: PORT
           value: "7000"
-        - name: RELAY_URL
-          value: "https://nexotv.alialjaffer.com"
         - name: CONFIG_SECRET
           valueFrom:
             secretKeyRef:
