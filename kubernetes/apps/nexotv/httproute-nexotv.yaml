@@ -16,16 +16,6 @@ spec:
   hostnames:
   - nexotv.alialjaffer.com
   rules:
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /playlist.m3u8
-    - path:
-        type: PathPrefix
-        value: /segment.ts
-    backendRefs:
-    - name: nexotv-relay
-      port: 7001
   - backendRefs:
     - name: nexotv
       port: 7000
