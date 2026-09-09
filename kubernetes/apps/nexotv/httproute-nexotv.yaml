@@ -10,8 +10,8 @@ spec:
   parentRefs:
   - group: gateway.networking.k8s.io
     kind: Gateway
-    name: cloudflare-tunnel
-    namespace: cloudflare-tunnel-system
+    name: homelab-gateway
+    namespace: kube-system
     sectionName: https
   hostnames:
   - nexotv.alialjaffer.com
