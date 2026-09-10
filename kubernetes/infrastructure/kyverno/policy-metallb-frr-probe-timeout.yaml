@@ -2,6 +2,10 @@ apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
   name: metallb-frr-probe-timeout
+  # autogen turns this into a DaemonSet mutation that reorders the pod
+  # template's containers; ArgoCD diffs container lists positionally, so it
+  # loops self-healing. Pods still get the mutation at admission time.
+  pod-policies.kyverno.io/autogen-controllers: none
 spec:
   background: false
   rules:
