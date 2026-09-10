@@ -11,8 +11,8 @@ metadata:
     release: monitoring
 spec:
   endpoints:
-    - port: http-metrics
-      interval: 30s
+  - port: http-metrics
+    interval: 30s
   selector:
     matchLabels:
       app.kubernetes.io/name: alloy
@@ -26,23 +26,23 @@ metadata:
     release: monitoring
 spec:
   endpoints:
-    - port: http-metrics
-      interval: 30s
+  - port: http-metrics
+    interval: 30s
   selector:
     matchLabels:
       app.kubernetes.io/name: loki
       app.kubernetes.io/instance: loki
     matchExpressions:
-      # The loki service (single binary) has no component label, while the
-      # canary and memcached services do. Exclude them so this monitor only
-      # scrapes Loki itself.
-      - key: app.kubernetes.io/component
-        operator: DoesNotExist
-      # The chart also publishes a headless service (variant=headless) carrying
-      # the same base labels; its http-metrics port spans every loki pod type,
-      # which yields 404s. Only scrape the main ClusterIP service.
-      - key: variant
-        operator: DoesNotExist
+    # The loki service (single binary) has no component label, while the
+    # canary and memcached services do. Exclude them so this monitor only
+    # scrapes Loki itself.
+    - key: app.kubernetes.io/component
+      operator: DoesNotExist
+    # The chart also publishes a headless service (variant=headless) carrying
+    # the same base labels; its http-metrics port spans every loki pod type,
+    # which yields 404s. Only scrape the main ClusterIP service.
+    - key: variant
+      operator: DoesNotExist
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -53,8 +53,8 @@ metadata:
     release: monitoring
 spec:
   endpoints:
-    - port: http-metrics
-      interval: 30s
+  - port: http-metrics
+    interval: 30s
   selector:
     matchLabels:
       app.kubernetes.io/name: loki
@@ -69,32 +69,12 @@ metadata:
     release: monitoring
 spec:
   endpoints:
-    - port: http-metrics
-      interval: 30s
+  - port: http-metrics
+    interval: 30s
   selector:
     matchLabels:
       app.kubernetes.io/name: loki
       app.kubernetes.io/component: memcached-chunks-cache
----
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: keycloak
-  namespace: monitoring
-  labels:
-    release: monitoring
-spec:
-  endpoints:
-    - port: management
-      path: /metrics
-      interval: 30s
-  selector:
-    matchLabels:
-      app: keycloak
-      app.kubernetes.io/instance: keycloak
-  namespaceSelector:
-    matchNames:
-      - keycloak
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -107,14 +87,14 @@ spec:
   # The sealed-secrets controller runs in kube-system (installed by the
   # bootstrap kustomization) and already exposes a dedicated metrics service.
   endpoints:
-    - targetPort: 8081
-      interval: 30s
+  - targetPort: 8081
+    interval: 30s
   selector:
     matchLabels:
       name: sealed-secrets-controller-metrics
   namespaceSelector:
     matchNames:
-      - kube-system
+    - kube-system
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -125,8 +105,8 @@ metadata:
     release: monitoring
 spec:
   endpoints:
-    - port: http-metrics
-      interval: 30s
+  - port: http-metrics
+    interval: 30s
   selector:
     matchLabels:
       app.kubernetes.io/name: loki

@@ -2,19 +2,16 @@
 
 Notes preserved from in-file comments removed during the comment audit. Sync-wave
 ordering itself lives in each file's `argocd.argoproj.io/sync-wave` annotation;
-these bullets capture the *why* behind that ordering.
+these bullets capture the _why_ behind that ordering.
 
 - `cert-manager-config.yaml`: needs cert-manager's CRDs (wave -4) synced first.
 - `cilium-config.yaml`: needs Cilium and the Gateway API CRDs already running.
 - `cloudflare-tunnel-gateway-controller.yaml`: replaces manual cloudflared
   ConfigMap edits for public routes. Needs the Gateway API CRDs
   (`gateway-api`, wave -5) and Cilium's GatewayClass (`cilium-config`, wave -1).
-- `cloudnative-pg.yaml`: needed before any Postgres Cluster CR (e.g. Keycloak's DB).
+- `cloudnative-pg.yaml`: needed before any Postgres Cluster CR.
 - `falco.yaml`: needs `monitoring` (wave 0) synced first for the ServiceMonitor CRD.
 - `gateway-api.yaml`: CRDs must exist before Cilium's Gateway controller starts.
-- `keycloak-operator.yaml`: must exist before the `keycloak` Application (wave 1).
-- `keycloak.yaml`: needs `cloudnative-pg` (wave -2) and `keycloak-operator`
-  (wave -1) healthy first.
 - `kyverno.yaml`: runs early (wave -2) so policies are in force before workloads sync.
 - `longhorn.yaml`: first install uses `helm install --no-hooks` during bootstrap
   to avoid a circular dependency on the pre-upgrade hook's service account. See
