@@ -6,25 +6,21 @@ One-time imperative steps to bring up a fresh Talos cluster. After bootstrap, Ar
 
 All Helm chart values are committed to Git alongside their ArgoCD Applications. Nothing is managed outside of the repo.
 
-| Component | Values file |
-|-----------|-------------|
-| Cilium (bootstrap) | `kubernetes/bootstrap/cilium/values.yaml` |
-| ArgoCD (bootstrap) | `kubernetes/bootstrap/argocd/values.yaml` |
-| Sealed Secrets | `kubernetes/infrastructure/sealed-secrets/values.yaml` |
-| cert-manager | `kubernetes/infrastructure/cert-manager/values.yaml` |
-| MetalLB | `kubernetes/infrastructure/metallb/values.yaml` |
-| Longhorn | `kubernetes/infrastructure/longhorn/values.yaml` |
-| ExternalDNS | `kubernetes/infrastructure/external-dns/values.yaml` |
-| kube-prometheus-stack | `kubernetes/infrastructure/monitoring/values.yaml` |
-| Loki | `kubernetes/infrastructure/loki/values.yaml` |
-| Thanos | `kubernetes/infrastructure/thanos/values.yaml` |
-| Grafana Alloy | `kubernetes/infrastructure/alloy/values.yaml` |
-| CloudNativePG | `kubernetes/infrastructure/cloudnative-pg/values.yaml` |
-| Kyverno | `kubernetes/infrastructure/kyverno/values.yaml` |
-
-Keycloak (operator + CR) is installed from
-upstream raw/kustomize-remote manifests, not Helm charts. See its `kustomization.yaml`
-under `kubernetes/infrastructure/`.
+| Component             | Values file                                            |
+| --------------------- | ------------------------------------------------------ |
+| Cilium (bootstrap)    | `kubernetes/bootstrap/cilium/values.yaml`              |
+| ArgoCD (bootstrap)    | `kubernetes/bootstrap/argocd/values.yaml`              |
+| Sealed Secrets        | `kubernetes/infrastructure/sealed-secrets/values.yaml` |
+| cert-manager          | `kubernetes/infrastructure/cert-manager/values.yaml`   |
+| MetalLB               | `kubernetes/infrastructure/metallb/values.yaml`        |
+| Longhorn              | `kubernetes/infrastructure/longhorn/values.yaml`       |
+| ExternalDNS           | `kubernetes/infrastructure/external-dns/values.yaml`   |
+| kube-prometheus-stack | `kubernetes/infrastructure/monitoring/values.yaml`     |
+| Loki                  | `kubernetes/infrastructure/loki/values.yaml`           |
+| Thanos                | `kubernetes/infrastructure/thanos/values.yaml`         |
+| Grafana Alloy         | `kubernetes/infrastructure/alloy/values.yaml`          |
+| CloudNativePG         | `kubernetes/infrastructure/cloudnative-pg/values.yaml` |
+| Kyverno               | `kubernetes/infrastructure/kyverno/values.yaml`        |
 
 Cilium and ArgoCD are bootstrap-installed imperatively (their Helm releases are not managed by ArgoCD). Values are tracked in `kubernetes/bootstrap/`. Everything else is fully ArgoCD-managed.
 
@@ -123,6 +119,7 @@ helm install cilium cilium/cilium --version 1.17.3 \
 ```
 
 Wait for nodes to come Ready:
+
 ```bash
 kubectl wait --for=condition=Ready nodes --all --timeout=300s
 ```
@@ -143,6 +140,7 @@ kubectl apply -f https://github.com/bitnami-labs/sealed-secrets/releases/downloa
 ```
 
 Fetch the public cert for sealing secrets:
+
 ```bash
 kubeseal --fetch-cert \
   --controller-name=sealed-secrets-controller \
@@ -214,6 +212,7 @@ kubectl apply -f kubernetes/argocd/apps/workloads.yaml
 ```
 
 ArgoCD syncs everything from Git. Watch progress:
+
 ```bash
 kubectl -n argocd get applications -w
 ```
@@ -244,13 +243,4 @@ sops --encrypt talos/clusterconfig/k8s-homelab-worker.yaml \
   > talos/clusterconfig/k8s-homelab-worker.sops
 
 # Store homelab.age securely (NOT in Git)
-```
-
-## Step 12 - Keycloak: retrieve the auto-generated admin password
-
-The operator generates the initial admin credentials; nothing to seal here.
-
-```bash
-kubectl get secret keycloak-initial-admin -n keycloak \
-  -o go-template='{{.data.username | base64decode}}{{"\n"}}{{.data.password | base64decode}}{{"\n"}}'
 ```

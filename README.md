@@ -19,12 +19,12 @@ It runs `cp0` at `192.168.8.99` with a custom-built Talos kernel because Apple's
 
 Four Lenovo M920q Tiny nodes. Fanless-ish, low power, surprisingly capable.
 
-| Node | IP | Status |
-|---|---|---|
-| wrk0 | 192.168.8.101 | Ready |
-| wrk1 | 192.168.8.102 | Ready |
-| wrk2 | 192.168.8.103 | Ready |
-| wrk3 | 192.168.8.100 | Ready |
+| Node | IP            | Status |
+| ---- | ------------- | ------ |
+| wrk0 | 192.168.8.101 | Ready  |
+| wrk1 | 192.168.8.102 | Ready  |
+| wrk2 | 192.168.8.103 | Ready  |
+| wrk3 | 192.168.8.100 | Ready  |
 
 All on Intel Core i5/i7 (8th/9th gen), 16-32GB DDR4, NVMe storage. The iGPU (Intel UHD 630) is exposed via the `i915` Talos extension for Quick Sync/VAAPI transcoding, scheduled cluster-wide as `gpu.intel.com/i915` via Node Feature Discovery + the Intel device plugin.
 
@@ -38,26 +38,25 @@ AMD Ryzen 7 7800X3D, 32GB RAM, RTX 4070 Ti Super, 3x 2TB NVMe, dual-boots Fedora
 
 ## Stack
 
-| Layer | What |
-|---|---|
-| OS | Talos Linux (immutable, API-managed) |
-| CNI | Cilium (kube-proxy replacement, Gateway API, Hubble) |
-| Ingress (LAN) | Gateway API + HTTPRoutes via Cilium's GatewayClass (no NGINX) |
-| Ingress (public) | cloudflare-tunnel-gateway-controller - dedicated Cloudflare Tunnel bound to its own GatewayClass/Gateway, so public HTTPRoutes need no manual tunnel config |
-| Storage | Longhorn (distributed, 2 replicas) |
-| Database | CloudNativePG (Postgres operator) |
-| Identity | Keycloak (HA, 3 instances, CloudNativePG-backed) |
-| GitOps | ArgoCD (App-of-Apps, 36 applications) |
-| Secrets (static) | Sealed Secrets + SOPS (age) |
-| Policy engine | Kyverno |
-| GPU scheduling | Node Feature Discovery + Intel device plugin (`gpu.intel.com/i915`) |
-| Metrics | kube-prometheus-stack + Thanos (indefinite retention via MinIO) |
-| Logs | Loki (90-day retention via MinIO) |
-| Log collector | Grafana Alloy |
-| DNS | Cloudflare (ExternalDNS + cert-manager DNS01) |
-| Backups | Longhorn native backup (S3 to GCS, daily at 02:00 UTC, 14-day retention) |
-| Power monitoring | Kepler (RAPL energy counters, node-level) |
-| Remote access | Legacy `cloudflared` tunnel (workload-specific routes) + the public Gateway tunnel above expose argocd, grafana, keycloak, vaultwarden, and pihole externally (Cloudflare-proxied); everything else (Hubble, Longhorn, MinIO console) stays LAN-only on the internal Gateway |
+| Layer            | What                                                                                                                                                                                                                                                               |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| OS               | Talos Linux (immutable, API-managed)                                                                                                                                                                                                                               |
+| CNI              | Cilium (kube-proxy replacement, Gateway API, Hubble)                                                                                                                                                                                                               |
+| Ingress (LAN)    | Gateway API + HTTPRoutes via Cilium's GatewayClass (no NGINX)                                                                                                                                                                                                      |
+| Ingress (public) | cloudflare-tunnel-gateway-controller - dedicated Cloudflare Tunnel bound to its own GatewayClass/Gateway, so public HTTPRoutes need no manual tunnel config                                                                                                        |
+| Storage          | Longhorn (distributed, 2 replicas)                                                                                                                                                                                                                                 |
+| Database         | CloudNativePG (Postgres operator)                                                                                                                                                                                                                                  |
+| GitOps           | ArgoCD (App-of-Apps, 36 applications)                                                                                                                                                                                                                              |
+| Secrets (static) | Sealed Secrets + SOPS (age)                                                                                                                                                                                                                                        |
+| Policy engine    | Kyverno                                                                                                                                                                                                                                                            |
+| GPU scheduling   | Node Feature Discovery + Intel device plugin (`gpu.intel.com/i915`)                                                                                                                                                                                                |
+| Metrics          | kube-prometheus-stack + Thanos (indefinite retention via MinIO)                                                                                                                                                                                                    |
+| Logs             | Loki (90-day retention via MinIO)                                                                                                                                                                                                                                  |
+| Log collector    | Grafana Alloy                                                                                                                                                                                                                                                      |
+| DNS              | Cloudflare (ExternalDNS + cert-manager DNS01)                                                                                                                                                                                                                      |
+| Backups          | Longhorn native backup (S3 to GCS, daily at 02:00 UTC, 14-day retention)                                                                                                                                                                                           |
+| Power monitoring | Kepler (RAPL energy counters, node-level)                                                                                                                                                                                                                          |
+| Remote access    | Legacy `cloudflared` tunnel (workload-specific routes) + the public Gateway tunnel above expose argocd, grafana, vaultwarden, and pihole externally (Cloudflare-proxied); everything else (Hubble, Longhorn, MinIO console) stays LAN-only on the internal Gateway |
 
 ---
 
@@ -75,7 +74,7 @@ AMD Ryzen 7 7800X3D, 32GB RAM, RTX 4070 Ti Super, 3x 2TB NVMe, dual-boots Fedora
 - **longhorn-backup** - scheduled PV backups to GCS (Longhorn RecurringJob)
 - **monitoring** - Grafana, Prometheus, Thanos, Loki, Alloy
 
-I tore down the Jellyfin/*arr media stack (Sonarr, Radarr, Prowlarr, Seerr, Decypharr, Dispatcharr) I used to run here, Stremio + NexoTV replaced it.
+I tore down the Jellyfin/\*arr media stack (Sonarr, Radarr, Prowlarr, Seerr, Decypharr, Dispatcharr) I used to run here, Stremio + NexoTV replaced it.
 
 ---
 
