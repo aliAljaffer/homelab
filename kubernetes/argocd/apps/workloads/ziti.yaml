@@ -1,0 +1,42 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ziti
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infrastructure
+  sources:
+  - repoURL: https://openziti.io/helm-charts/
+    chart: ziti-controller
+    targetRevision: 3.3.2
+    helm:
+      valueFiles:
+      - $values/kubernetes/infrastructure/ziti/controller-values.yaml
+  - repoURL: https://openziti.io/helm-charts/
+    chart: ziti-router
+    targetRevision: 3.0.3
+    helm:
+      valueFiles:
+      - $values/kubernetes/infrastructure/ziti/router-values.yaml
+  - repoURL: git@github.com:aliAljaffer/homelab.git
+    targetRevision: main
+    ref: values
+  - repoURL: git@github.com:aliAljaffer/homelab.git
+    targetRevision: main
+    path: kubernetes/infrastructure/ziti
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ziti
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - ServerSideApply=true
+    - ServerSideDiff=true

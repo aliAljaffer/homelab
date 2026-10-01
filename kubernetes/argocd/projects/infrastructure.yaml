@@ -16,6 +16,8 @@ spec:
   - quay.io/sustainable_computing_io/charts # OCI, no oci:// scheme; Argo appends the chart name (kepler)
   - https://helm.cilium.io/
   - https://charts.jetstack.io
+  - https://openziti.io/helm-charts/
+  - ghcr.io/alialjaffer/charts # ziti-operator, OCI, no oci:// scheme
   - https://metallb.github.io/metallb
   - https://charts.longhorn.io
   - https://kubernetes-sigs.github.io/external-dns/
