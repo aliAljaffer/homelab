@@ -42,9 +42,9 @@ committed to git. It is delivered by `scripts/enroll-router.sh`, which:
 2. runs `ziti edge create edge-router router1 --tunneler-enabled --jwt-output-file`,
 3. writes the JWT to the Secret `ziti-router-enrollment` (key `enrollmentJwt`).
 
-That Secret is **not** tracked by Argo, so Argo never prunes it and the router can
-re-enroll if its volume is lost. Re-run the script after a fresh install, or
-after wiping the router's PVC.
+That Secret is **not** tracked by Argo (the kustomization has no resources), so
+Argo never prunes it and the router can re-enroll if its volume is lost. Re-run
+the script after a fresh install, or after wiping the router's PVC.
 
 ```sh
 kubernetes/infrastructure/ziti/scripts/enroll-router.sh
@@ -69,17 +69,24 @@ Once (1) is resolved, a `ZitiRouter` + a helper ConfigMap/Secret can replace
 
 ## Metrics and dashboard
 
-Both the controller and the router are scraped, and a Grafana dashboard named
-"OpenZiti" renders them.
-
-- Controller: `prometheus.service.enabled=true` creates the Service and a
-  ServiceMonitor. The chart's ServiceMonitor is not labeled as
-  kube-prometheus-stack requires, so `controller-servicemonitor.yaml` adds one
-  that is.
-- Router: the chart can collect fabric metrics (`fabric.metrics.enabled`) but
-  has no way to expose them, so this directory overrides the generated
-  `ziti-router-config` ConfigMap to add a metrics web listener, plus
-  `router-metrics.yaml` for the Service and ServiceMonitor. `scripts/check-router-config.sh`
-  guards that override against chart drift.
+- The controller exposes `/metrics` (HTTPS). `prometheus.service.enabled=true`
+  makes the chart create the Service and a ServiceMonitor.
+- **Notifier:** Prometheus only selects ServiceMonitors labeled
+  `release: monitoring` (see the monitoring Application). The controller
+  chart's ServiceMonitor is not labeled that way, so it is not scraped yet. See
+  the "Known gaps" section below.
 - `fabric.events.enabled=true` turns on the full fabric event set.
 
+## Known gaps to fix upstream
+
+These are worth an issue or a small change; they don't block the install.
+
+1. **Controller ServiceMonitor label.** The controller chart's ServiceMonitor
+   needs the `release: monitoring` label to match the kube-prometheus-stack
+   selector. Options: add a ServiceMonitor in the monitoring app that selects
+   the controller service, or patch the chart to accept extra labels.
+2. **Router metrics not exposed.** `fabric.metrics.enabled=true` configures the
+   router to collect metrics, but the `ziti-router` chart defines no metrics
+   port/Service (and `.Values.ports` is referenced in the Deployment template
+   but never set in `values.yaml`). A small Service + ServiceMonitor over the
+   router pod, or a chart fix, is needed to scrape the router.
