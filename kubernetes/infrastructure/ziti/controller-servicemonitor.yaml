@@ -1,0 +1,20 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: ziti-controller
+  namespace: ziti
+  labels:
+    release: monitoring
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ziti-controller
+      app.kubernetes.io/instance: ziti-controller
+      app.kubernetes.io/component: ziti-controller
+  endpoints:
+    - port: prometheus
+      interval: 30s
+      scheme: https
+      tlsConfig:
+        insecureSkipVerify: true

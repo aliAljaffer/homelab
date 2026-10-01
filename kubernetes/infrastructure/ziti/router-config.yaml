@@ -1,0 +1,72 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ziti-router-config
+  namespace: ziti
+data:
+  ziti-router.yaml: |-
+    v: 3
+
+    identity:
+      cert:        /etc/ziti/config/ziti-router.cert
+      server_cert: /etc/ziti/config/ziti-router.server.chain.cert
+      key:         /etc/ziti/config/ziti-router.key
+      ca:          /etc/ziti/config/ziti-router.cas
+
+    ctrl:
+      endpointsFile: endpoints.yml
+    link:
+      dialers:
+        - binding: transport
+      listeners:
+        - binding:          transport
+          bind:             tls:0.0.0.0:3022
+          advertise:        tls:ziti-router-edge.ziti.svc:443
+          options: {}
+    listeners:
+      - binding: edge
+        address: tls:0.0.0.0:3022
+        options:
+          advertise: ziti-router-edge.ziti.svc:443
+      - binding: tunnel
+        options:
+          mode: host
+
+    metrics:
+      reportInterval: 5s
+      intervalAgeThreshold: 5s
+
+    edge:
+      csr:
+        sans:
+          dns:
+            - localhost
+            - ziti-router-edge.ziti.svc
+          ip:
+            - 127.0.0.1
+          email: []
+          uri: []
+      heartbeatIntervalSeconds: 60
+    forwarder:
+      latencyProbeInterval: 10
+      linkDialQueueLength: 1000
+      linkDialWorkerCount: 32
+      rateLimitedQueueLength: 5000
+      rateLimitedWorkerCount: 64
+      xgressDialQueueLength: 1000
+      xgressDialWorkerCount: 128
+
+    web:
+      - name: metrics
+        bindPoints:
+          - interface: 0.0.0.0:9090
+            address: 0.0.0.0:9090
+        identity:
+          cert:        /etc/ziti/config/ziti-router.cert
+          server_cert: /etc/ziti/config/ziti-router.server.chain.cert
+          key:         /etc/ziti/config/ziti-router.key
+          ca:          /etc/ziti/config/ziti-router.cas
+        apis:
+          - binding: metrics
+            options: {}
