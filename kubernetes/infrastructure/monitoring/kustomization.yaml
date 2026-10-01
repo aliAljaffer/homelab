@@ -10,3 +10,4 @@ resources:
   - grafana-smtp-secret.sealed.yaml
   - networkpolicy.yaml
   - servicemonitors.yaml
+  - grafana-dashboard-openziti.yaml

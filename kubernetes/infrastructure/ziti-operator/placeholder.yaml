@@ -1,0 +1,7 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ziti-operator-directory
+  namespace: ziti-operator-system
+data: {}

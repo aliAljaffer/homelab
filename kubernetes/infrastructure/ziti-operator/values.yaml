@@ -1,0 +1,33 @@
+---
+connection:
+  create: true
+  name: default
+  managementUrl: https://ziti-controller-mgmt.ziti.svc:443/edge/management/v1
+  caBundle:
+    configMapName: ziti-root-ca
+    key: ca.crt
+  auth:
+    updb:
+      secretName: ziti-operator-credential
+  roleScope: Namespaced
+  hostingRouters:
+    - router1
+  clusterId: default
+
+# Copies the root-most CA (edge-root) from the controller's edge-signer Secret
+# into the ziti-root-ca ConfigMap in this namespace.
+trustManager:
+  enabled: true
+  name: ziti-root-ca
+  key: ca.crt
+  sources:
+    - secret:
+        name: ziti-controller-edge-signer-secret
+        key: ca.crt
+
+prometheus:
+  enabled: true
+
+metrics:
+  enabled: true
+  secure: true

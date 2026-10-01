@@ -1,0 +1,7 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: trust-manager-directory
+  namespace: cert-manager
+data: {}

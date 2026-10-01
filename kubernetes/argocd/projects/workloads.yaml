@@ -10,7 +10,7 @@ spec:
   description: User workloads and applications
   sourceRepos:
   - git@github.com:aliAljaffer/homelab.git
-  - https://actions.github.io/actions-runner-controller
+  - https://openziti.io/helm-charts/ # ziti-controller + ziti-router charts
   - oci://ghcr.io/actions/actions-runner-controller-charts
   destinations:
   - server: https://kubernetes.default.svc
