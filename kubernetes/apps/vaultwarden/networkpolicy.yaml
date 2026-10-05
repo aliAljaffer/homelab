@@ -15,9 +15,9 @@ spec:
               protocol: TCP
           rules:
             http:
-              - path: '^/$'
-              - path: '^/(api|identity|notifications|attachments|icons|sends|events|sso|connect|twofactor|two-step|services|platform|alive|app|images|css|locales|assets|fonts|scripts)(/|\?|$)'
-              - path: '^/[A-Za-z0-9._-]+\.(js|css|json|png|svg|ico|xml|woff2?|html|txt|webmanifest)(\?.*)?$'
+              - path: '/$'
+              - path: '/(api|identity|notifications|attachments|icons|sends|events|sso|connect|twofactor|two-step|services|platform|alive|app|images|css|locales|assets|fonts|scripts)(/|\?|$)'
+              - path: '/[A-Za-z0-9._-]+\.(js|css|json|png|svg|ico|xml|woff2?|html|txt|webmanifest)(\?.*)?$'
     # Everything unmatched (incl. /admin) is denied from the tunnel; the panel
     # stays reachable only from the node via kubectl port-forward (host rule).
     # kubelet liveness/readiness probe (httpGet :80 /alive).
