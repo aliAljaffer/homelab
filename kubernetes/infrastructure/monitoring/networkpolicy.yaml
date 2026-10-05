@@ -33,6 +33,23 @@ spec:
         protocol: TCP
       - port: "9100"
         protocol: TCP
+  - toEntities:
+    - host
+    - remote-node
+    toPorts:
+    - ports:
+      - port: "9100"
+        protocol: TCP
+      - port: "9120"
+        protocol: TCP
+      - port: "9140"
+        protocol: TCP
+      - port: "9141"
+        protocol: TCP
+      - port: "9962"
+        protocol: TCP
+      - port: "9963"
+        protocol: TCP
   - toEndpoints:
     - matchLabels:
         app.kubernetes.io/name: alertmanager
