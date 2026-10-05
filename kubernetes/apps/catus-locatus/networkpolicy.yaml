@@ -157,6 +157,13 @@ spec:
               protocol: TCP
     - fromEndpoints:
         - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": monitoring
+      toPorts:
+        - ports:
+            - port: "9187"
+              protocol: TCP
+    - fromEndpoints:
+        - matchLabels:
             cnpg.io/cluster: catus-locatus-db
       toPorts:
         - ports:

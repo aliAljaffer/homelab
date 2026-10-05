@@ -394,6 +394,13 @@ spec:
         - matchPattern: "*"
   - toEndpoints:
     - matchLabels:
+        app.kubernetes.io/name: grafana
+    toPorts:
+    - ports:
+      - port: "3000"
+        protocol: TCP
+  - toEndpoints:
+    - matchLabels:
         app.kubernetes.io/name: thanos
         app.kubernetes.io/component: query
     toPorts:

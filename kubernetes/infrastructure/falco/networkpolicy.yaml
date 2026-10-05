@@ -1,0 +1,66 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: falco-default
+  namespace: falco
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: falco
+  ingress:
+  # ServiceMonitor falco-metrics scrapes the webserver /metrics on :8765.
+  - fromEndpoints:
+    - matchLabels:
+        "k8s:io.kubernetes.pod.namespace": monitoring
+    toPorts:
+    - ports:
+      - port: "8765"
+        protocol: TCP
+  # falcosidekick reads Falco's event stream.
+  - fromEndpoints:
+    - matchLabels:
+        app.kubernetes.io/name: falcosidekick
+    toPorts:
+    - ports:
+      - port: "8765"
+        protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: falcosidekick-default
+  namespace: falco
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: falcosidekick
+  ingress:
+  # ServiceMonitor falcosidekick-metrics scrapes /metrics on :2801.
+  - fromEndpoints:
+    - matchLabels:
+        "k8s:io.kubernetes.pod.namespace": monitoring
+    toPorts:
+    - ports:
+      - port: "2801"
+        protocol: TCP
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        "k8s:io.kubernetes.pod.namespace": kube-system
+        k8s-app: kube-dns
+    toPorts:
+    - ports:
+      - port: "53"
+        protocol: UDP
+      - port: "53"
+        protocol: TCP
+      rules:
+        dns:
+        - matchPattern: "*"
+  - toEndpoints:
+    - matchLabels:
+        app.kubernetes.io/name: falco
+    toPorts:
+    - ports:
+      - port: "8765"
+        protocol: TCP
