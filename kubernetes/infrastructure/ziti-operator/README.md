@@ -6,13 +6,9 @@ operator reconciles `ZitiApp`, `ZitiIdentity`, `ZitiRouter`, and related CRDs
 against the controller installed by the `ziti` app.
 
 - Ordering: sync-wave `3`, after the `ziti` app (wave `2`) that creates the
-  controller it connects to, and after `trust-manager` (wave `-3`).
+  controller it connects to.
 - Connection: `ZitiConnection/default` targets
   `https://ziti-controller-mgmt.ziti.svc:443/edge/management/v1`.
-- CA: a trust-manager `Bundle` copies the Ziti root CA from
-  `ziti-controller-edge-signer-secret` into the `ziti-root-ca` ConfigMap in
-  `ziti-operator-system` (the controller's cert-manager Secret `ca.crt` key holds
-  the root-most certificate).
 - RBAC: cluster-wide (default).
 
 ## Secret: `ziti-operator-credential` (not in git)

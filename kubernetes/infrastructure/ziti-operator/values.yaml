@@ -14,17 +14,6 @@ connection:
     - router1
   clusterId: default
 
-# Copies the root-most CA (edge-root) from the controller's edge-signer Secret
-# into the ziti-root-ca ConfigMap in this namespace.
-trustManager:
-  enabled: true
-  name: ziti-root-ca
-  key: ca.crt
-  sources:
-    - secret:
-        name: ziti-controller-edge-signer-secret
-        key: ca.crt
-
 prometheus:
   enabled: true
 
