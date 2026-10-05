@@ -5,17 +5,15 @@ metadata:
   name: vaultwarden
   namespace: vaultwarden
   annotations:
-    external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
 spec:
   parentRefs:
-  - group: gateway.networking.k8s.io
-    kind: Gateway
-    name: homelab-gateway
-    namespace: kube-system
-    sectionName: https
+    - name: cloudflare-tunnel
+      namespace: cloudflare-tunnel-system
+      sectionName: https
   hostnames:
-  - vw.alialjaffer.com
+    - vw.alialjaffer.com
   rules:
-  - backendRefs:
-    - name: vaultwarden
-      port: 80
+    - backendRefs:
+        - name: vaultwarden
+          port: 80
