@@ -56,6 +56,13 @@ spec:
         - ports:
             - port: "5432"
               protocol: TCP
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": monitoring
+      toPorts:
+        - ports:
+            - port: "9187"
+              protocol: TCP
     # CNPG operator -> instance traffic (failover/backup orchestration)
     - fromEndpoints:
         - matchLabels:
