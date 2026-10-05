@@ -14,12 +14,8 @@ chart `appVersion`s are 2.0.3, so `image.tag` pins both to 2.0.4.
 
 ## Ordering
 
-1. `trust-manager` (wave -3) must be running first. The controller chart v3
-   requires it: the chart renders a `trust.cert-manager.io/v1alpha1` `Bundle`
-   that composes the controller's ctrl-plane CA bundle from the edge-root
-   Secret.
-2. `ziti` (wave 2) installs the controller, then the router.
-3. The router needs an enrollment JWT (see below).
+1. `ziti` (wave 2) installs the controller, then the router.
+2. The router needs an enrollment JWT (see below).
 
 ## Namespace and endpoints
 
