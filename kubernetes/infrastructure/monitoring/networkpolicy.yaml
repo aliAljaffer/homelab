@@ -31,6 +31,8 @@ spec:
     - ports:
       - port: "10250"
         protocol: TCP
+      - port: "9100"
+        protocol: TCP
   - toEndpoints:
     - matchLabels:
         app.kubernetes.io/name: alertmanager
