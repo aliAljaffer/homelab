@@ -13,12 +13,6 @@ spec:
         - ports:
             - port: "80"
               protocol: TCP
-          rules:
-            http:
-              - path: "/"
-              - pathRegex: '^/(api|identity|notifications|attachments|icons|sends|events|sso|connect|twofactor|two-step|services|platform|alive|app|images|css|locales|assets|fonts|scripts)(/|$)'
-              - pathRegex: '^/[A-Za-z0-9._-]+\.(js|css|json|png|svg|ico|xml|woff2?|html|txt|webmanifest)(\?.*)?$'
-    # /admin stays reachable only from the node: kubectl port-forward.
     # kubelet liveness/readiness probe (httpGet :80 /alive).
     - fromEntities:
         - host
