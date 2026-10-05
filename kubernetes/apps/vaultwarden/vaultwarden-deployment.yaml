@@ -35,7 +35,7 @@ spec:
         - name: DOMAIN
           value: "https://vw.alialjaffer.com"
         - name: SIGNUPS_ALLOWED
-          value: "false"
+          value: "true"
         - name: ENABLE_WEBSOCKET
           value: "true"
         - name: ADMIN_TOKEN
