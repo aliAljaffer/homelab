@@ -446,15 +446,25 @@ spec:
   - fromEndpoints:
     - matchLabels:
         app.kubernetes.io/name: grafana
+    toPorts:
+    - ports:
+      # loki-gateway Service is 80 -> targetPort http-metrics (8080);
+      # Cilium enforces the post-DNAT port.
+      - port: "8080"
+        protocol: TCP
+  - fromEndpoints:
     - matchLabels:
         app.kubernetes.io/name: alloy
+    toPorts:
+    - ports:
+      - port: "8080"
+        protocol: TCP
+  - fromEndpoints:
     - matchLabels:
         app.kubernetes.io/name: loki
         app.kubernetes.io/component: canary
     toPorts:
     - ports:
-      # loki-gateway Service is 80 -> targetPort http-metrics (8080);
-      # Cilium enforces the post-DNAT port.
       - port: "8080"
         protocol: TCP
   # kubelet readiness probe (httpGet :8080 /).
@@ -502,6 +512,11 @@ spec:
     - matchLabels:
         app.kubernetes.io/name: loki
         app.kubernetes.io/component: gateway
+    toPorts:
+    - ports:
+      - port: "3100"
+        protocol: TCP
+  - fromEndpoints:
     - matchLabels:
         app.kubernetes.io/name: loki
         app.kubernetes.io/component: canary
@@ -548,6 +563,11 @@ spec:
   - toEndpoints:
     - matchLabels:
         app.kubernetes.io/component: memcached-chunks-cache
+    toPorts:
+    - ports:
+      - port: "11211"
+        protocol: TCP
+  - toEndpoints:
     - matchLabels:
         app.kubernetes.io/component: memcached-results-cache
     toPorts:
