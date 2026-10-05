@@ -212,6 +212,49 @@ spec:
     - ports:
       - port: "8081"
         protocol: TCP
+  # Grafana metrics (ServiceMonitor monitoring-grafana).
+  - toEndpoints:
+    - matchLabels:
+        "k8s:io.kubernetes.pod.namespace": monitoring
+        app.kubernetes.io/name: grafana
+    toPorts:
+    - ports:
+      - port: "3000"
+        protocol: TCP
+  # Falco engine-health metrics and falcosidekick metrics.
+  - toEndpoints:
+    - matchLabels:
+        "k8s:io.kubernetes.pod.namespace": falco
+        app.kubernetes.io/name: falco
+    toPorts:
+    - ports:
+      - port: "8765"
+        protocol: TCP
+  - toEndpoints:
+    - matchLabels:
+        "k8s:io.kubernetes.pod.namespace": falco
+        app.kubernetes.io/name: falcosidekick
+    toPorts:
+    - ports:
+      - port: "2801"
+        protocol: TCP
+  # postgres_exporter on the CNPG instances.
+  - toEndpoints:
+    - matchLabels:
+        "k8s:io.kubernetes.pod.namespace": umami
+        cnpg.io/cluster: umami-db
+    toPorts:
+    - ports:
+      - port: "9187"
+        protocol: TCP
+  - toEndpoints:
+    - matchLabels:
+        "k8s:io.kubernetes.pod.namespace": catus-locatus
+        cnpg.io/cluster: catus-locatus-db
+    toPorts:
+    - ports:
+      - port: "9187"
+        protocol: TCP
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
