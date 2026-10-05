@@ -66,6 +66,13 @@ spec:
         protocol: TCP
   - toEndpoints:
     - matchLabels:
+        app: umami
+    toPorts:
+    - ports:
+      - port: "80"
+        protocol: TCP
+  - toEndpoints:
+    - matchLabels:
         app: pihole
     toPorts:
     - ports:
@@ -117,4 +124,12 @@ spec:
     toPorts:
     - ports:
       - port: "443"
+        protocol: TCP
+  - toEndpoints:
+    - matchLabels:
+        "k8s:io.kubernetes.pod.namespace": cloudflare-tunnel-system
+        app.kubernetes.io/name: cloudflare-tunnel-gateway-controller-proxy
+    toPorts:
+    - ports:
+      - port: "8081"
         protocol: TCP
