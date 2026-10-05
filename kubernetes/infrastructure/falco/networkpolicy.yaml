@@ -8,7 +8,6 @@ spec:
     matchLabels:
       app.kubernetes.io/name: falco
   ingress:
-  # ServiceMonitor falco-metrics scrapes the webserver /metrics on :8765.
   - fromEndpoints:
     - matchLabels:
         "k8s:io.kubernetes.pod.namespace": monitoring
@@ -16,13 +15,16 @@ spec:
     - ports:
       - port: "8765"
         protocol: TCP
-  # falcosidekick reads Falco's event stream.
   - fromEndpoints:
     - matchLabels:
-        app.kubernetes.io/name: falcosidekick
+        "k8s:io.kubernetes.pod.namespace": falco
     toPorts:
     - ports:
       - port: "8765"
+        protocol: TCP
+      - port: "4222"
+        protocol: TCP
+      - port: "8766"
         protocol: TCP
 ---
 apiVersion: cilium.io/v2
@@ -35,13 +37,21 @@ spec:
     matchLabels:
       app.kubernetes.io/name: falcosidekick
   ingress:
-  # ServiceMonitor falcosidekick-metrics scrapes /metrics on :2801.
   - fromEndpoints:
     - matchLabels:
         "k8s:io.kubernetes.pod.namespace": monitoring
     toPorts:
     - ports:
       - port: "2801"
+        protocol: TCP
+  - fromEndpoints:
+    - matchLabels:
+        "k8s:io.kubernetes.pod.namespace": falco
+    toPorts:
+    - ports:
+      - port: "2801"
+        protocol: TCP
+      - port: "2810"
         protocol: TCP
   egress:
   - toEndpoints:
@@ -59,7 +69,7 @@ spec:
         - matchPattern: "*"
   - toEndpoints:
     - matchLabels:
-        app.kubernetes.io/name: falco
+        "k8s:io.kubernetes.pod.namespace": falco
     toPorts:
     - ports:
       - port: "8765"
