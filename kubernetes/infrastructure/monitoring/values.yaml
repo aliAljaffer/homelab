@@ -77,7 +77,6 @@ grafana:
     - name: grafana-discord-webhook
     - name: grafana-github-token
 
-  # Injected as GF_SMTP_USER / GF_SMTP_PASSWORD.
   smtp:
     existingSecret: grafana-smtp-secret
 
@@ -211,9 +210,8 @@ grafana:
       jsonData:
         httpMethod: POST
         timeInterval: 15s
-    # deleteDatasources below clears a stale auto-uid "GitHub" row left by an
-    # earlier attempt at this datasource, a same-name/different-uid row can't
-    # be reconciled otherwise.
+    # deleteDatasources below clears a same-name/different-uid row, which
+    # Grafana can't reconcile otherwise.
     - name: GitHub
       type: grafana-github-datasource
       uid: github

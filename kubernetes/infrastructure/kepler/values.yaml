@@ -71,7 +71,6 @@ config:
       debugCollectors:
         - go
 
-# release: monitoring label is required to match Prometheus's serviceMonitorSelector.
 serviceMonitor:
   enabled: true
   interval: 5s

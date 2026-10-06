@@ -15,7 +15,6 @@ spec:
   # same endpoint, so this only adds the host entity on top of that, it
   # doesn't replace it.
   ingress:
-  # kubelet liveness/readiness probe (httpGet :8081 /healthz, /readyz).
   - fromEntities:
     - host
     toPorts:
@@ -95,7 +94,6 @@ spec:
     - ports:
       - port: "8080"
         protocol: TCP
-  # kubelet liveness/readiness probe (httpGet :8081 /healthz, /readyz).
   - fromEntities:
     - host
     toPorts:

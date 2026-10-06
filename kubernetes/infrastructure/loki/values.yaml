@@ -102,9 +102,6 @@ sidecar:
       cpu: 45m
       memory: 208Mi
 
-# monitoring.lokiCanary.enabled: false below is the wrong key and does nothing (no such field in
-# this chart's schema). Real toggle is top-level lokiCanary.enabled. Canary is running unintentionally;
-# to disable it, set lokiCanary: {enabled: false} at the top level.
 lokiCanary:
   resources:
     requests:

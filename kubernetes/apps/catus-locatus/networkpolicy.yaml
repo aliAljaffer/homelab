@@ -22,7 +22,6 @@ spec:
         - ports:
             - port: "4001"
               protocol: TCP
-    # kubelet liveness/readiness probe (httpGet :4001 /api/health).
     - fromEntities:
         - host
       toPorts:
@@ -76,7 +75,6 @@ spec:
         - ports:
             - port: "8080"
               protocol: TCP
-    # kubelet liveness/readiness probe (httpGet :8080 /health, /).
     - fromEntities:
         - host
       toPorts:
@@ -116,7 +114,6 @@ spec:
         - ports:
             - port: "9001"
               protocol: TCP
-    # kubelet liveness probe (httpGet :9000 /minio/health/live).
     - fromEntities:
         - host
       toPorts:
@@ -169,7 +166,7 @@ spec:
         - ports:
             - port: "5432"
               protocol: TCP
-    # CNPG operator -> instance traffic (failover/backup orchestration), pre-allowed though not yet observed live.
+    # CNPG operator -> instance traffic (failover/backup orchestration).
     - fromEndpoints:
         - matchLabels:
             "k8s:io.kubernetes.pod.namespace": cnpg-system
@@ -177,7 +174,6 @@ spec:
         - ports:
             - port: "8000"
               protocol: TCP
-    # kubelet liveness/readiness/startup probe (httpGet :8000 /healthz, /readyz, /startupz).
     - fromEntities:
         - host
       toPorts:
