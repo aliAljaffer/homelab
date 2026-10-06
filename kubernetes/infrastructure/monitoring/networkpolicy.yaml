@@ -422,6 +422,12 @@ spec:
     - ports:
       - port: "3000"
         protocol: TCP
+  - fromEntities:
+    - ingress
+    toPorts:
+    - ports:
+      - port: "3000"
+        protocol: TCP
   - fromEndpoints:
     - matchLabels:
         "k8s:io.kubernetes.pod.namespace": monitoring
@@ -430,6 +436,8 @@ spec:
       - port: "3000"
         protocol: TCP
   egress:
+  - toEntities:
+    - kube-apiserver
   - toEndpoints:
     - matchLabels:
         "k8s:io.kubernetes.pod.namespace": kube-system
