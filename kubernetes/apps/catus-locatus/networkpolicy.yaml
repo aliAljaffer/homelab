@@ -106,10 +106,8 @@ spec:
         - ports:
             - port: "9000"
               protocol: TCP
-    # kube-system: homelab-gateway pod, for the minio-console HTTPRoute.
-    - fromEndpoints:
-        - matchLabels:
-            "k8s:io.kubernetes.pod.namespace": kube-system
+    - fromEntities:
+        - ingress
       toPorts:
         - ports:
             - port: "9001"
