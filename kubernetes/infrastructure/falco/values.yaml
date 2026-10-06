@@ -1,7 +1,6 @@
 driver:
   kind: modern_ebpf
   modernEbpf:
-    # Runs with BPF/SYS_RESOURCE/PERFMON/SYS_PTRACE instead of a fully privileged container.
     leastPrivileged: true
 
 falco:
@@ -14,7 +13,6 @@ falco:
 metrics:
   enabled: true
 
-# release: monitoring label matches Prometheus's serviceMonitorSelector.
 serviceMonitor:
   create: true
   labels:

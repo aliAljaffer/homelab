@@ -12,7 +12,6 @@ spec:
   project: infrastructure
   sources:
   - repoURL: ghcr.io/lexfrei/charts
-    # No oci:// scheme here, see projects/infrastructure.yaml.
     chart: cloudflare-tunnel-gateway-controller
     targetRevision: 3.4.0
     helm:

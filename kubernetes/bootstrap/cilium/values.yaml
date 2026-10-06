@@ -4,8 +4,8 @@ k8sServiceHost: 192.168.8.99
 k8sServicePort: 6443
 
 # Logs policy drops without enforcing them, needed before default-deny
-# NetworkPolicies go live (see CONTEXT-networkpolicy-audit.md). Flip back
-# to false once enforce mode is confirmed safe.
+# NetworkPolicies go live. Flip back to false once enforce mode is
+# confirmed safe.
 policyAuditMode: true
 
 ipam:
@@ -81,7 +81,7 @@ operator:
       labels:
         release: monitoring
   # Gateway API reconciliation for the whole cluster stalls under this if
-  # starved (rate-limiter Wait() context-cancels mid-reconcile). Was 5m/20m.
+  # starved (rate-limiter Wait() context-cancels mid-reconcile).
   resources:
     requests:
       cpu: 50m

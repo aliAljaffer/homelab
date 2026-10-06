@@ -4,7 +4,7 @@ global:
     createSecret: false
     secretName: thanos-objstore-secret # sealed in bootstrap/README.md
     secretKey: objstore.yml # must match the key in the sealed secret
-  # Applies to query, storegateway, and compactor
+  # Applies to query, storegateway, and compactor.
   serviceMonitor:
     enabled: true
     labels:

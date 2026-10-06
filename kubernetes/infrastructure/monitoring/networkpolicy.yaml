@@ -23,7 +23,6 @@ spec:
         - matchPattern: "*"
   - toEntities:
     - kube-apiserver
-  # kubelet/cAdvisor scrape (kube-prometheus-kubelet ServiceMonitor).
   - toEntities:
     - host
     - remote-node
@@ -57,7 +56,6 @@ spec:
     - ports:
       - port: "9093"
         protocol: TCP
-  # Thanos sidecar (same pod): upload TSDB blocks to GCS.
   - toFQDNs:
     - matchName: "storage.googleapis.com"
     - matchName: "oauth2.googleapis.com"
@@ -136,7 +134,6 @@ spec:
     - ports:
       - port: "9617"
         protocol: TCP
-  # Log stack scrape targets (ServiceMonitors in servicemonitors.yaml).
   - toEndpoints:
     - matchLabels:
         app.kubernetes.io/name: alloy
@@ -205,7 +202,6 @@ spec:
     - ports:
       - port: "9402"
         protocol: TCP
-  # Cilium agent + operator metrics (enabled in bootstrap/cilium/values.yaml).
   - toEndpoints:
     - matchLabels:
         "k8s:io.kubernetes.pod.namespace": kube-system
@@ -222,7 +218,6 @@ spec:
     - ports:
       - port: "9963"
         protocol: TCP
-  # sealed-secrets controller metrics.
   - toEndpoints:
     - matchLabels:
         "k8s:io.kubernetes.pod.namespace": kube-system
@@ -231,7 +226,6 @@ spec:
     - ports:
       - port: "8081"
         protocol: TCP
-  # Grafana metrics (ServiceMonitor monitoring-grafana).
   - toEndpoints:
     - matchLabels:
         "k8s:io.kubernetes.pod.namespace": monitoring
@@ -240,7 +234,6 @@ spec:
     - ports:
       - port: "3000"
         protocol: TCP
-  # Falco engine-health metrics and falcosidekick metrics.
   - toEndpoints:
     - matchLabels:
         "k8s:io.kubernetes.pod.namespace": falco
@@ -257,7 +250,6 @@ spec:
     - ports:
       - port: "2801"
         protocol: TCP
-  # postgres_exporter on the CNPG instances.
   - toEndpoints:
     - matchLabels:
         "k8s:io.kubernetes.pod.namespace": umami
@@ -293,7 +285,6 @@ spec:
     - ports:
       - port: "9090"
         protocol: TCP
-  # kubelet liveness/readiness probe (httpGet :9090 /-/healthy, /-/ready).
   - fromEntities:
     - host
     toPorts:
@@ -344,8 +335,7 @@ spec:
     - ports:
       - port: "10901"
         protocol: TCP
-  # kubelet liveness/readiness probe (httpGet :10902 /-/healthy, /-/ready). No
-  # other consumer observed for this port.
+  # No other consumer observed for port 10902.
   - fromEntities:
     - host
     toPorts:
@@ -426,7 +416,6 @@ spec:
     - ports:
       - port: "3000"
         protocol: TCP
-  # kubelet liveness/readiness probe (httpGet :3000 /api/health).
   - fromEntities:
     - host
     toPorts:
@@ -469,14 +458,14 @@ spec:
     - ports:
       - port: "9090"
         protocol: TCP
+  # loki-gateway Service is 80 -> targetPort http-metrics (8080);
+  # Cilium enforces the post-DNAT port.
   - toEndpoints:
     - matchLabels:
         app.kubernetes.io/name: loki
         app.kubernetes.io/component: gateway
     toPorts:
     - ports:
-      # loki-gateway Service is 80 -> targetPort http-metrics (8080);
-      # Cilium enforces the post-DNAT port.
       - port: "8080"
         protocol: TCP
   # SES SMTP for alert/invite emails (grafana.ini smtp.host).
@@ -517,8 +506,6 @@ spec:
         app.kubernetes.io/name: grafana
     toPorts:
     - ports:
-      # loki-gateway Service is 80 -> targetPort http-metrics (8080);
-      # Cilium enforces the post-DNAT port.
       - port: "8080"
         protocol: TCP
   - fromEndpoints:
@@ -536,7 +523,6 @@ spec:
     - ports:
       - port: "8080"
         protocol: TCP
-  # kubelet readiness probe (httpGet :8080 /).
   - fromEntities:
     - host
     toPorts:
@@ -593,7 +579,6 @@ spec:
     - ports:
       - port: "3100"
         protocol: TCP
-  # Prometheus scrape (ServiceMonitor monitoring-loki).
   - fromEndpoints:
     - matchLabels:
         operator.prometheus.io/name: kube-prometheus-prometheus
@@ -601,7 +586,6 @@ spec:
     - ports:
       - port: "3100"
         protocol: TCP
-  # kubelet readiness probe (httpGet :3100 /ready).
   - fromEntities:
     - host
     toPorts:
@@ -655,7 +639,6 @@ spec:
       app.kubernetes.io/name: loki
       app.kubernetes.io/component: canary
   ingress:
-  # Prometheus scrape (ServiceMonitor monitoring-loki-canary).
   - fromEndpoints:
     - matchLabels:
         operator.prometheus.io/name: kube-prometheus-prometheus
@@ -683,8 +666,6 @@ spec:
         app.kubernetes.io/component: gateway
     toPorts:
     - ports:
-      # loki-gateway Service is 80 -> targetPort http-metrics (8080);
-      # Cilium enforces the post-DNAT port.
       - port: "8080"
         protocol: TCP
   - toEndpoints:
@@ -718,7 +699,6 @@ spec:
     - ports:
       - port: "11211"
         protocol: TCP
-  # Prometheus scrape (ServiceMonitors monitoring-loki-*-cache).
   - fromEndpoints:
     - matchLabels:
         operator.prometheus.io/name: kube-prometheus-prometheus
@@ -726,8 +706,6 @@ spec:
     - ports:
       - port: "9150"
         protocol: TCP
-  # kubelet liveness/readiness probes: memcached tcpSocket :11211,
-  # exporter httpGet :9150 /metrics.
   - fromEntities:
     - host
     toPorts:
@@ -747,7 +725,6 @@ spec:
     matchLabels:
       app.kubernetes.io/name: alloy
   ingress:
-  # Prometheus scrape (ServiceMonitor monitoring-alloy).
   - fromEndpoints:
     - matchLabels:
         operator.prometheus.io/name: kube-prometheus-prometheus
@@ -778,8 +755,6 @@ spec:
         app.kubernetes.io/component: gateway
     toPorts:
     - ports:
-      # loki-gateway Service is 80 -> targetPort http-metrics (8080);
-      # Cilium enforces the post-DNAT port.
       - port: "8080"
         protocol: TCP
 ---
@@ -800,7 +775,6 @@ spec:
     - ports:
       - port: "9093"
         protocol: TCP
-  # kubelet liveness/readiness probe (httpGet :9093 /-/healthy, /-/ready).
   - fromEntities:
     - host
     toPorts:
@@ -847,7 +821,6 @@ spec:
     - ports:
       - port: "10250"
         protocol: TCP
-  # kubelet liveness/readiness probe (httpGet :10250 /healthz).
   - fromEntities:
     - host
     toPorts:
@@ -888,8 +861,6 @@ spec:
     - ports:
       - port: "8080"
         protocol: TCP
-  # kubelet liveness probe (httpGet :8080 /livez) and readiness probe
-  # (httpGet :8081 /readyz).
   - fromEntities:
     - host
     toPorts:

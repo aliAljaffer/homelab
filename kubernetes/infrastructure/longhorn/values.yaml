@@ -16,7 +16,6 @@ persistence:
     enable: true
     jobList: '[{"name":"default","isGroup":true}]'
 
-# Exposed via the chart's native httproute block below instead.
 ingress:
   enabled: false
 
