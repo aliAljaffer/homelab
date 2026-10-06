@@ -849,6 +849,8 @@ spec:
     - ports:
       - port: "9093"
         protocol: TCP
+      - port: "8080"
+        protocol: TCP
   - fromEntities:
     - host
     toPorts:
@@ -893,6 +895,13 @@ spec:
   # the post-DNAT port.
   - fromEntities:
     - kube-apiserver
+    toPorts:
+    - ports:
+      - port: "10250"
+        protocol: TCP
+  - fromEndpoints:
+    - matchLabels:
+        operator.prometheus.io/name: kube-prometheus-prometheus
     toPorts:
     - ports:
       - port: "10250"
