@@ -204,6 +204,43 @@ spec:
         protocol: TCP
   - toEndpoints:
     - matchLabels:
+        app.kubernetes.io/name: thanos
+    toPorts:
+    - ports:
+      - port: "9090"
+        protocol: TCP
+      - port: "10902"
+        protocol: TCP
+  - toEndpoints:
+    - matchLabels:
+        app.kubernetes.io/name: kube-state-metrics
+    toPorts:
+    - ports:
+      - port: "8080"
+        protocol: TCP
+  - toEndpoints:
+    - matchLabels:
+        app.kubernetes.io/name: kube-prometheus-stack-prometheus-operator
+    toPorts:
+    - ports:
+      - port: "10250"
+        protocol: TCP
+  - toEndpoints:
+    - matchLabels:
+        app.kubernetes.io/name: cloudflare-tunnel-gateway-controller
+    toPorts:
+    - ports:
+      - port: "8080"
+        protocol: TCP
+  - toEndpoints:
+    - matchLabels:
+        app.kubernetes.io/name: alertmanager
+    toPorts:
+    - ports:
+      - port: "8080"
+        protocol: TCP
+  - toEndpoints:
+    - matchLabels:
         "k8s:io.kubernetes.pod.namespace": kube-system
         k8s-app: cilium
     toPorts:
@@ -285,6 +322,13 @@ spec:
     - ports:
       - port: "9090"
         protocol: TCP
+  - fromEndpoints:
+    - matchLabels:
+        operator.prometheus.io/name: kube-prometheus-prometheus
+    toPorts:
+    - ports:
+      - port: "9090"
+        protocol: TCP
   - fromEntities:
     - host
     toPorts:
@@ -335,7 +379,13 @@ spec:
     - ports:
       - port: "10901"
         protocol: TCP
-  # No other consumer observed for port 10902.
+  - fromEndpoints:
+    - matchLabels:
+        operator.prometheus.io/name: kube-prometheus-prometheus
+    toPorts:
+    - ports:
+      - port: "10902"
+        protocol: TCP
   - fromEntities:
     - host
     toPorts:
@@ -374,6 +424,20 @@ spec:
     matchLabels:
       app.kubernetes.io/name: thanos
       app.kubernetes.io/component: compactor
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        operator.prometheus.io/name: kube-prometheus-prometheus
+    toPorts:
+    - ports:
+      - port: "10902"
+        protocol: TCP
+  - fromEntities:
+    - host
+    toPorts:
+    - ports:
+      - port: "10902"
+        protocol: TCP
   egress:
   - toEndpoints:
     - matchLabels:
@@ -601,6 +665,8 @@ spec:
       - port: "3100"
         protocol: TCP
   egress:
+  - toEntities:
+    - kube-apiserver
   - toEndpoints:
     - matchLabels:
         "k8s:io.kubernetes.pod.namespace": kube-system
@@ -788,6 +854,8 @@ spec:
     toPorts:
     - ports:
       - port: "9093"
+        protocol: TCP
+      - port: "8080"
         protocol: TCP
   egress:
   - toEndpoints:
