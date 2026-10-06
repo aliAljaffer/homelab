@@ -409,9 +409,11 @@ spec:
       rules:
         dns:
         - matchPattern: "*"
-  - toFQDNs:
-    - matchName: "storage.googleapis.com"
-    - matchName: "oauth2.googleapis.com"
+  # toFQDNs for storage/oauth2.googleapis.com does not work here: Cilium's
+  # DNS proxy never adds those names to the FQDN cache as lookup entries, so
+  # every bucket connection is denied (POLICY_DENIED) and compaction fails.
+  - toEntities:
+    - world
     toPorts:
     - ports:
       - port: "443"
@@ -455,9 +457,11 @@ spec:
       rules:
         dns:
         - matchPattern: "*"
-  - toFQDNs:
-    - matchName: "storage.googleapis.com"
-    - matchName: "oauth2.googleapis.com"
+  # toFQDNs for storage/oauth2.googleapis.com does not work here: Cilium's
+  # DNS proxy never adds those names to the FQDN cache as lookup entries, so
+  # every bucket connection is denied (POLICY_DENIED) and compaction fails.
+  - toEntities:
+    - world
     toPorts:
     - ports:
       - port: "443"
