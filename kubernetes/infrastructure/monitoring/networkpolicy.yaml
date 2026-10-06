@@ -225,8 +225,11 @@ spec:
     - ports:
       - port: "10250"
         protocol: TCP
+  # Namespace label is required: a label-only selector does not match
+  # endpoints outside the policy's own namespace.
   - toEndpoints:
     - matchLabels:
+        "k8s:io.kubernetes.pod.namespace": cloudflare-tunnel-system
         app.kubernetes.io/name: cloudflare-tunnel-gateway-controller
     toPorts:
     - ports:
