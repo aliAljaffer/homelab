@@ -25,7 +25,7 @@ spec:
         configMap:
           name: nexotv-patches
       containers:
-      - image: savibrabo/nexotv:2.1.0
+      - image: savibrabo/nexotv:2.1.0@sha256:a26e5561f7615b524c4686c44b3735c18e9546399e3278e2d854b05236e03cd8
         name: nexotv
         env:
         - name: PORT

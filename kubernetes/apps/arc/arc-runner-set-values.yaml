@@ -6,4 +6,4 @@ template:
   spec:
     containers:
       - name: runner
-        image: alialjaffer/arc-runner-aws:latest
+        image: alialjaffer/arc-runner-aws:latest@sha256:2423158ec43347d330e886f1a3c1a298d5fc5a48661eccdd0261e5e9552c621d

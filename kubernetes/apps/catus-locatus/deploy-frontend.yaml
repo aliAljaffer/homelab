@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
         - name: frontend-t4p3
-          image: docker.io/alialjaffer/c8s-loc8s-k8s-web:latest
+          image: docker.io/alialjaffer/c8s-loc8s-k8s-web:latest@sha256:6537c63123dc1401c9562f37dbf0a0f159c5f14fef313cc002bcb972faffbb74
           env:
             - name: "VITE_CATUS_LOCATUS_API_URL"
               value: "/api/"

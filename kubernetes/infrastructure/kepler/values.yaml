@@ -2,7 +2,7 @@
 image:
   repository: quay.io/sustainable_computing_io/kepler
   pullPolicy: IfNotPresent
-  tag: v0.11.4
+  tag: v0.11.4@sha256:45571f233951fb96c3a2900e1d5e4cbb4ade9cd36ed419dcd87661e067168fdf
 
 namespace:
   create: false   # namespace.yaml in this kustomization creates it

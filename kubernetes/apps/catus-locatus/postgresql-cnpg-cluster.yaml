@@ -6,7 +6,7 @@ metadata:
   namespace: catus-locatus
 spec:
   instances: 2
-  imageName: ghcr.io/cloudnative-pg/postgis:17-3.5-9
+  imageName: ghcr.io/cloudnative-pg/postgis:17-3.5-9@sha256:8e8bce2d922f7e96110a3b1ad50090d0ae4006ed7c3411f19b901bc7aeb7c12a
   storage:
     size: 20Gi
     storageClass: longhorn

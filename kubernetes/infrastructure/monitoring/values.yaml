@@ -15,7 +15,7 @@ prometheus:
               storage: 20Gi
 
     thanos:
-      image: quay.io/thanos/thanos:v0.37.2
+      image: quay.io/thanos/thanos:v0.37.2@sha256:0f72bcecb5c8d7f53634385696179a3da95df97584d583c5385205cf47340487
       objectStorageConfig:
         existingSecret:
           name: thanos-objstore-secret

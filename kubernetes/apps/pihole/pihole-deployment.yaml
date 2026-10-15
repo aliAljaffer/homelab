@@ -22,7 +22,7 @@ spec:
             requests:
               cpu: 100m
               memory: 128Mi
-          image: pihole/pihole:2026.07.2
+          image: pihole/pihole:2026.07.2@sha256:7c96327ecfb96dbc74b0a47d073dbef7d60526e0aa87519b2a2f7a0007cb5c88
           ports:
             - containerPort: 80
               name: http
@@ -56,7 +56,7 @@ spec:
             - name: pihole-data
               mountPath: /etc/pihole
         - name: exporter
-          image: ekofr/pihole-exporter:latest
+          image: ekofr/pihole-exporter:latest@sha256:5b3c4922935703a9a3c6501aeb4b9f9c9a0196b558959d1238fb64cacd5a3810
           ports:
             - containerPort: 9617
               name: metrics
