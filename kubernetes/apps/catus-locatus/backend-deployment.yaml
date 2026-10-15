@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
         - name: backend-t4p3
-          image: docker.io/alialjaffer/c8s-loc8s-k8s-api:latest
+          image: docker.io/alialjaffer/c8s-loc8s-k8s-api:latest@sha256:3d9c9be76a1dd80b58ebcd165ec9db4ac65430417cf4579f3f7c149e05b9996c
           imagePullPolicy: Always
           resources:
             requests:
