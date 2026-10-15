@@ -67,16 +67,22 @@ spec:
         - name: vaultwarden-data
           mountPath: /data
         readinessProbe:
-          httpGet:
-            path: /alive
-            port: 80
+          exec:
+            command:
+              - /usr/bin/wget
+              - -q
+              - --spider
+              - http://127.0.0.1:80/alive
           initialDelaySeconds: 5
           periodSeconds: 10
           timeoutSeconds: 5
         livenessProbe:
-          httpGet:
-            path: /alive
-            port: 80
+          exec:
+            command:
+              - /usr/bin/wget
+              - -q
+              - --spider
+              - http://127.0.0.1:80/alive
           initialDelaySeconds: 15
           periodSeconds: 20
           timeoutSeconds: 5
