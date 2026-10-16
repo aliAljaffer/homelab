@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - ghcr-arc-repo.sealed.yaml
   - argocd-secret.sealed.yaml
+  - argocd-notifications-secret.sealed.yaml

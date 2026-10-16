@@ -44,7 +44,7 @@ spec:
               name: vaultwarden-secret
               key: ADMIN_TOKEN
         - name: SMTP_HOST
-          value: "email-smtp.us-east-1.amazonaws.com"
+          value: "smtp.resend.com"
         - name: SMTP_PORT
           value: "587"
         - name: SMTP_SECURITY

@@ -82,6 +82,55 @@ notifications:
     limits:
       cpu: 20m
       memory: 176Mi
+  # Email notifications via Resend SMTP. The API key lives in
+  # argocd-notifications-secret (SealedSecret in kubernetes/argocd/) and is
+  # referenced below as $email-password. secret.create:false so Helm does not
+  # own that secret.
+  # Named notifier: the key is service.<type>, the block is the SMTP options.
+  # The notifier is registered as "email", which is what the subscription
+  # recipients below reference (email:<address>).
+  notifiers:
+    service.email: |
+      host: smtp.resend.com
+      port: 587
+      from: homelab@alialjaffer.com
+      username: resend
+      password: $email-password
+  templates:
+    template.app-sync-failed: |
+      email:
+        subject: '[ArgoCD] Sync failed: {{.app.metadata.name}}'
+      message: |
+        Application {{.app.metadata.name}} failed to sync.
+        Sync status: {{.app.status.sync.status}}
+        Health: {{.app.status.health.status}}
+        {{- if .app.status.operationState }}
+        {{ .app.status.operationState.message }}
+        {{- end }}
+    template.app-health-degraded: |
+      email:
+        subject: '[ArgoCD] Degraded: {{.app.metadata.name}}'
+      message: |
+        Application {{.app.metadata.name}} has degraded.
+        Health: {{.app.status.health.status}}
+  triggers:
+    trigger.on-sync-failed: |
+      - description: Application syncing has failed
+        send: [app-sync-failed]
+        when: app.status.operationState.phase in ['Error', 'Failed']
+    trigger.on-health-degraded: |
+      - description: Application has degraded
+        send: [app-health-degraded]
+        when: app.status.health.status == 'Degraded'
+  subscriptions:
+    - recipients:
+        - email:ahjfr@icloud.com
+      triggers:
+        - on-sync-failed
+        - on-health-degraded
+  secret:
+    create: false
+    name: argocd-notifications-secret
 
 dex:
   image:

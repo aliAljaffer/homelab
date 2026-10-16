@@ -152,7 +152,7 @@ grafana:
       wal: true  # required for SQLite on networked (Longhorn) storage
     smtp:
       enabled: true
-      host: email-smtp.us-east-1.amazonaws.com:587
+      host: smtp.resend.com:587
       from_address: homelab@alialjaffer.com
       from_name: Grafana
       startTLS_policy: MandatoryStartTLS
@@ -550,12 +550,20 @@ alertmanager:
     # reference it without the URL living in this repo in plaintext.
     secrets:
       - grafana-discord-webhook
+      - alertmanager-smtp-secret
   # Replace the chart default (route everything to "null") so PrometheusRule
   # alerts actually deliver to Discord. Without this, every default alert
   # (Watchdog, KubernetesPodCrashLooping, TargetDown, ...) fires silently.
   config:
     global:
       resolve_timeout: 5m
+      # Outbound email via Resend SMTP. The API key is mounted from the
+      # alertmanager-smtp-secret SealedSecret (secret key: password).
+      smtp_smarthost: 'smtp.resend.com:587'
+      smtp_from: 'homelab@alialjaffer.com'
+      smtp_auth_username: 'resend'
+      smtp_auth_password_file: '/etc/alertmanager/secrets/alertmanager-smtp-secret/password'
+      smtp_require_tls: true
     inhibit_rules:
       - source_matchers:
           - 'severity = critical'
@@ -585,18 +593,28 @@ alertmanager:
       group_interval: 5m
       repeat_interval: 12h
       receiver: 'discord'
-      # The Watchdog alert fires continuously and is the deadman's switch: if
-      # these notifications stop, the alerting pipeline itself is broken.
+      # Fan out to email as well as Discord. continue:true on the email route
+      # lets the Discord catch-all below also match. Watchdog (the 12h
+      # deadman's-switch heartbeat) is excluded from email so it doesn't
+      # generate a nightly message; it still goes to Discord.
       routes:
+        - receiver: 'email'
+          matchers:
+            - alertname != "Watchdog"
+          continue: true
         - receiver: 'discord'
           matchers:
-            - alertname = "Watchdog"
+            - alertname =~ ".+"
     receivers:
       - name: 'discord'
         discord_configs:
           - webhook_url_file: /etc/alertmanager/secrets/grafana-discord-webhook/DISCORD_WEBHOOK_URL
             title: '{{ .GroupLabels.alertname }} {{ if eq .Status "firing" }}[FIRING]{{ else }}[RESOLVED]{{ end }}'
             message: '{{ range .Alerts }}{{ .Annotations.summary }} (severity={{ .Labels.severity }}){{ end }}'
+      - name: 'email'
+        email_configs:
+          - to: 'ahjfr@icloud.com'
+            send_resolved: true
       - name: 'null'
 
 nodeExporter:

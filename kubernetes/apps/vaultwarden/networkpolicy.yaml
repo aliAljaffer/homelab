@@ -42,7 +42,7 @@ spec:
               - matchPattern: "*"
     # Matches SMTP_HOST in vaultwarden-deployment.yaml.
     - toFQDNs:
-        - matchName: "email-smtp.us-east-1.amazonaws.com"
+        - matchName: "smtp.resend.com"
       toPorts:
         - ports:
             - port: "587"
