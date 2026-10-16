@@ -12,6 +12,19 @@ server:
       enabled: true
       additionalLabels:
         release: monitoring
+  # The liveness path is /healthz?full=true, which queries repo-server and the
+  # app controller too. Under a cluster-wide refresh storm (e.g. a push that
+  # makes all apps re-evaluate) that can exceed the chart's default 1s timeout,
+  # so the kubelet kills a healthy server - observed as 6 restarts. Give the
+  # probes breathing room and let the startup probe absorb slow warm-ups.
+  readinessProbe:
+    timeoutSeconds: 3
+  livenessProbe:
+    timeoutSeconds: 3
+  startupProbe:
+    enabled: true
+    failureThreshold: 30
+    timeoutSeconds: 3
   # No CPU limit: a 20m cap (2ms per 100ms CFS period) throttled this pod in
   # ~80% of periods and stalled the UI. CPU is compressible; cap memory only.
   resources:
