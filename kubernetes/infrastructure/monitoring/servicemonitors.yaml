@@ -79,6 +79,26 @@ spec:
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
+  name: keycloak
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  endpoints:
+    - port: management
+      path: /metrics
+      interval: 30s
+  selector:
+    matchLabels:
+      app: keycloak
+      app.kubernetes.io/instance: keycloak
+  namespaceSelector:
+    matchNames:
+      - keycloak
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
   name: sealed-secrets
   namespace: monitoring
   labels:
