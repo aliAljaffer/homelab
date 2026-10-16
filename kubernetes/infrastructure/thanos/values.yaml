@@ -17,7 +17,6 @@ query:
       cpu: 10m
       memory: 264Mi
     limits:
-      cpu: 30m
       memory: 528Mi
   replicaLabels:
   - prometheus_replica
@@ -35,7 +34,6 @@ storegateway:
       cpu: 5m
       memory: 640Mi
     limits:
-      cpu: 20m
       memory: 1280Mi
   persistence:
     enabled: true
@@ -49,7 +47,6 @@ compactor:
       cpu: 30m
       memory: 2296Mi
     limits:
-      cpu: 90m
       memory: 4592Mi
   retention:
     resolutionRaw: "" # empty means keep forever

@@ -27,7 +27,6 @@ prometheus:
           cpu: 5m
           memory: 176Mi
         limits:
-          cpu: 20m
           memory: 352Mi
 
     resources:
@@ -35,7 +34,6 @@ prometheus:
         cpu: 180m
         memory: 3816Mi
       limits:
-        cpu: 540m
         memory: 7632Mi
 
     additionalScrapeConfigs:
@@ -142,7 +140,6 @@ grafana:
       cpu: 50m
       memory: 880Mi
     limits:
-      cpu: 150m
       memory: 1760Mi
 
   grafana.ini:
@@ -169,7 +166,6 @@ grafana:
         cpu: 25m
         memory: 136Mi
       limits:
-        cpu: 75m
         memory: 272Mi
 
   additionalDataSources:
@@ -544,7 +540,6 @@ alertmanager:
         cpu: 5m
         memory: 56Mi
       limits:
-        cpu: 20m
         memory: 112Mi
     # Mount the Discord webhook secret so discord_configs.webhook_url_file can
     # reference it without the URL living in this repo in plaintext.
@@ -626,7 +621,6 @@ prometheus-node-exporter:
       cpu: 10m
       memory: 40Mi
     limits:
-      cpu: 30m
       memory: 80Mi
 
 kubeStateMetrics:
@@ -638,7 +632,6 @@ kube-state-metrics:
       cpu: 25m
       memory: 104Mi
     limits:
-      cpu: 75m
       memory: 208Mi
 
 prometheusOperator:
@@ -648,7 +641,6 @@ prometheusOperator:
       cpu: 5m
       memory: 48Mi
     limits:
-      cpu: 20m
       memory: 96Mi
   # Shared setting: also sizes the config-reloader sidecar injected into the
   # Alertmanager StatefulSet, not just Prometheus's.
@@ -658,5 +650,4 @@ prometheusOperator:
         cpu: 5m
         memory: 24Mi
       limits:
-        cpu: 20m
         memory: 48Mi
