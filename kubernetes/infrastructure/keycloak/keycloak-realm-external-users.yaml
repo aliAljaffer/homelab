@@ -1,0 +1,13 @@
+---
+apiVersion: k8s.keycloak.org/v2beta1
+kind: KeycloakRealmImport
+metadata:
+  name: external-users
+  namespace: keycloak
+spec:
+  keycloakCRName: keycloak
+  realm:
+    id: external-users
+    realm: external-users
+    displayName: External Users
+    enabled: true
