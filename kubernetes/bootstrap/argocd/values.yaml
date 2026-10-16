@@ -12,12 +12,13 @@ server:
       enabled: true
       additionalLabels:
         release: monitoring
+  # No CPU limit: a 20m cap (2ms per 100ms CFS period) throttled this pod in
+  # ~80% of periods and stalled the UI. CPU is compressible; cap memory only.
   resources:
     requests:
-      cpu: 5m
+      cpu: 100m
       memory: 392Mi
     limits:
-      cpu: 20m
       memory: 784Mi
 
 controller:
@@ -62,10 +63,9 @@ applicationSet:
         release: monitoring
   resources:
     requests:
-      cpu: 5m
+      cpu: 50m
       memory: 80Mi
     limits:
-      cpu: 20m
       memory: 160Mi
 
 notifications:
@@ -77,10 +77,9 @@ notifications:
         release: monitoring
   resources:
     requests:
-      cpu: 5m
+      cpu: 50m
       memory: 88Mi
     limits:
-      cpu: 20m
       memory: 176Mi
   # Email notifications via Resend SMTP. The API key lives in
   # argocd-notifications-secret (SealedSecret in kubernetes/argocd/) and is
@@ -144,10 +143,9 @@ dex:
       enabled: false
   resources:
     requests:
-      cpu: 5m
+      cpu: 50m
       memory: 48Mi
     limits:
-      cpu: 20m
       memory: 96Mi
 
 redis:
@@ -170,10 +168,9 @@ redis:
         release: monitoring
   resources:
     requests:
-      cpu: 5m
+      cpu: 50m
       memory: 120Mi
     limits:
-      cpu: 20m
       memory: 240Mi
 
 configs:
