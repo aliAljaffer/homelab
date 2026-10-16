@@ -23,7 +23,7 @@ spec:
               - name: csi-attacher
                 resources:
                   requests: { cpu: 5m, memory: 88Mi }
-                  limits: { cpu: 20m, memory: 176Mi }
+                  limits: { memory: 176Mi }
 
     - name: longhorn-csi-provisioner
       match:
@@ -43,7 +43,7 @@ spec:
               - name: csi-provisioner
                 resources:
                   requests: { cpu: 5m, memory: 64Mi }
-                  limits: { cpu: 20m, memory: 128Mi }
+                  limits: { memory: 128Mi }
 
     - name: longhorn-csi-resizer
       match:
@@ -63,7 +63,7 @@ spec:
               - name: csi-resizer
                 resources:
                   requests: { cpu: 5m, memory: 80Mi }
-                  limits: { cpu: 20m, memory: 160Mi }
+                  limits: { memory: 160Mi }
 
     - name: longhorn-csi-snapshotter
       match:
@@ -83,7 +83,7 @@ spec:
               - name: csi-snapshotter
                 resources:
                   requests: { cpu: 5m, memory: 80Mi }
-                  limits: { cpu: 20m, memory: 160Mi }
+                  limits: { memory: 160Mi }
 
     - name: longhorn-csi-plugin
       match:
@@ -103,15 +103,15 @@ spec:
               - name: longhorn-csi-plugin
                 resources:
                   requests: { cpu: 5m, memory: 72Mi }
-                  limits: { cpu: 20m, memory: 144Mi }
+                  limits: { memory: 144Mi }
               - name: longhorn-liveness-probe
                 resources:
                   requests: { cpu: 5m, memory: 40Mi }
-                  limits: { cpu: 20m, memory: 80Mi }
+                  limits: { memory: 80Mi }
               - name: node-driver-registrar
                 resources:
                   requests: { cpu: 5m, memory: 16Mi }
-                  limits: { cpu: 20m, memory: 32Mi }
+                  limits: { memory: 32Mi }
 
     - name: longhorn-driver-deployer
       match:
@@ -131,7 +131,7 @@ spec:
               - name: longhorn-driver-deployer
                 resources:
                   requests: { cpu: 5m, memory: 16Mi }
-                  limits: { cpu: 20m, memory: 32Mi }
+                  limits: { memory: 32Mi }
 
     - name: longhorn-manager
       match:
@@ -151,7 +151,7 @@ spec:
               - name: pre-pull-share-manager-image
                 resources:
                   requests: { cpu: 5m, memory: 16Mi }
-                  limits: { cpu: 20m, memory: 32Mi }
+                  limits: { memory: 32Mi }
 
     - name: longhorn-ui
       match:
@@ -171,7 +171,7 @@ spec:
               - name: longhorn-ui
                 resources:
                   requests: { cpu: 5m, memory: 16Mi }
-                  limits: { cpu: 20m, memory: 32Mi }
+                  limits: { memory: 32Mi }
 
     - name: longhorn-engine-image
       match:
@@ -189,7 +189,7 @@ spec:
             path: /spec/containers/0/resources
             value:
               requests: { cpu: 25m, memory: 24Mi }
-              limits: { cpu: 75m, memory: 48Mi }
+              limits: { memory: 48Mi }
 
     - name: metallb-frr-k8s-statuscleaner
       match:
@@ -209,7 +209,7 @@ spec:
               - name: frr-k8s-statuscleaner
                 resources:
                   requests: { cpu: 5m, memory: 32Mi }
-                  limits: { cpu: 20m, memory: 64Mi }
+                  limits: { memory: 64Mi }
 
     - name: loki-chunks-cache-exporter
       # memcached_exporter has no resources key in this chart version, same as the Longhorn rules above.
@@ -233,7 +233,7 @@ spec:
               - name: exporter
                 resources:
                   requests: { cpu: 10m, memory: 32Mi }
-                  limits: { cpu: 30m, memory: 64Mi }
+                  limits: { memory: 64Mi }
 
     - name: loki-results-cache-exporter
       match:
@@ -256,7 +256,7 @@ spec:
               - name: exporter
                 resources:
                   requests: { cpu: 5m, memory: 32Mi }
-                  limits: { cpu: 20m, memory: 64Mi }
+                  limits: { memory: 64Mi }
 
     - name: metrics-server
       # Not GitOps-managed, installed out-of-band during cluster bootstrap. Covered here so it isn't ungoverned.
@@ -277,4 +277,4 @@ spec:
               - name: metrics-server
                 resources:
                   requests: { cpu: 10m, memory: 112Mi }
-                  limits: { cpu: 30m, memory: 224Mi }
+                  limits: { memory: 224Mi }

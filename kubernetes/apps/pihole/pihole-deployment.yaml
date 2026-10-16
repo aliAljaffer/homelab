@@ -17,7 +17,6 @@ spec:
         - name: pihole
           resources:
             limits:
-              cpu: 500m
               memory: 512Mi
             requests:
               cpu: 100m
@@ -75,7 +74,6 @@ spec:
               value: "9617"
           resources:
             limits:
-              cpu: 100m
               memory: 64Mi
             requests:
               cpu: 10m

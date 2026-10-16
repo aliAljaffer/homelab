@@ -46,7 +46,6 @@ controller:
       cpu: 480m
       memory: 1520Mi
     limits:
-      cpu: 1440m
       memory: 3040Mi
 
 repoServer:
@@ -64,7 +63,6 @@ repoServer:
       cpu: 250m
       memory: 384Mi
     limits:
-      cpu: 2000m
       memory: 1229Mi
 
 applicationSet:
@@ -171,7 +169,6 @@ redis:
         cpu: 5m
         memory: 16Mi
       limits:
-        cpu: 20m
         memory: 32Mi
   metrics:
     enabled: true

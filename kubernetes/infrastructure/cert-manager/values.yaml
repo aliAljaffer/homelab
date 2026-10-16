@@ -8,7 +8,6 @@ resources:
     cpu: 5m
     memory: 120Mi
   limits:
-    cpu: 20m
     memory: 240Mi
 
 cainjector:
@@ -17,7 +16,6 @@ cainjector:
       cpu: 5m
       memory: 176Mi
     limits:
-      cpu: 20m
       memory: 352Mi
 
 webhook:
@@ -26,7 +24,6 @@ webhook:
       cpu: 5m
       memory: 80Mi
     limits:
-      cpu: 20m
       memory: 160Mi
 
 prometheus:

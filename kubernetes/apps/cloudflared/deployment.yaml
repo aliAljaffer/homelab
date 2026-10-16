@@ -37,7 +37,6 @@ spec:
               cpu: "50m"
             limits:
               memory: "128Mi"
-              cpu: "200m"
           volumeMounts:
             - name: config
               mountPath: /etc/cloudflared/config
