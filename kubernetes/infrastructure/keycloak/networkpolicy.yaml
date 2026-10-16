@@ -78,6 +78,8 @@ spec:
             app: keycloak
             app.kubernetes.io/managed-by: keycloak-operator
         - matchLabels:
+            app: keycloak-realm-import
+        - matchLabels:
             cnpg.io/cluster: keycloak-db
       toPorts:
         - ports:
