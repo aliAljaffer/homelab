@@ -547,9 +547,9 @@ spec:
     - ports:
       - port: "8080"
         protocol: TCP
-  # SES SMTP for alert/invite emails (grafana.ini smtp.host).
+  # Resend SMTP for alert/invite emails (grafana.ini smtp.host).
   - toFQDNs:
-    - matchName: "email-smtp.us-east-1.amazonaws.com"
+    - matchName: "smtp.resend.com"
     toPorts:
     - ports:
       - port: "587"
@@ -898,6 +898,13 @@ spec:
     toPorts:
     - ports:
       - port: "443"
+        protocol: TCP
+  # Resend SMTP for email alerts (alertmanager global.smtp_smarthost).
+  - toFQDNs:
+    - matchName: "smtp.resend.com"
+    toPorts:
+    - ports:
+      - port: "587"
         protocol: TCP
 ---
 apiVersion: cilium.io/v2

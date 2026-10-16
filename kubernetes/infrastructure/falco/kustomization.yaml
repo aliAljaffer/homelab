@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - networkpolicy.yaml
+  - falcosidekick-smtp-secret.sealed.yaml

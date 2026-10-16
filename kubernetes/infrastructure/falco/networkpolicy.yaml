@@ -74,3 +74,10 @@ spec:
     - ports:
       - port: "8765"
         protocol: TCP
+  # Resend SMTP output (falcosidekick config.smtp).
+  - toFQDNs:
+    - matchName: "smtp.resend.com"
+    toPorts:
+    - ports:
+      - port: "587"
+        protocol: TCP
