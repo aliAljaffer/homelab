@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - cnpg-cluster.yaml
+  - scheduled-backup.yaml
   - umami-deployment.yaml
   - umami-service.yaml
   - httproute-umami.yaml

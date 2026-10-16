@@ -11,6 +11,10 @@ spec:
     size: 5Gi
     storageClass: longhorn
   enableSuperuserAccess: false
+  backup:
+    target: prefer-standby
+    volumeSnapshot:
+      online: true
   bootstrap:
     initdb:
       database: umami

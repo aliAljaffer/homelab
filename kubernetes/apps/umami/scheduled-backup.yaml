@@ -1,0 +1,13 @@
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: umami-db-backup
+  namespace: umami
+spec:
+  schedule: "0 0 2 * * *"
+  cluster:
+    name: umami-db
+  method: volumeSnapshot
+  immediate: true
+  target: prefer-standby
