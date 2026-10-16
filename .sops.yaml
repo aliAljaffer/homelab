@@ -5,9 +5,9 @@ creation_rules:
   - path_regex: talos/clusterconfig/.*\.yaml$
     encrypted_regex: "^(key|token|secret|secretboxEncryptionSecret)$"
     age: >-
-      age13jd0rndp589yqxpxw36fkrn8jkgazqrlvj22txp4gfh8e0qskusq97zta9
+      age1vum76hps9al4v9y76md3v4ndc35v2w23qc3v0gvzpwyt500ltvaq7ns2tr
 
   # Any other files encrypted with SOPS
   - path_regex: .*\.sops\.yaml$
     age: >-
-      age13jd0rndp589yqxpxw36fkrn8jkgazqrlvj22txp4gfh8e0qskusq97zta9
+      age1vum76hps9al4v9y76md3v4ndc35v2w23qc3v0gvzpwyt500ltvaq7ns2tr
