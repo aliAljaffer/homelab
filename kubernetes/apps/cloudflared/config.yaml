@@ -15,13 +15,13 @@ data:
     ingress:
       # kubectl: cloudflared access tcp --hostname k.alialjaffer.com --url localhost:6443
       - hostname: k.alialjaffer.com
-        service: tcp://192.168.8.99:6443
+        service: tcp://192.168.8.250:6443
         originRequest:
           noTLSVerify: true
 
       # talosctl: cloudflared access tcp --hostname t.alialjaffer.com --url localhost:50000
       - hostname: t.alialjaffer.com
-        service: tcp://192.168.8.99:50000
+        service: tcp://192.168.8.250:50000
         originRequest:
           noTLSVerify: true
 

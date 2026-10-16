@@ -35,11 +35,17 @@ machine:
         hostDNS:
             enabled: true
             forwardKubeDNSToHost: true
+    network:
+        interfaces:
+            - interface: eno1
+              dhcp: true
+              vip:
+                ip: 192.168.8.250
 cluster:
     id: hPEZEXUQ2jkxmyO6ueDejoY9OkCLFGOFjqLpas6WNug=
     secret: ENC[AES256_GCM,data:XVzkXlmK68krnKsd89Z/wU3F/3AmmwWP6Xw4Qd5ljzybDFiIrIYchKQK3ZQ=,iv:4mt+7sKylM8b+eL/obu+N1gq5Gaqwnj3jySzYwj/Ta0=,tag:5rA7f3UrYqj+yPDfRtDTiA==,type:str]
     controlPlane:
-        endpoint: https://192.168.8.99:6443
+        endpoint: https://api.alialjaffer.com:6443
     clusterName: k8s-homelab
     network:
         dnsDomain: cluster.local
@@ -83,6 +89,9 @@ cluster:
             kind: Policy
             rules:
                 - level: Metadata
+        certSANs:
+            - api.alialjaffer.com
+            - 192.168.8.250
     controllerManager:
         image: registry.k8s.io/kube-controller-manager:v1.36.2
         extraArgs:
@@ -119,8 +128,8 @@ sops:
             TnNPK0ZBVWJvMzk0VFhIdzBoMVRDd00Kd+vjCLlRLN9RkV0TQOd5/L/Zi7XrT/6b
             hlPWq+ms0NItOqCGSpqH+jOU2ynwU1JQ2U2yT6nx5FMenl6DWu+0CQ==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-10-16T06:52:56Z"
-    mac: ENC[AES256_GCM,data:T+bn+F8j6vgpev9eTTW6Nv5B/5ZYdWzBe2INt+W5ylUQhfbr1E6HfyNiXmRmEeV3+6jGTMXuodXXYLJO2KuKSc+Tb6jAJF1bfUlT1G/lqk3xyXIS/R82JrX40JDWsYIUB6Hx9eq39nIANS1IJlBMKa5eQMf/9C9GB868i6rvmCk=,iv:YsatK/SNPyFml+gLLhSdTlzFLflVFSPYXYx12XQDNrY=,tag:kB1/GwTD2GVFIk1eu3yekA==,type:str]
+    lastmodified: "2026-10-16T07:27:06Z"
+    mac: ENC[AES256_GCM,data:VYn/jW/pG0njukepnS2M1H4s1MJPhudllBcg2m2Vkw28j8BUoyLJ/A6oKZEcB2VPDCs6Z/2f8WyXlV7o0XT27Pw+2jC+d8lXriGBtnQQNqf/6Yaj7D0iVuJ9sNYgNNlCfUwJMIzsPR1LcdKypMQ4k+J6xfvCgLFwZaOe+OOthi0=,iv:izn+eG9xknSh5yEFc2jBHU/ofl6xrH1Cevt6XFU/uxM=,tag:lTRpU1dYdA8rIJxuCww1AQ==,type:str]
     pgp: []
     encrypted_regex: ^(key|token|secret|secretboxEncryptionSecret)$
     version: 3.9.1
@@ -143,8 +152,8 @@ sops:
             TnNPK0ZBVWJvMzk0VFhIdzBoMVRDd00Kd+vjCLlRLN9RkV0TQOd5/L/Zi7XrT/6b
             hlPWq+ms0NItOqCGSpqH+jOU2ynwU1JQ2U2yT6nx5FMenl6DWu+0CQ==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-10-16T06:52:56Z"
-    mac: ENC[AES256_GCM,data:T+bn+F8j6vgpev9eTTW6Nv5B/5ZYdWzBe2INt+W5ylUQhfbr1E6HfyNiXmRmEeV3+6jGTMXuodXXYLJO2KuKSc+Tb6jAJF1bfUlT1G/lqk3xyXIS/R82JrX40JDWsYIUB6Hx9eq39nIANS1IJlBMKa5eQMf/9C9GB868i6rvmCk=,iv:YsatK/SNPyFml+gLLhSdTlzFLflVFSPYXYx12XQDNrY=,tag:kB1/GwTD2GVFIk1eu3yekA==,type:str]
+    lastmodified: "2026-10-16T07:27:06Z"
+    mac: ENC[AES256_GCM,data:VYn/jW/pG0njukepnS2M1H4s1MJPhudllBcg2m2Vkw28j8BUoyLJ/A6oKZEcB2VPDCs6Z/2f8WyXlV7o0XT27Pw+2jC+d8lXriGBtnQQNqf/6Yaj7D0iVuJ9sNYgNNlCfUwJMIzsPR1LcdKypMQ4k+J6xfvCgLFwZaOe+OOthi0=,iv:izn+eG9xknSh5yEFc2jBHU/ofl6xrH1Cevt6XFU/uxM=,tag:lTRpU1dYdA8rIJxuCww1AQ==,type:str]
     pgp: []
     encrypted_regex: ^(key|token|secret|secretboxEncryptionSecret)$
     version: 3.9.1

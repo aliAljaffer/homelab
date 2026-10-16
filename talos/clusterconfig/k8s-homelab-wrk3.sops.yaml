@@ -39,7 +39,7 @@ cluster:
     id: hPEZEXUQ2jkxmyO6ueDejoY9OkCLFGOFjqLpas6WNug=
     secret: ENC[AES256_GCM,data:wZHrOzsISHP5+KILu4ev7OZzBHEitYmhkN/U5Wuvm+39Mk9+5MJLFr7LbMs=,iv:GpWm93x2PmF04y9yZxrWjnhH7dqVkM/1OEViDoWHCQ4=,tag:qdcPfXS2A+MH2uF1uKRPOg==,type:str]
     controlPlane:
-        endpoint: https://192.168.8.99:6443
+        endpoint: https://api.alialjaffer.com:6443
     clusterName: k8s-homelab
     network:
         dnsDomain: cluster.local
@@ -74,8 +74,8 @@ sops:
             NHUrSDFHUXQyV3ZOa2I5emNKZ2M0Z00KzL60YzhiHrsud7K3COrc2mId/K4jASNB
             Vdv+t7YY4KiJ26V1wVYbGrwFy04GASznOcJllG2kqc9cpvOkfC68NQ==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-10-16T06:52:56Z"
-    mac: ENC[AES256_GCM,data:IfH66+oAdBSktuKHEct2lulJQkArczlNX8XyfdaxjAqS8BY4W608Zpy3yi3dy2IRZv4SrUl7lHrp9VV+1pojWJSfor/fofn4nz5RST2892nhjT2reRvsq5VcWm67rJ6dW/yx3URp8t9q12enVdEooStaskFQgclwqgpErh+TnMk=,iv:8gvptpjLXE4nk65IJsQCSCWmehnS7NFGpux5HZvf59I=,tag:B7WcxoDCBTml3eSjbj5XCw==,type:str]
+    lastmodified: "2026-10-16T07:27:06Z"
+    mac: ENC[AES256_GCM,data:14C7aZQYNLJvwAiVIVy7MR7m6DeMPtHLr/8II6JPIz5D6R9RHfD7aYI7C0eM2//PV56HnBEaJa/um71PEZjYGiGg0sdkNVo3bLqWnbMISdYQ+jslPMe5OaPI69MeG1Sg6OtDUH91lGhWEmilscfIDlgFGG9v1dsdxs2jz54YjNU=,iv:xc73zj1gT2N3CY8jEdZDy3a+WeQnUEePgtp7pStsgQ0=,tag:bGIWNRxDlFavqhbYFRR03Q==,type:str]
     pgp: []
     encrypted_regex: ^(key|token|secret|secretboxEncryptionSecret)$
     version: 3.9.1
@@ -98,8 +98,8 @@ sops:
             NHUrSDFHUXQyV3ZOa2I5emNKZ2M0Z00KzL60YzhiHrsud7K3COrc2mId/K4jASNB
             Vdv+t7YY4KiJ26V1wVYbGrwFy04GASznOcJllG2kqc9cpvOkfC68NQ==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-10-16T06:52:56Z"
-    mac: ENC[AES256_GCM,data:IfH66+oAdBSktuKHEct2lulJQkArczlNX8XyfdaxjAqS8BY4W608Zpy3yi3dy2IRZv4SrUl7lHrp9VV+1pojWJSfor/fofn4nz5RST2892nhjT2reRvsq5VcWm67rJ6dW/yx3URp8t9q12enVdEooStaskFQgclwqgpErh+TnMk=,iv:8gvptpjLXE4nk65IJsQCSCWmehnS7NFGpux5HZvf59I=,tag:B7WcxoDCBTml3eSjbj5XCw==,type:str]
+    lastmodified: "2026-10-16T07:27:06Z"
+    mac: ENC[AES256_GCM,data:14C7aZQYNLJvwAiVIVy7MR7m6DeMPtHLr/8II6JPIz5D6R9RHfD7aYI7C0eM2//PV56HnBEaJa/um71PEZjYGiGg0sdkNVo3bLqWnbMISdYQ+jslPMe5OaPI69MeG1Sg6OtDUH91lGhWEmilscfIDlgFGG9v1dsdxs2jz54YjNU=,iv:xc73zj1gT2N3CY8jEdZDy3a+WeQnUEePgtp7pStsgQ0=,tag:bGIWNRxDlFavqhbYFRR03Q==,type:str]
     pgp: []
     encrypted_regex: ^(key|token|secret|secretboxEncryptionSecret)$
     version: 3.9.1
