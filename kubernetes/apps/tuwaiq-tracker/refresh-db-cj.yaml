@@ -8,6 +8,10 @@ spec:
     metadata:
       name: refresh-db
     spec:
+      # Without this, a failed run sits around forever (failedJobsHistoryLimit
+      # only caps *count*, not age) and KubeJobFailed keeps re-notifying every
+      # repeat_interval until someone deletes it by hand.
+      ttlSecondsAfterFinished: 86400
       template:
         spec:
           containers:

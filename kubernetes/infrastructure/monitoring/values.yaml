@@ -707,6 +707,12 @@ alertmanager:
             send_resolved: true
       - name: 'null'
 
+# Cilium runs with kube-proxy-replacement: true -- no kube-proxy pods exist on
+# this cluster, so the chart's KubeProxyDown rule (absent(up{job="kube-proxy"}))
+# is permanently true and can never resolve.
+kubeProxy:
+  enabled: false
+
 nodeExporter:
   enabled: true
 
