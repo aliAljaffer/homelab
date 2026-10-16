@@ -55,6 +55,13 @@ spec:
         - ports:
             - port: "5432"
               protocol: TCP
+    # Realm SMTP (Resend) for notification emails. See README.
+    - toFQDNs:
+        - matchName: smtp.resend.com
+      toPorts:
+        - ports:
+            - port: "587"
+              protocol: TCP
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -120,3 +127,6 @@ spec:
         - ports:
             - port: "5432"
               protocol: TCP
+    # CNPG instances and the initdb Job call the apiserver directly.
+    - toEntities:
+        - kube-apiserver

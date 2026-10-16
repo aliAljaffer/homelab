@@ -6,8 +6,23 @@ metadata:
   namespace: keycloak
 spec:
   keycloakCRName: keycloak
+  placeholders:
+    SMTP_PASSWORD:
+      secret:
+        name: keycloak-smtp-secret
+        key: SMTP_PASSWORD
   realm:
     id: external-users
     realm: external-users
     displayName: External Users
     enabled: true
+    smtpServer:
+      host: smtp.resend.com
+      port: "587"
+      from: homelab@alialjaffer.com
+      fromDisplayName: External Users
+      user: resend
+      password: "${SMTP_PASSWORD}"
+      auth: "true"
+      starttls: "true"
+      ssl: "false"
