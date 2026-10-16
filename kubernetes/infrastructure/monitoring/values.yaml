@@ -636,7 +636,6 @@ alertmanager:
     # reference it without the URL living in this repo in plaintext.
     secrets:
       - grafana-discord-webhook
-      - alertmanager-smtp-secret
     # The Alertmanager CRD has no spec.config field: `alertmanager.config` above
     # is rendered into the Secret `alertmanager-<crname>`, and the CR has to name
     # that Secret or the operator silently falls back to its own generated
