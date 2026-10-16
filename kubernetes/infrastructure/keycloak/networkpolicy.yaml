@@ -55,6 +55,17 @@ spec:
         - ports:
             - port: "5432"
               protocol: TCP
+    # Intra-realm Infinispan clustering (DNS_PING + JGroups).
+    - toEndpoints:
+        - matchLabels:
+            app: keycloak
+            app.kubernetes.io/managed-by: keycloak-operator
+      toPorts:
+        - ports:
+            - port: "7800"
+              protocol: TCP
+            - port: "57800"
+              protocol: TCP
     # Realm SMTP (Resend) for notification emails. See README.
     - toFQDNs:
         - matchName: smtp.resend.com
