@@ -637,6 +637,12 @@ alertmanager:
     secrets:
       - grafana-discord-webhook
       - alertmanager-smtp-secret
+    # The Alertmanager CRD has no spec.config field: `alertmanager.config` above
+    # is rendered into the Secret `alertmanager-<crname>`, and the CR has to name
+    # that Secret or the operator silently falls back to its own generated
+    # "route everything to null" config. The chart does not default this, so
+    # without the line below every PrometheusRule alert is accepted and dropped.
+    configSecret: alertmanager-kube-prometheus-alertmanager
   # Replace the chart default (route everything to "null") so PrometheusRule
   # alerts actually deliver to Discord. Without this, every default alert
   # (Watchdog, KubernetesPodCrashLooping, TargetDown, ...) fires silently.
