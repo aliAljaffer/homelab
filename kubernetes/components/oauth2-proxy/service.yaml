@@ -1,0 +1,18 @@
+---
+# Front door for the protected app: the app's HTTPRoute targets this Service,
+# not the app's own Service. Port 80 keeps existing backendRefs unchanged.
+apiVersion: v1
+kind: Service
+metadata:
+  name: oauth2-proxy
+  labels:
+    app.kubernetes.io/name: oauth2-proxy
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: oauth2-proxy
+  ports:
+    - name: http
+      port: 80
+      targetPort: 4180
+      protocol: TCP

@@ -34,3 +34,11 @@
   times out and the whole install stalls.
 - The `kc.alialjaffer.com` HTTPRoute uses the LAN `homelab-gateway`, not the
   public Cloudflare tunnel, and is not Cloudflare-proxied.
+- `keycloak-realm-homelab.yaml` declares the shared `oauth2-proxy` OIDC client
+  used by the per-app auth gate (`kubernetes/components/oauth2-proxy`), with its
+  secret injected from `keycloak-oauth2-proxy-secret.sealed.yaml` through a
+  placeholder. Same re-import rule as the SMTP block: because realm import skips
+  an existing realm, the client only lands automatically on a fresh `homelab`
+  realm. On a live one, add it by hand (Clients -> Create client, id
+  `oauth2-proxy`, redirect `https://*.alialjaffer.com/oauth2/callback`, PKCE
+  S256) or recreate the realm.
