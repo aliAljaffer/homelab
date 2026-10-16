@@ -1,0 +1,13 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: smtp-relay-resend
+  namespace: mail
+spec:
+  encryptedData:
+    password: AgAzyqKRYHeHDSQUzJmy8dsQ9D7albjtBuhXvlrVF2PTbK1wOJX9BhNhY+nT+u/2oXmZbwuv9toUVUwog+pfhu+NAo6pX+pummDCM7sZ7/piLEcHbC2SjYJ6PqW1pIid70XOF7xTFetcedJ434CEpkEICAa4xF3bjR1whDQAhKFsMTC6bps9eqBHZFLcH96mHJkm14PKj9P6zDOKoN1CjBhi56yQB6vi9V+3S5aizIV6iTs6Dnorq/oQ2cBBRq/yMB/J3pQhj8EsYvqcJ7OBgmeWr95f/bsRTQfL8RLPdmjPGpkW8xdi4Vo4TtXNCy5mTonp08pl26DTYO3JHx9UPoynqSdkqeXd0ipbAKYeUGopBFfSOcD0+a8U2UduXQcglvxu1OgXNzVVyEdK0JsKrR0zPBRMiA+JwwZoGND5rBfvf7AQ+s2Rstlaqx7GAOkIq6G9IxBlwQOtMqJuGeFHORfolf8OPt+xm+JRbWGx5afOJ2D61SSx1pXF+gyNJw4u6bR/9JYh8jAAwkJqaHyrYFAmfRTnNTIaXvP+s7trPKs698UpnfuSXymURVdS6cyFmNGahYMp1dRgpZhY8oP8V+3UZ6vyvqQ37d8AOFGeydZqBAoQWIMHXWcngiN5G49rVzB9G5K66k+ev1AS6ZqMukrq0jPGcGmqA95YHhRvzOTLRUJWAXhBdHbAk4wHd0UStLvj+HLDZLv1aqt9Z9CnDKXObp2sSc0M2u7V4dEvwu0ZFNM6/Qk=
+  template:
+    metadata:
+      name: smtp-relay-resend
+      namespace: mail

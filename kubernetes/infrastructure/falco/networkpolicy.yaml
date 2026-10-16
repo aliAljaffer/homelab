@@ -74,9 +74,11 @@ spec:
     - ports:
       - port: "8765"
         protocol: TCP
-  # Resend SMTP output (falcosidekick config.smtp).
-  - toFQDNs:
-    - matchName: "smtp.resend.com"
+  # Central rate-limited SMTP relay (falcosidekick config.smtp).
+  - toEndpoints:
+    - matchLabels:
+        "k8s:io.kubernetes.pod.namespace": mail
+        app.kubernetes.io/name: smtp-relay
     toPorts:
     - ports:
       - port: "587"

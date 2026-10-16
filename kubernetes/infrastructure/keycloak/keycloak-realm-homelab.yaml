@@ -11,18 +11,43 @@ spec:
       secret:
         name: keycloak-smtp-secret
         key: SMTP_PASSWORD
+    OAUTH2_PROXY_CLIENT_SECRET:
+      secret:
+        name: keycloak-oauth2-proxy-secret
+        key: CLIENT_SECRET
   realm:
     id: homelab
     realm: homelab
     displayName: Homelab
     enabled: true
     smtpServer:
-      host: smtp.resend.com
+      host: smtp-relay.mail.svc.cluster.local
       port: "587"
       from: homelab@alialjaffer.com
       fromDisplayName: Homelab
       user: resend
       password: "${SMTP_PASSWORD}"
-      auth: "true"
-      starttls: "true"
+      auth: "false"
+      starttls: "false"
       ssl: "false"
+    # Shared OIDC client for the per-app oauth2-proxy reverse proxies. See
+    # kubernetes/components/oauth2-proxy/README.md. The wildcard redirect lets
+    # any *.alialjaffer.com app use one client; replace it with explicit
+    # per-app callback URIs to lock that down.
+    clients:
+      - clientId: oauth2-proxy
+        name: oauth2-proxy
+        enabled: true
+        protocol: openid-connect
+        publicClient: false
+        standardFlowEnabled: true
+        implicitFlowEnabled: false
+        directAccessGrantsEnabled: false
+        serviceAccountsEnabled: false
+        secret: "${OAUTH2_PROXY_CLIENT_SECRET}"
+        redirectUris:
+          - "https://*.alialjaffer.com/oauth2/callback"
+        webOrigins:
+          - "https://*.alialjaffer.com"
+        attributes:
+          pkce.code.challenge.method: S256

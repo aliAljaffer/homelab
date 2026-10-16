@@ -17,12 +17,12 @@ spec:
     displayName: External Users
     enabled: true
     smtpServer:
-      host: smtp.resend.com
+      host: smtp-relay.mail.svc.cluster.local
       port: "587"
       from: homelab@alialjaffer.com
       fromDisplayName: External Users
       user: resend
       password: "${SMTP_PASSWORD}"
-      auth: "true"
-      starttls: "true"
+      auth: "false"
+      starttls: "false"
       ssl: "false"

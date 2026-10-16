@@ -61,20 +61,13 @@ falcosidekick:
         falcosidekick:
           namespace: monitoring
           folder: Falco
-  # Email Falco runtime-security events via Resend SMTP. Non-secret fields go in
-  # the chart-managed config secret; the API key is injected as SMTP_PASSWORD
-  # from the falcosidekick-smtp-secret SealedSecret.
+  # Email Falco runtime-security events. Mail goes through the cluster's
+  # rate-limited relay (mail/smtp-relay), which forwards to Resend and holds the
+  # API key, so no SMTP credentials are configured here.
   config:
     smtp:
-      hostport: "smtp.resend.com:587"
-      tls: true
-      user: "resend"
+      hostport: "smtp-relay.mail.svc.cluster.local:587"
+      tls: false
       from: "homelab@alialjaffer.com"
       to: "ahjfr@icloud.com"
       minimumpriority: "warning"
-    extraEnv:
-      - name: SMTP_PASSWORD
-        valueFrom:
-          secretKeyRef:
-            name: falcosidekick-smtp-secret
-            key: password

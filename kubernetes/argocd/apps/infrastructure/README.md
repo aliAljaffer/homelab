@@ -23,5 +23,8 @@ these bullets capture the _why_ behind that ordering.
 - `sealed-secrets.yaml`: controller installed via `kubectl apply` during bootstrap,
   not Helm. This Application adopts it into ArgoCD afterward. See
   `bootstrap/README.md` step 5.
+- `smtp-relay.yaml`: single rate-limited SMTP egress point for every
+  email-emitting app (wave -1, before the senders in monitoring/falco/keycloak).
+  See `kubernetes/infrastructure/smtp-relay/README.md`.
 - `thanos.yaml`: this app is store-gateway/compactor/querier only. The sidecar
   itself runs inside Prometheus, configured in `monitoring/values.yaml`.

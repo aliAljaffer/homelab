@@ -40,9 +40,12 @@ spec:
           rules:
             dns:
               - matchPattern: "*"
-    # Matches SMTP_HOST in vaultwarden-deployment.yaml.
-    - toFQDNs:
-        - matchName: "smtp.resend.com"
+    # Central rate-limited SMTP relay (matches SMTP_HOST in
+    # vaultwarden-deployment.yaml).
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": mail
+            app.kubernetes.io/name: smtp-relay
       toPorts:
         - ports:
             - port: "587"

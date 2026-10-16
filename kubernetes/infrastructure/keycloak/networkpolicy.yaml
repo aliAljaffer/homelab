@@ -66,9 +66,11 @@ spec:
               protocol: TCP
             - port: "57800"
               protocol: TCP
-    # Realm SMTP (Resend) for notification emails. See README.
-    - toFQDNs:
-        - matchName: smtp.resend.com
+    # Central rate-limited SMTP relay for notification emails. See README.
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": mail
+            app.kubernetes.io/name: smtp-relay
       toPorts:
         - ports:
             - port: "587"

@@ -1,0 +1,43 @@
+---
+# Plain-text copy of the Postfix mail log for postfix_exporter to tail. rsyslog
+# still writes JSON to stdout (LOG_FORMAT=json); this second action mirrors the
+# postfix facilities to a real file, which is what the exporter reads.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: smtp-relay-metrics
+  namespace: mail
+  labels:
+    app.kubernetes.io/name: smtp-relay
+data:
+  maillog.conf: |
+    template(name="metricslog" type="string" string="/var/log/mail.log")
+    if ($syslogfacility == '2') or ($programname == 'postfix') then {
+      action(type="omfile" DynaFile="metricslog" template="plain" DirCreateMode="0755" FileCreateMode="0644")
+    }
+  logrotate.conf: |
+    /var/log/mail.log {
+        copytruncate
+        rotate 1
+        monthly
+        minsize 1M
+        compress
+        missingok
+        notifempty
+        dateext
+        olddir /var/log/
+        maxage 90
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: smtp-relay-metrics-scripts
+  namespace: mail
+  labels:
+    app.kubernetes.io/name: smtp-relay
+data:
+  logrotate.sh: |
+    #!/bin/sh
+    set -e
+    exec /usr/sbin/logrotate /etc/logrotate.d/smtp-relay.conf

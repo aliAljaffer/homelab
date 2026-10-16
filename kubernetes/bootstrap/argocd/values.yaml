@@ -92,20 +92,16 @@ notifications:
       memory: 88Mi
     limits:
       memory: 176Mi
-  # Email notifications via Resend SMTP. The API key lives in
-  # argocd-notifications-secret (SealedSecret in kubernetes/argocd/) and is
-  # referenced below as $email-password. secret.create:false so Helm does not
-  # own that secret.
+  # Email notifications via the cluster's rate-limited relay (mail/smtp-relay).
+  # The relay holds the Resend API key, so no credentials are configured here.
   # Named notifier: the key is service.<type>, the block is the SMTP options.
   # The notifier is registered as "email", which is what the subscription
   # recipients below reference (email:<address>).
   notifiers:
     service.email: |
-      host: smtp.resend.com
+      host: smtp-relay.mail.svc.cluster.local
       port: 587
       from: homelab@alialjaffer.com
-      username: resend
-      password: $email-password
   templates:
     template.app-sync-failed: |
       email:
