@@ -3,10 +3,10 @@ debug: false
 persist: true
 machine:
     type: controlplane
-    token: ENC[AES256_GCM,data:0dh3UEACcVnM3EWBzCxg6/MKNuT5BA8=,iv:xB2aU+HNu10oNTYt5wH9sC3ul3kKzGLK7qiOPj5isZ0=,tag:1n6hkDMosdkEoCmBEZAwXw==,type:str]
+    token: ENC[AES256_GCM,data:I0sxNel6xfOi1/OalmTGmQBNz62w5yo=,iv:Daene6eYJoSf4/ONgC3UHluUH/gD7CTBHynWO1Vl0Rs=,tag:ZPRq7Frle+YYR6GVstJMqw==,type:str]
     ca:
         crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJQakNCOGFBREFnRUNBaEJJLzhPcVIyWGpZWDZZOWJXZzFCMmJNQVVHQXl0bGNEQVFNUTR3REFZRFZRUUsKRXdWMFlXeHZjekFlRncweU5qQTNNamd4TlRFd01ERmFGdzB6TmpBM01qVXhOVEV3TURGYU1CQXhEakFNQmdOVgpCQW9UQlhSaGJHOXpNQ293QlFZREsyVndBeUVBUFlKMW1hc2RtdlpLQzFwUmg5Z3pFMkJaMjUwalo0RGgvcE11ClcrS0NCbHVqWVRCZk1BNEdBMVVkRHdFQi93UUVBd0lDaERBZEJnTlZIU1VFRmpBVUJnZ3JCZ0VGQlFjREFRWUkKS3dZQkJRVUhBd0l3RHdZRFZSMFRBUUgvQkFVd0F3RUIvekFkQmdOVkhRNEVGZ1FVSHZQOFpYQjBjWWtPKzlvOAorLzZFSUx1RkV5Y3dCUVlESzJWd0EwRUFESE5TWHJ5MW9LWVpNTFc0VWNKV3RtenlhMEs4ZUxKNDVBbG9LakdxCkYzaTVYWmhWS0ZOTlUvaUN0TnZQdWdJL3pXYkIyVlo0bUsyaUloYlEvanZoREE9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
-        key: ""
+        key: ENC[AES256_GCM,data:rOTgVBo76kO5nKEaftdhB/2FeklX4G4buyIgPZNAPct5Ki67xkVTJL3tqFHA7LxsCvB4vaoNsGkBcybKGTQxkYogRFiLvC5ofa2zFqfeAykSvD+TvnSEWI+mkrgwr1zrLmvXM8tFuyGRT/O2LwjKUDabjCsD1jfzS1mNuDZ0kY6R8pkYNMIlTCMfB8VLCkI6Fp1mPjO05K6MOPXXC/+uJGcw83UPsn1xBtW6/a9U4qFm3/El,iv:Q5DdytKrbAIwEI/I+BY1WMchWok001wAayv0yLRStcQ=,tag:JoOAZSFWJa2VnohaMbcC7w==,type:str]
     certSANs: []
     kubelet:
         image: ghcr.io/siderolabs/kubelet:v1.36.2
@@ -27,7 +27,7 @@ machine:
             forwardKubeDNSToHost: true
 cluster:
     id: hPEZEXUQ2jkxmyO6ueDejoY9OkCLFGOFjqLpas6WNug=
-    secret: ENC[AES256_GCM,data:Byz0p2huYowVmGCRUiW1l3S8jLbJI+hLpOYsdVflPv8fyo1IJPR+YVqH2cc=,iv:aAX23q9MrmnBYjGac6GRjHyZaE5T9HEqe+KIOY3gvUY=,tag:o3SAsM1S5vXH6s9nBW7SLw==,type:str]
+    secret: ENC[AES256_GCM,data:vvvgQbNsaZM/XHIZeMtevqXYXRI1Jlf+/pyzqN8YONPyxPqkNk5i2jSAtfo=,iv:mVlyONzmbfkv9fjSGDEAUSDzO0o/zwDMCh+B335Qdgg=,tag:R/S6492M6YWa/Cskp2jcAg==,type:str]
     controlPlane:
         endpoint: https://192.168.8.99:6443
     clusterName: k8s-homelab
@@ -37,7 +37,7 @@ cluster:
             - 10.244.0.0/16
         serviceSubnets:
             - 10.96.0.0/12
-    token: ENC[AES256_GCM,data:BbZLUplCuMnq9to/7EoCJVqW+jW3hTM=,iv:QGXGdfA10zYKvN5CSWLL9nr+Ej7AEXQGZM6iH1Xs8F8=,tag:x0myQYXa9X+L3We/no/Yuw==,type:str]
+    token: ENC[AES256_GCM,data:V7nStvyHFhr0TJjx27QQqGjYZzQvHYs=,iv:E9SleoX3+JnI+gWjYvgsN02GzTTAyKyc9J4Pw4ze4/k=,tag:VUr5P8uKx7VUnyQscsT0wQ==,type:str]
     ca:
         crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJpekNDQVRDZ0F3SUJBZ0lSQUpvOXhydHpaemVrQ3FTNVAray9ZR1V3Q2dZSUtvWkl6ajBFQXdJd0ZURVQKTUJFR0ExVUVDaE1LYTNWaVpYSnVaWFJsY3pBZUZ3MHlOakEzTWpneE5URXdNREZhRncwek5qQTNNalV4TlRFdwpNREZhTUJVeEV6QVJCZ05WQkFvVENtdDFZbVZ5Ym1WMFpYTXdXVEFUQmdjcWhrak9QUUlCQmdncWhrak9QUU1CCkJ3TkNBQVJMNUltUjNnTzNnN2ZyQWJKb2pkRmJmckZPTUIwYitTK3QwbjBxazh4ZTI3NDk0SXY5bXZqVGFQb28KTUxHclVKcFlWTStiQmEyQTRnY1Z6bFpHVWNmR28yRXdYekFPQmdOVkhROEJBZjhFQkFNQ0FvUXdIUVlEVlIwbApCQll3RkFZSUt3WUJCUVVIQXdFR0NDc0dBUVVGQndNQ01BOEdBMVVkRXdFQi93UUZNQU1CQWY4d0hRWURWUjBPCkJCWUVGR3lrOVQ4U1M1YURZWFFWM2VDSEFCNmtXdlRTTUFvR0NDcUdTTTQ5QkFNQ0Ewa0FNRVlDSVFDMVBTQ1IKL0pzK0RZbS9sZjNOM2NISGNWRTZZYVh1bisrWldrVjd3d2JUVFFJaEFMZkRWb29vaUp0VjUwb0NWaUxtSUhQVwpMUmNnVnlOUkdBNUE5V0g5KzZFdgotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
         key: ""
@@ -56,21 +56,21 @@ sops:
         - recipient: age13jd0rndp589yqxpxw36fkrn8jkgazqrlvj22txp4gfh8e0qskusq97zta9
           enc: |
             -----BEGIN AGE ENCRYPTED FILE-----
-            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA2YUQ1amE1b090eEFwalor
-            RUFaRkNVbDBCMXFvZE1SeHVGVlY1dmh5OWdZCi9kSnFmYzBrVmVyYmRNcldQUGtl
-            TGsrUUhXdFByaVdRNjBvV3dzaWpkOWsKLS0tIFJmeXM1c1JOekxuWVcxN0VWVFFm
-            T29BeVlEbzFqeUxTTU90cm5MbE43UlEKaKS1fvyqwxRZCA/gd76j+WcAKVfEgx38
-            rBxALlICZxnuAtoF050NuWF+iXZxhSdeZpmd6hakWhaJu+P85VBlww==
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA0T1pWZEJ0cXhtM0phTzJa
+            Qnp3VXFicC90MzNDSmxXVm1sQ2Q2MmxuMW5FCmdUUW9DRWRGY2tMTjRCcGt3RXdx
+            OEM2ZVA5QkQyMDZ4WUdLMUpUOEwzNkEKLS0tIGpHUFJlby9od05DYzZkYjdHSm9K
+            VHo4QVZNbDRuMU44OXJsYlNhR25ONEkKszfIwWJ2AZ4AktSy643NZa7L+TBG4gyS
+            TgIsfzt03echpf6M9RcsT+NqUY1n5NXP2SA3UDHevuJvJOTtnpOjlA==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-10-16T06:04:01Z"
-    mac: ENC[AES256_GCM,data:piWYarc0ILF123ktaNZvhkO7eW2qjEqpv2cyILi2EGFSJ7aOZGAKpWSd/B3n///U2fORH/shvB6l3xXghUKs8bUQ4xAExUNB/qFjYmtx9QjMG6Q+solXCMwI7+TcX/xdDf4HgMRsSVp8Cf7US5cpInEWqETLU+cT9YpGrjsPiVs=,iv:AjmKA5B0DM4JxelzrxkBLTlP7m+FIR3Au+TRZkqkWV8=,tag:uuPWPBXq8ezzDutwezT6yw==,type:str]
+    lastmodified: "2026-10-16T06:10:29Z"
+    mac: ENC[AES256_GCM,data:aP71c2KYs8lYyPmUHr49Lgn62x3KNWpcPj47MHWV9hNwmMny++SrgEv+Kg/bTsogqK/W0sqQ+4VtiVVtR2JNnLanh/cK3iYgS7QVutFyDHTYdGzLsjPirhdDrhfWfrMpIXIzQFvcC3SkcqbEqeX28R/En0WdtuqoEQzvppekbI8=,iv:3HQpn5ljzaFHxoz8DIMbZkWzQrhjUIRpqcAIO0/KMoE=,tag:4SjdX4Lx+GpDkk3NPXb8xA==,type:str]
     pgp: []
     encrypted_regex: ^(key|token|secret|secretboxEncryptionSecret)$
     version: 3.9.1
 ---
 apiVersion: v1alpha1
 kind: HostnameConfig
-hostname: wrk3
+hostname: wrk0
 sops:
     kms: []
     gcp_kms: []
@@ -80,14 +80,14 @@ sops:
         - recipient: age13jd0rndp589yqxpxw36fkrn8jkgazqrlvj22txp4gfh8e0qskusq97zta9
           enc: |
             -----BEGIN AGE ENCRYPTED FILE-----
-            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA2YUQ1amE1b090eEFwalor
-            RUFaRkNVbDBCMXFvZE1SeHVGVlY1dmh5OWdZCi9kSnFmYzBrVmVyYmRNcldQUGtl
-            TGsrUUhXdFByaVdRNjBvV3dzaWpkOWsKLS0tIFJmeXM1c1JOekxuWVcxN0VWVFFm
-            T29BeVlEbzFqeUxTTU90cm5MbE43UlEKaKS1fvyqwxRZCA/gd76j+WcAKVfEgx38
-            rBxALlICZxnuAtoF050NuWF+iXZxhSdeZpmd6hakWhaJu+P85VBlww==
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA0T1pWZEJ0cXhtM0phTzJa
+            Qnp3VXFicC90MzNDSmxXVm1sQ2Q2MmxuMW5FCmdUUW9DRWRGY2tMTjRCcGt3RXdx
+            OEM2ZVA5QkQyMDZ4WUdLMUpUOEwzNkEKLS0tIGpHUFJlby9od05DYzZkYjdHSm9K
+            VHo4QVZNbDRuMU44OXJsYlNhR25ONEkKszfIwWJ2AZ4AktSy643NZa7L+TBG4gyS
+            TgIsfzt03echpf6M9RcsT+NqUY1n5NXP2SA3UDHevuJvJOTtnpOjlA==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-10-16T06:04:01Z"
-    mac: ENC[AES256_GCM,data:piWYarc0ILF123ktaNZvhkO7eW2qjEqpv2cyILi2EGFSJ7aOZGAKpWSd/B3n///U2fORH/shvB6l3xXghUKs8bUQ4xAExUNB/qFjYmtx9QjMG6Q+solXCMwI7+TcX/xdDf4HgMRsSVp8Cf7US5cpInEWqETLU+cT9YpGrjsPiVs=,iv:AjmKA5B0DM4JxelzrxkBLTlP7m+FIR3Au+TRZkqkWV8=,tag:uuPWPBXq8ezzDutwezT6yw==,type:str]
+    lastmodified: "2026-10-16T06:10:29Z"
+    mac: ENC[AES256_GCM,data:aP71c2KYs8lYyPmUHr49Lgn62x3KNWpcPj47MHWV9hNwmMny++SrgEv+Kg/bTsogqK/W0sqQ+4VtiVVtR2JNnLanh/cK3iYgS7QVutFyDHTYdGzLsjPirhdDrhfWfrMpIXIzQFvcC3SkcqbEqeX28R/En0WdtuqoEQzvppekbI8=,iv:3HQpn5ljzaFHxoz8DIMbZkWzQrhjUIRpqcAIO0/KMoE=,tag:4SjdX4Lx+GpDkk3NPXb8xA==,type:str]
     pgp: []
     encrypted_regex: ^(key|token|secret|secretboxEncryptionSecret)$
     version: 3.9.1
