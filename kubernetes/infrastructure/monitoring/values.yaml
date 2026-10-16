@@ -227,8 +227,13 @@ grafana:
     contactpoints.yaml:
       apiVersion: 1
       contactPoints:
+        # One contact point, two integrations: Grafana notifies every
+        # integration a contact point contains, so this fans out to Discord and
+        # email. Fan-out has to live here because Grafana routes each alert to
+        # exactly one contact point (two notification policies would not both
+        # fire).
         - orgId: 1
-          name: Discord Channel
+          name: Discord + Email
           receivers:
             - uid: ff3iaps1ewgzkb
               type: discord
@@ -237,11 +242,19 @@ grafana:
                 url: "${DISCORD_WEBHOOK_URL}"  # Set via grafana.envFromSecret
                 use_discord_username: false
               disableResolveMessage: false
+            # Email goes through the cluster's rate-limited relay
+            # (mail/smtp-relay), configured under grafana.grafana.ini.smtp above.
+            - uid: homelab-email-01
+              type: email
+              settings:
+                addresses: ahjfr@icloud.com
+                singleEmail: true
+              disableResolveMessage: false
     policies.yaml:
       apiVersion: 1
       policies:
         - orgId: 1
-          receiver: Discord Channel
+          receiver: Discord + Email
           group_by:
             - grafana_folder
             - alertname
@@ -284,7 +297,7 @@ grafana:
               execErrState: Error
               for: 10m
               notification_settings:
-                receiver: Discord Channel
+                receiver: Discord + Email
 
             - uid: cf3ib3yooms5ca
               title: High Temperature > 80°C
@@ -317,7 +330,7 @@ grafana:
               execErrState: Error
               for: 10m
               notification_settings:
-                receiver: Discord Channel
+                receiver: Discord + Email
 
             - uid: ff3ib9gnzeubkc
               title: High Memory Usage > 70%
@@ -350,7 +363,7 @@ grafana:
               execErrState: Error
               for: 10m
               notification_settings:
-                receiver: Discord Channel
+                receiver: Discord + Email
 
             # Covers all nodes, unlike "High Temperature > 80°C" above which only
             # matches chip="platform_coretemp_0" and misses nodes without a coretemp
@@ -386,7 +399,7 @@ grafana:
               execErrState: Error
               for: 10m
               notification_settings:
-                receiver: Discord Channel
+                receiver: Discord + Email
 
             # Loki logging pipeline. These cover the "silent" failure modes:
             # logs collected but never reaching Loki, and Loki querying broken
@@ -422,7 +435,7 @@ grafana:
               execErrState: Error
               for: 10m
               notification_settings:
-                receiver: Discord Channel
+                receiver: Discord + Email
 
             - uid: lg7a0af1byfbb
               title: Loki Ingest Stalled
@@ -456,7 +469,7 @@ grafana:
               execErrState: Error
               for: 10m
               notification_settings:
-                receiver: Discord Channel
+                receiver: Discord + Email
 
             - uid: lg7a0af1byfcc
               title: Loki Canary Missing Entries
@@ -489,7 +502,7 @@ grafana:
               execErrState: Error
               for: 5m
               notification_settings:
-                receiver: Discord Channel
+                receiver: Discord + Email
 
             - uid: lg7a0af1byfdd
               title: Loki Canary Query Failures
@@ -522,7 +535,7 @@ grafana:
               execErrState: Error
               for: 5m
               notification_settings:
-                receiver: Discord Channel
+                receiver: Discord + Email
 
             # Thanos is the only long-term store: Prometheus keeps 2d locally, so
             # anything the sidecar fails to upload to the GCS bucket is gone for
@@ -563,7 +576,7 @@ grafana:
               execErrState: Error
               for: 30m
               notification_settings:
-                receiver: Discord Channel
+                receiver: Discord + Email
 
             # Bucket read/write failing outright (the CiliumNetworkPolicy
             # regression): storegateway block-metadata syncs and compactor
@@ -600,7 +613,7 @@ grafana:
               execErrState: Error
               for: 15m
               notification_settings:
-                receiver: Discord Channel
+                receiver: Discord + Email
 
 # Drop high-cardinality apiserver histograms, no homelab value.
 kubeApiServer:
