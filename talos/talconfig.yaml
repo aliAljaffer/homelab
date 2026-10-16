@@ -3,7 +3,7 @@ clusterName: k8s-homelab
 talosVersion: v1.13.7
 kubernetesVersion: v1.36.2
 endpoint: https://192.168.8.99:6443
-allowSchedulingOnControlPlanes: true
+allowSchedulingOnControlPlanes: false
 
 cniConfig:
   name: none # Cilium installed via bootstrap, not Talos default (Flannel)
@@ -29,7 +29,7 @@ nodes:
 - hostname: wrk0
   ipAddress: 192.168.8.101
   installDisk: /dev/nvme0n1
-  controlPlane: true
+  controlPlane: false
   networkInterfaces:
   - deviceSelector:
       hardwareAddr: "*"
@@ -38,7 +38,7 @@ nodes:
 - hostname: wrk1
   ipAddress: 192.168.8.102
   installDisk: /dev/nvme0n1
-  controlPlane: true
+  controlPlane: false
   networkInterfaces:
   - deviceSelector:
       hardwareAddr: "*"
