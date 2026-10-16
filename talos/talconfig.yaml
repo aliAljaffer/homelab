@@ -2,7 +2,12 @@
 clusterName: k8s-homelab
 talosVersion: v1.13.7
 kubernetesVersion: v1.36.2
-endpoint: https://192.168.8.99:6443
+endpoint: https://api.alialjaffer.com:6443
+# Extra SANs for the kube-apiserver serving certificate: the API DNS name and
+# the floating VIP. See docs/api-endpoint.md.
+additionalApiServerCertSans:
+- api.alialjaffer.com
+- 192.168.8.250
 allowSchedulingOnControlPlanes: true
 
 cniConfig:
@@ -25,6 +30,9 @@ nodes:
   - deviceSelector:
       hardwareAddr: "*"
     dhcp: true
+    # Floating API VIP (shared with wrk0/wrk1); see docs/api-endpoint.md
+    vip:
+      ip: 192.168.8.250
 
 - hostname: wrk0
   ipAddress: 192.168.8.101
@@ -34,6 +42,9 @@ nodes:
   - deviceSelector:
       hardwareAddr: "*"
     dhcp: true
+    # Floating API VIP (shared with cp0/wrk1); see docs/api-endpoint.md
+    vip:
+      ip: 192.168.8.250
 
 - hostname: wrk1
   ipAddress: 192.168.8.102
@@ -43,6 +54,9 @@ nodes:
   - deviceSelector:
       hardwareAddr: "*"
     dhcp: true
+    # Floating API VIP (shared with cp0/wrk0); see docs/api-endpoint.md
+    vip:
+      ip: 192.168.8.250
 
 - hostname: wrk2
   ipAddress: 192.168.8.103
