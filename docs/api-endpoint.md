@@ -22,6 +22,10 @@ cp0 took the API down even though etcd had quorum. It is now fronted by a
   `api.alialjaffer.com`, `192.168.8.250`.
 - **Endpoint** - `endpoint: https://api.alialjaffer.com:6443` in
   `talconfig.yaml` (renders to `cluster.controlPlane.endpoint` on every node).
+- **Cilium** - `k8sServiceHost: 192.168.8.250` in
+  `kubernetes/bootstrap/cilium/values.yaml`. With `kubeProxyReplacement: true`
+  the cilium-agent uses this address for its own API access, so point it at the
+  VIP instead of a single control plane (it was `192.168.8.99`, i.e. cp0 only).
 - **DNS** - `api.alialjaffer.com` -> `192.168.8.250`, created out of band in
   Cloudflare (DNS-only, private IP - same pattern as the other internal
   `*.alialjaffer.com` records). external-dns does not manage this record.
