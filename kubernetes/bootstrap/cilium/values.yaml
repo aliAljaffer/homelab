@@ -1,6 +1,8 @@
 ---
 kubeProxyReplacement: true
-k8sServiceHost: 192.168.8.99
+# Talos floating API VIP (shared by cp0/wrk0/wrk1), not a single node IP, so
+# cilium-agents survive losing any one control plane. See docs/api-endpoint.md.
+k8sServiceHost: 192.168.8.250
 k8sServicePort: 6443
 
 # Logs policy drops without enforcing them, needed before default-deny
