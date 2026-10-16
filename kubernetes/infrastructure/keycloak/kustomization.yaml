@@ -7,4 +7,5 @@ resources:
   - keycloak-realm-homelab.yaml
   - keycloak-realm-external-users.yaml
   - httproute-keycloak.yaml
+  - keycloak-smtp-secret.sealed.yaml
   - networkpolicy.yaml
