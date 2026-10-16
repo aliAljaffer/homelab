@@ -5,7 +5,6 @@ controller:
       cpu: 5m
       memory: 232Mi
     limits:
-      cpu: 20m
       memory: 464Mi
 
 speaker:
@@ -15,7 +14,6 @@ speaker:
       cpu: 20m
       memory: 56Mi
     limits:
-      cpu: 60m
       memory: 112Mi
 
 # frr-k8s is a real Helm dependency, not a values passthrough. Its keys use
@@ -28,7 +26,6 @@ frr-k8s:
         cpu: 5m
         memory: 32Mi
       limits:
-        cpu: 20m
         memory: 64Mi
     frr:
       resources:
@@ -36,7 +33,6 @@ frr-k8s:
           cpu: 250m
           memory: 64Mi
         limits:
-          cpu: 1000m
           memory: 256Mi
     reloader:
       resources:
@@ -44,7 +40,6 @@ frr-k8s:
           cpu: 5m
           memory: 16Mi
         limits:
-          cpu: 20m
           memory: 32Mi
     frrMetrics:
       resources:
@@ -52,7 +47,6 @@ frr-k8s:
           cpu: 15m
           memory: 56Mi
         limits:
-          cpu: 45m
           memory: 112Mi
     frrStatus:
       resources:
@@ -60,7 +54,6 @@ frr-k8s:
           cpu: 5m
           memory: 32Mi
         limits:
-          cpu: 20m
           memory: 64Mi
 
 prometheus:

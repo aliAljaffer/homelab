@@ -63,7 +63,6 @@ singleBinary:
       cpu: 70m
       memory: 560Mi
     limits:
-      cpu: 210m
       memory: 1120Mi
   # Chart has no storage.secretName field; GCS SDK reads GOOGLE_APPLICATION_CREDENTIALS.
   # Secret: loki-gcs-credentials SealedSecret, key service_account.json
@@ -92,7 +91,6 @@ gateway:
       cpu: 10m
       memory: 24Mi
     limits:
-      cpu: 30m
       memory: 48Mi
 
 # sidecar here is the k8s-sidecar container (loki-sc-rules) that loads alerting/recording rules from ConfigMaps
@@ -102,7 +100,6 @@ sidecar:
       cpu: 15m
       memory: 104Mi
     limits:
-      cpu: 45m
       memory: 208Mi
 
 lokiCanary:
@@ -111,7 +108,6 @@ lokiCanary:
       cpu: 20m
       memory: 64Mi
     limits:
-      cpu: 60m
       memory: 128Mi
 
 # selfMonitoring off: Alloy handles this instead of the chart's bundled agent
