@@ -11,10 +11,6 @@
 # Allow templates
 !**/*.template*
 
-# Allow specific named files that aren't sensitive
-!**/route53-*
-!**/externaldns-*
-
 # SOPS / age private keys - NEVER commit
 *.age
 *.key
