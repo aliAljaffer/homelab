@@ -33,7 +33,6 @@ longhornManager:
       cpu: 60m
       memory: 384Mi
     limits:
-      cpu: 180m
       memory: 768Mi
 
 metrics:

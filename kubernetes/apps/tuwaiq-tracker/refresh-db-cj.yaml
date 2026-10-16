@@ -23,7 +23,6 @@ spec:
                 cpu: 128m
                 memory: 64Mi
               limits:
-                cpu: 512m
                 memory: 128Mi
             env:
             - name: CRON_SECRET

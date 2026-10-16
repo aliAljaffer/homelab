@@ -23,7 +23,6 @@ resources:
     cpu: 125m
     memory: 560Mi
   limits:
-    cpu: 375m
     memory: 1120Mi
 
 envoy:
@@ -32,7 +31,6 @@ envoy:
       cpu: 10m
       memory: 88Mi
     limits:
-      cpu: 30m
       memory: 176Mi
 
 # Agent + operator Prometheus metrics, with ServiceMonitors labeled for the
@@ -54,7 +52,6 @@ hubble:
         cpu: 35m
         memory: 40Mi
       limits:
-        cpu: 105m
         memory: 80Mi
   ui:
     enabled: true
@@ -64,7 +61,6 @@ hubble:
           cpu: 30m
           memory: 72Mi
         limits:
-          cpu: 90m
           memory: 144Mi
     frontend:
       resources:
@@ -72,7 +68,6 @@ hubble:
           cpu: 5m
           memory: 16Mi
         limits:
-          cpu: 20m
           memory: 32Mi
 
 operator:
@@ -89,7 +84,6 @@ operator:
       cpu: 50m
       memory: 192Mi
     limits:
-      cpu: 500m
       memory: 384Mi
 
 # Talos handles cgroup auto-mount itself.
