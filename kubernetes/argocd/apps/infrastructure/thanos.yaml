@@ -31,13 +31,14 @@ spec:
     jsonPointers:
     - /spec/persistentVolumeClaimRetentionPolicy
     - /spec/template/spec/containers/0/startupProbe/initialDelaySeconds
-    - /spec/volumeClaimTemplates/0/apiVersion
-    - /spec/volumeClaimTemplates/0/kind
     # volumeClaimTemplates is immutable on live StatefulSets, so the size in
     # values.yaml can only be applied on a fresh install. Existing PVCs are
-    # resized manually (see kubernetes/infrastructure/thanos/README.md); ignoring
-    # the field keeps the app Synced instead of erroring on the forbidden patch.
-    - /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+    # resized manually (see kubernetes/infrastructure/thanos/README.md). The
+    # whole list is ignored: ArgoCD's diff engine reports defaulted VCT fields
+    # (apiVersion/kind, and resources.requests.storage once it differs) as drift
+    # that cannot be patched anyway, which would leave the app permanently
+    # OutOfSync.
+    - /spec/volumeClaimTemplates
   syncPolicy:
     automated:
       prune: true
