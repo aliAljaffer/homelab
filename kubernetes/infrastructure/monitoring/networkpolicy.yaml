@@ -568,6 +568,18 @@ spec:
     - ports:
       - port: "443"
         protocol: TCP
+  # Grafana startup: download-dashboards init container + plugin install.
+  # (raw.githubusercontent.com: dashboard JSON, grafana.com/dl.grafana.com:
+  #  plugin catalog + binaries, storage.googleapis.com: misc assets)
+  - toFQDNs:
+    - matchName: "raw.githubusercontent.com"
+    - matchName: "grafana.com"
+    - matchName: "dl.grafana.com"
+    - matchName: "storage.googleapis.com"
+    toPorts:
+    - ports:
+      - port: "443"
+        protocol: TCP
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
