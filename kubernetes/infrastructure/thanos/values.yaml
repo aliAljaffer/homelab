@@ -52,10 +52,17 @@ compactor:
     resolutionRaw: "" # empty means keep forever
     resolution5m: ""
     resolution1h: ""
+  # The compactor downloads every block it intends to compact into this volume,
+  # so it must be comfortably larger than the raw metrics footprint. It filled up
+  # the original 10Gi on 2026-10-16 and halted (`preallocate: no space left on
+  # device`), which stops all downsampling and retention. 50Gi gives headroom.
+  # NOTE: spec.volumeClaimTemplates is immutable on StatefulSets, so changing
+  # this value does NOT resize an existing PVC. See README.md for the manual
+  # expansion procedure.
   persistence:
     enabled: true
     storageClass: longhorn
-    size: 10Gi
+    size: 50Gi
 
 ruler:
   enabled: false
