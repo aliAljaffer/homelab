@@ -9,6 +9,9 @@ spec:
   task: backup
   groups:
   - default
-  retain: 14
+  # 30 daily backups ~= one month of recovery window. The 2026 metrics-loss
+  # incident needed data from 38 days back, which the old 14 kept for only two
+  # weeks (see monitoring/README.md). Pair with the monthly job for longer reach.
+  retain: 30
   concurrency: 1
   labels: {}
