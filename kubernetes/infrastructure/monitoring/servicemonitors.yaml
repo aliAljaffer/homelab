@@ -131,3 +131,22 @@ spec:
     matchLabels:
       app.kubernetes.io/name: loki
       app.kubernetes.io/component: memcached-results-cache
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: smtp-relay
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  # postfix_exporter sidecar inside the mail/smtp-relay Deployment.
+  endpoints:
+    - port: metrics
+      interval: 30s
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: smtp-relay
+  namespaceSelector:
+    matchNames:
+      - mail

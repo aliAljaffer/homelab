@@ -547,9 +547,11 @@ spec:
     - ports:
       - port: "8080"
         protocol: TCP
-  # Resend SMTP for alert/invite emails (grafana.ini smtp.host).
-  - toFQDNs:
-    - matchName: "smtp.resend.com"
+  # Central rate-limited SMTP relay (grafana.ini smtp.host) for alerts/invites.
+  - toEndpoints:
+    - matchLabels:
+        "k8s:io.kubernetes.pod.namespace": mail
+        app.kubernetes.io/name: smtp-relay
     toPorts:
     - ports:
       - port: "587"
@@ -899,9 +901,11 @@ spec:
     - ports:
       - port: "443"
         protocol: TCP
-  # Resend SMTP for email alerts (alertmanager global.smtp_smarthost).
-  - toFQDNs:
-    - matchName: "smtp.resend.com"
+  # Central rate-limited SMTP relay (alertmanager global.smtp_smarthost).
+  - toEndpoints:
+    - matchLabels:
+        "k8s:io.kubernetes.pod.namespace": mail
+        app.kubernetes.io/name: smtp-relay
     toPorts:
     - ports:
       - port: "587"

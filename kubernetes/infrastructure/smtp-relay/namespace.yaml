@@ -1,0 +1,11 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mail
+  labels:
+    # Postfix's master process runs as root by design; it needs no added
+    # capabilities, so baseline is sufficient (restricted would block root).
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/audit: baseline
+    pod-security.kubernetes.io/warn: baseline

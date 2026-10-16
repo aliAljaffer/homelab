@@ -1,0 +1,62 @@
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: smtp-relay
+  namespace: mail
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: smtp-relay
+  ingress:
+    # kubelet readiness probe.
+    - fromEntities:
+        - host
+        - health
+    # Only the cluster's email senders may submit mail. Each entry mirrors the
+    # namespace of a sender whose config points at smtp-relay.mail.svc.
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": falco
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": monitoring
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": keycloak
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": vaultwarden
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": argocd
+      toPorts:
+        - ports:
+            - port: "587"
+              protocol: TCP
+    # Prometheus scrapes the exporter sidecar (ServiceMonitor "smtp-relay").
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": monitoring
+      toPorts:
+        - ports:
+            - port: "9154"
+              protocol: TCP
+  egress:
+    # Resolve smtp.resend.com.
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    # Deliver to Resend.
+    - toFQDNs:
+        - matchName: "smtp.resend.com"
+      toPorts:
+        - ports:
+            - port: "587"
+              protocol: TCP

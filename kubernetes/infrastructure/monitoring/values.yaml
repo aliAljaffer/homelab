@@ -75,8 +75,8 @@ grafana:
     - name: grafana-discord-webhook
     - name: grafana-github-token
 
-  smtp:
-    existingSecret: grafana-smtp-secret
+  # Mail goes through the cluster's rate-limited relay (mail/smtp-relay),
+  # which authenticates to Resend itself, so no SMTP credentials are set here.
 
   plugins:
     - grafana-github-datasource
@@ -149,10 +149,10 @@ grafana:
       wal: true  # required for SQLite on networked (Longhorn) storage
     smtp:
       enabled: true
-      host: smtp.resend.com:587
+      host: smtp-relay.mail.svc.cluster.local:587
       from_address: homelab@alialjaffer.com
       from_name: Grafana
-      startTLS_policy: MandatoryStartTLS
+      startTLS_policy: NoStartTLS
 
   # sidecar.resources is shared by grafana-sc-dashboard and
   # grafana-sc-datasources, the chart has one resources key for both. Sized
@@ -552,13 +552,12 @@ alertmanager:
   config:
     global:
       resolve_timeout: 5m
-      # Outbound email via Resend SMTP. The API key is mounted from the
-      # alertmanager-smtp-secret SealedSecret (secret key: password).
-      smtp_smarthost: 'smtp.resend.com:587'
+      # Outbound email via the cluster's rate-limited relay (mail/smtp-relay),
+      # which forwards to Resend with the API key it holds. No SMTP credentials
+      # are configured here.
+      smtp_smarthost: 'smtp-relay.mail.svc.cluster.local:587'
       smtp_from: 'homelab@alialjaffer.com'
-      smtp_auth_username: 'resend'
-      smtp_auth_password_file: '/etc/alertmanager/secrets/alertmanager-smtp-secret/password'
-      smtp_require_tls: true
+      smtp_require_tls: false
     inhibit_rules:
       - source_matchers:
           - 'severity = critical'
