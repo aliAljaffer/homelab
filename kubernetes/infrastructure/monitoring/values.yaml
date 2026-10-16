@@ -524,6 +524,84 @@ grafana:
               notification_settings:
                 receiver: Discord Channel
 
+            # Thanos is the only long-term store: Prometheus keeps 2d locally, so
+            # anything the sidecar fails to upload to the GCS bucket is gone for
+            # good. In 2026-08 the objectstore credential was rotated and the
+            # Prometheus/Thanos pods were not restarted, so uploads failed for
+            # ~2 months and every block that aged out of Prometheus was lost.
+            # Nothing paged, because nothing was watching the bucket write path.
+            # Blocks land every 2h, so zero block loads in 6h means the path is
+            # broken even though every pod still reports Running.
+            - uid: th7a0af1byfaa
+              title: Thanos Bucket Uploads Stalled
+              condition: C
+              data:
+                - refId: A
+                  relativeTimeRange:
+                    from: 600
+                    to: 0
+                  datasourceUid: thanos
+                  model:
+                    expr: 'sum(increase(thanos_bucket_store_block_loads_total[6h]))'
+                    instant: true
+                    refId: A
+                - refId: C
+                  datasourceUid: __expr__
+                  model:
+                    conditions:
+                      - evaluator:
+                          params: [1]
+                          type: lt
+                        query:
+                          params: [C]
+                        reducer:
+                          type: last
+                    expression: A
+                    type: threshold
+                    refId: C
+              noDataState: NoData
+              execErrState: Error
+              for: 30m
+              notification_settings:
+                receiver: Discord Channel
+
+            # Bucket read/write failing outright (the CiliumNetworkPolicy
+            # regression): storegateway block-metadata syncs and compactor
+            # objectstore operations error out. A handful of 15s retries is
+            # normal noise, so only a sustained burst pages.
+            - uid: th7a0af1byfbb
+              title: Thanos Bucket Access Failing
+              condition: C
+              data:
+                - refId: A
+                  relativeTimeRange:
+                    from: 900
+                    to: 0
+                  datasourceUid: thanos
+                  model:
+                    expr: 'sum(increase(thanos_blocks_meta_sync_failures_total[15m])) + sum(increase(thanos_objstore_bucket_operation_failures_total[15m]))'
+                    instant: true
+                    refId: A
+                - refId: C
+                  datasourceUid: __expr__
+                  model:
+                    conditions:
+                      - evaluator:
+                          params: [1]
+                          type: gt
+                        query:
+                          params: [C]
+                        reducer:
+                          type: last
+                    expression: A
+                    type: threshold
+                    refId: C
+              noDataState: NoData
+              execErrState: Error
+              for: 15m
+              notification_settings:
+                receiver: Discord Channel
+
 # Drop high-cardinality apiserver histograms, no homelab value.
 kubeApiServer:
   serviceMonitor:
