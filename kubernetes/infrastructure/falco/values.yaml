@@ -8,6 +8,26 @@ falco:
   webserver:
     prometheus_metrics_enabled: true
 
+# Local rule overrides, loaded after the upstream ruleset (the chart mounts this
+# under /etc/falco/rules.d, which rules_files loads last). Without these,
+# "Drop and execute new binary in container" (CRITICAL) fires on every pod start
+# and floods the falcosidekick SMTP output.
+customRules:
+  falco_rules.local.yaml: |-
+    # The container plugin tags host container-runtime processes (CNI plugins,
+    # the sysctl init) with container.id="runtime". Those are not workload
+    # containers, so "binary not part of base image" must not fire for them.
+    - rule: Drop and execute new binary in container
+      condition: and not (container.id = runtime)
+      override:
+        condition: append
+
+    # pihole rewrites pihole-FTL in place, which tripped the same rule.
+    - list: known_drop_and_execute_containers
+      items: ['docker.io/pihole/pihole']
+      override:
+        items: append
+
 # Falco's own engine-health metrics (event/drop counts, CPU/RSS, rule matches),
 # separate from serviceMonitor and falcosidekick's metrics below.
 metrics:
