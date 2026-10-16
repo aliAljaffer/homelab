@@ -5,6 +5,11 @@ metadata:
   namespace: pihole
 spec:
   replicas: 1
+  # RWO Longhorn PVC: the default RollingUpdate deadlocks because the new pod
+  # cannot attach the volume while the old one holds it. Recreate tears the old
+  # pod down first. Same reason as the Grafana deployment.
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: pihole
