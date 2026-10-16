@@ -176,15 +176,6 @@ EOF
   --dry-run=client -o yaml \
   | kubeseal --cert pub-sealed-secrets.pem -o yaml \
   > kubernetes/infrastructure/monitoring/thanos-objstore.sealed.yaml
-
-# Route53 credentials for cert-manager
-kubectl create secret generic route53-credentials \
-  --namespace cert-manager \
-  --from-literal=account-access-key=AWS_ACCESS_KEY_ID \
-  --from-literal=secret-access-key=AWS_SECRET_ACCESS_KEY \
-  --dry-run=client -o yaml \
-  | kubeseal --cert pub-sealed-secrets.pem -o yaml \
-  > kubernetes/infrastructure/cert-manager/route53-credentials.sealed.yaml
 ```
 
 ## Step 7 - Bootstrap App-of-Apps
