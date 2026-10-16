@@ -47,6 +47,7 @@ AMD Ryzen 7 7800X3D, 32GB RAM, RTX 4070 Ti Super, 3x 2TB NVMe, dual-boots Fedora
 | Storage          | Longhorn (distributed, 2 replicas)                                                                                                                                                                                                                                 |
 | Database         | CloudNativePG (Postgres operator)                                                                                                                                                                                                                                  |
 | Identity         | Keycloak (HA, 3 instances, CloudNativePG-backed; realms `homelab` + `external-users`)                                                                                                                                                                             |
+| Auth gate        | oauth2-proxy, a reusable per-app OIDC reverse proxy for apps with no login of their own (reuses the Keycloak `homelab` realm)                                                                                                                                      |
 | GitOps           | ArgoCD (App-of-Apps, 36 applications)                                                                                                                                                                                                                              |
 | Secrets (static) | Sealed Secrets + SOPS (age)                                                                                                                                                                                                                                        |
 | Policy engine    | Kyverno                                                                                                                                                                                                                                                            |
@@ -82,6 +83,7 @@ I tore down the Jellyfin/\*arr media stack (Sonarr, Radarr, Prowlarr, Seerr, Dec
 ## Docs
 
 - [Bootstrap runbook](kubernetes/bootstrap/README.md)
+- [oauth2-proxy auth gate](kubernetes/components/oauth2-proxy/README.md)
 - [Backup and restore](docs/backup-and-restore.md)
 - [Remote access](docs/remote-access.md)
 - [Talos on Intel Mac](docs/talos-intel-mac.md)

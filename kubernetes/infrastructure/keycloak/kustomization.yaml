@@ -8,4 +8,5 @@ resources:
   - keycloak-realm-external-users.yaml
   - httproute-keycloak.yaml
   - keycloak-smtp-secret.sealed.yaml
+  - keycloak-oauth2-proxy-secret.sealed.yaml
   - networkpolicy.yaml
