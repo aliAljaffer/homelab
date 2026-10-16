@@ -195,8 +195,11 @@ configs:
           - CiliumIdentity
         clusters:
           - "*"
-  repositories:
-    homelab:
-      url: git@github.com:aliAljaffer/homelab.git
-      name: homelab
-      type: git
+  # NOTE: do not register the homelab repo here. The chart renders
+  # `configs.repositories` into a credential-less Secret (no sshPrivateKey),
+  # which then competes with the real SSH credential Secret
+  # (`argocd-repo-homelab-ssh`) for the same git URL. ArgoCD picks one at
+  # random, so ~half of ls-remote calls fail with:
+  #   "error creating SSH agent: SSH_AUTH_SOCK not-specified"
+  # The SSH-key Secret is the single source of truth; keep it as the only
+  # repository credential for this URL.
