@@ -34,14 +34,17 @@ storegateway:
   # every block's index-header on next startup instead of the usual
   # incremental build for new blocks only. With ~480 blocks that rebuild spike
   # alone exceeded the old 1280Mi limit and OOMKilled both replicas in a crash
-  # loop, each restart losing most of its progress. Headroom also makes sense
-  # long-term: block count only grows with retention raised to keep-forever.
+  # loop. 2560Mi got both through the rebuild, but storegateway-0 kept dying
+  # afterward too -- it finished loading, started serving queries, then
+  # OOMKilled ~1-2 minutes later -- so this isn't just a one-time rebuild
+  # spike: steady-state query-serving memory needs headroom too, now that the
+  # block count has roughly doubled from the 2026-10 recovery work.
   resources:
     requests:
       cpu: 5m
       memory: 640Mi
     limits:
-      memory: 2560Mi
+      memory: 4096Mi
   persistence:
     enabled: true
     storageClass: longhorn
