@@ -1,0 +1,69 @@
+---
+# Recording rules backing the "Cluster Health" dashboard (grafana-dashboard-
+# cluster-health.yaml). Two problems these fix, found 2026-10-17 while
+# diagnosing slow dashboard loads:
+#
+# 1. Several panels independently repeated the same `node_uname_info` join
+#    (instance -> nodename) -- CPU%, memory%, disk%, 3x load average, RX/TX,
+#    temperature, ACPI zone. Every viewer's every refresh recomputed the join
+#    from raw series instead of it being computed once. Precomputed here
+#    instead; panels just read the resulting series.
+# 2. The two cost/energy panels ran `avg_over_time((sum(...))[7d:1m])` --
+#    10,080 evaluation points, from raw (there is no downsampled data for
+#    this cluster yet) -- on every single dashboard load. kepler_cluster_cpu:
+#    avg7d precomputes it once on a 15m cycle at a coarser 10m subquery step;
+#    a monthly estimate does not need per-refresh precision.
+#
+# label release: monitoring is required for the Prometheus CR's ruleSelector
+# (matchLabels: {release: monitoring}) to pick this up; namespace is
+# unrestricted (ruleNamespaceSelector: {}).
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cluster-health-recording-rules
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  groups:
+    - name: cluster-health.node-joins
+      interval: 1m
+      rules:
+        - record: node:cpu_usage:percent
+          expr: >-
+            100 * (1 - avg by (nodename) (rate(node_cpu_seconds_total{mode="idle"}[5m])
+            * on(instance) group_left(nodename) (max by (instance, nodename) (node_uname_info))))
+        - record: node:memory_usage:percent
+          expr: >-
+            100 * (1 - (node_memory_MemAvailable_bytes * on(instance) group_left(nodename)
+            (max by (instance, nodename) (node_uname_info))) / (node_memory_MemTotal_bytes
+            * on(instance) group_left(nodename) (max by (instance, nodename) (node_uname_info))))
+        - record: node:disk_usage_var:percent
+          expr: >-
+            100 * (1 - (node_filesystem_avail_bytes{mountpoint="/var"} / node_filesystem_size_bytes{mountpoint="/var"}))
+            * on(instance) group_left(nodename) (max by (instance, nodename) (node_uname_info))
+        - record: node:load1:nodename
+          expr: node_load1 * on(instance) group_left(nodename) (max by (instance, nodename) (node_uname_info))
+        - record: node:load5:nodename
+          expr: node_load5 * on(instance) group_left(nodename) (max by (instance, nodename) (node_uname_info))
+        - record: node:load15:nodename
+          expr: node_load15 * on(instance) group_left(nodename) (max by (instance, nodename) (node_uname_info))
+        - record: node:network_receive_bytes:rate5m_nodename
+          expr: >-
+            sum by (instance) (rate(node_network_receive_bytes_total{device!~"lo|veth.*|cni.*|cilium.*|flannel.*"}[5m]))
+            * on(instance) group_left(nodename) (max by (instance, nodename) (node_uname_info))
+        - record: node:network_transmit_bytes:rate5m_nodename
+          expr: >-
+            sum by (instance) (rate(node_network_transmit_bytes_total{device!~"lo|veth.*|cni.*|cilium.*|flannel.*"}[5m]))
+            * on(instance) group_left(nodename) (max by (instance, nodename) (node_uname_info))
+        - record: node:hwmon_temp_celsius:max_nodename
+          expr: >-
+            max by (nodename) (node_hwmon_temp_celsius * on(instance) group_left(nodename)
+            (max by (instance, nodename) (node_uname_info)))
+        - record: node:thermal_zone_temp:nodename
+          expr: node_thermal_zone_temp * on(instance) group_left(nodename) (max by (instance, nodename) (node_uname_info))
+    - name: cluster-health.energy
+      interval: 15m
+      rules:
+        - record: kepler:cluster_cpu_watts:avg7d
+          expr: avg_over_time((sum(kepler_node_cpu_watts))[7d:10m])
