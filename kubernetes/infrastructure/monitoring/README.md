@@ -58,10 +58,20 @@ What was recovered on 2026-10-16:
   gaps remain inside that span — only the compaction outputs survived there).
 - **2026-08-13 → 08-24** from the Velero kopia repo, once the password above was
   found (each snapshot holds Prometheus' 2d window; 11 snapshots cover the span).
-- **2026-09-24 → 10-02** by undeleteing 7 retention-pruned Longhorn backups
-  (`bb84f102…` … `446e044f…`) and their 37 007 unique blocks out of soft-delete.
+- **2026-09-26 → 10-02** by undeleting 7 retention-pruned Longhorn backups
+  (`bb84f102…` … `446e044f…`) out of soft-delete, then (on 2026-10-17 — the
+  undelete alone is not a recovery, see below) extracting and uploading them.
 - **2026-10-01 → now** from the live Longhorn backups (Sept 30–Oct 16: dailies
   covering 10-01…10-14, plus the bucket's own 10-13→now) and `thanos/` blocks.
+
+**Correction (2026-10-17):** the line above previously claimed 09-24→10-02 was
+recovered on 10-16. It wasn't — the Longhorn backups had been undeleted from
+soft-delete, but nobody ran extract+upload against them, so the Thanos bucket
+had zero blocks for that window for a full day after this file said otherwise.
+Found by re-querying the bucket directly instead of trusting this table.
+**Lesson: a recovery claim in this file is only as good as the last time
+someone re-verified it against the live bucket/query state — re-check before
+relying on one, don't just read it.**
 
 The **2026-08-24 → 2026-09-24** window (about four weeks) is the only permanent
 hole: Velero stopped at 08-24, Longhorn's daily backups from that period were
@@ -121,5 +131,29 @@ The failure was silent for ~2 months, so prevention is layered:
 4. **Keep the DR password in git.** If Velero (or any repo-password-gated tool) is
    ever reintroduced, its repository password must be a SealedSecret in the repo
    *before* the namespace can be deleted, or its backups are write-only.
+5. **The recovery toolkit validates and self-labels now (2026-10-17).**
+   `upload_blocks.sh` checks TSDB magic bytes on `index` and `chunks/000001`
+   and injects `thanos.labels` before every upload — both were missing before
+   and both cost a full day during the 10-17 recovery (see "Manual bucket
+   mutations" below). The magic-byte check is partial: it catches truncation
+   and gross corruption, not full index-to-chunk consistency. The debugfs/
+   ext4 extraction is not reliably deterministic — one run silently corrupted
+   47 of 156 blocks with files that were present and correctly sized but
+   internally broken; a second extraction of the identical backup was clean.
+   **Treat any just-uploaded recovery batch as unverified until it passes a
+   live query pass** (one instant query per block's time range, watching for
+   `warnings` in the response — see the validation sweeps in this incident's
+   session) — a clean upload log is not proof.
+6. **Manual bucket mutations require clearing Thanos's local caches, not just
+   a restart.** The compactor caches block metadata under
+   `/var/thanos/compact/meta-syncer/<ULID>`; the storegateway caches a derived
+   index-header under `/var/thanos/store/<ULID>/`. Neither invalidates when
+   the bucket object changes underneath it — both kept serving pre-fix state
+   through multiple plain restarts on 10-17. After uploading new blocks,
+   rewriting an existing block's `meta.json`, or any other out-of-band bucket
+   write: `rm -rf` the affected ULIDs' directories (or all of them) under
+   `/var/thanos/compact/` on the compactor and `/var/thanos/store/` on both
+   storegateway replicas, *then* `kubectl rollout restart`. Restart alone is
+   not enough — the cache lives on the pod's PVC, not in memory.
 
 
