@@ -29,12 +29,19 @@ query:
 
 storegateway:
   enabled: true
+  # Bumped 2026-10-17: clearing /var/thanos/store (the index-header cache, see
+  # monitoring/README.md "Manual bucket mutations") forces a cold rebuild of
+  # every block's index-header on next startup instead of the usual
+  # incremental build for new blocks only. With ~480 blocks that rebuild spike
+  # alone exceeded the old 1280Mi limit and OOMKilled both replicas in a crash
+  # loop, each restart losing most of its progress. Headroom also makes sense
+  # long-term: block count only grows with retention raised to keep-forever.
   resources:
     requests:
       cpu: 5m
       memory: 640Mi
     limits:
-      memory: 1280Mi
+      memory: 2560Mi
   persistence:
     enabled: true
     storageClass: longhorn
