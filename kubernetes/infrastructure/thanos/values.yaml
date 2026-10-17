@@ -34,17 +34,19 @@ storegateway:
   # every block's index-header on next startup instead of the usual
   # incremental build for new blocks only. With ~480 blocks that rebuild spike
   # alone exceeded the old 1280Mi limit and OOMKilled both replicas in a crash
-  # loop. 2560Mi got both through the rebuild, but storegateway-0 kept dying
-  # afterward too -- it finished loading, started serving queries, then
-  # OOMKilled ~1-2 minutes later -- so this isn't just a one-time rebuild
-  # spike: steady-state query-serving memory needs headroom too, now that the
-  # block count has roughly doubled from the 2026-10 recovery work.
+  # loop. 1280Mi -> 2560Mi -> 4096Mi, still OOMKilling repeatedly (both
+  # replicas, tens of minutes apart, not just on startup) -- nodes have
+  # plenty of headroom (28-68% memory used cluster-wide) so this isn't a node
+  # capacity problem. Bumped again pending a proper investigation into
+  # whether this is a real steady-state requirement at this block count or an
+  # actual leak; don't be surprised if this needs to go even higher or if the
+  # root cause turns out to be something other than "needs more memory."
   resources:
     requests:
       cpu: 5m
       memory: 640Mi
     limits:
-      memory: 4096Mi
+      memory: 6144Mi
   persistence:
     enabled: true
     storageClass: longhorn
