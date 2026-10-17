@@ -47,6 +47,14 @@ storegateway:
       memory: 640Mi
     limits:
       memory: 6144Mi
+  # No request-size limit exists by default (store.grpc.downloaded-bytes-limit
+  # is 0 = unbounded), so a single wide/expensive query could pull unlimited
+  # chunk data into memory on top of the already-reserved 2GB chunk pool +
+  # 250MB index cache. Caps one request's blast radius without throttling
+  # normal concurrent dashboard load (series-max-concurrency default of 20 is
+  # untouched).
+  extraArgs:
+    - --store.grpc.downloaded-bytes-limit=2GB
   persistence:
     enabled: true
     storageClass: longhorn
