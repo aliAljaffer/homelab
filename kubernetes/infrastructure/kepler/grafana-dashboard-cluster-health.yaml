@@ -21,7 +21,7 @@ data:
       "tags": ["cluster", "nodes", "power", "kepler", "temperature"],
       "timezone": "browser",
       "time": {"from": "now-6h", "to": "now"},
-      "refresh": "30s",
+      "refresh": "2m",
       "schemaVersion": 39,
       "fiscalYearStartMonth": 0,
       "links": [],
@@ -95,11 +95,11 @@ data:
         {
           "type": "stat",
           "title": "Estimated Monthly Energy (kWh)",
-          "description": "Extrapolated from trailing 7-day average cluster CPU power draw (Kepler), projected to a 30-day month. Kepler's kepler_node_cpu_watts covers CPU package power only  -  actual total node power (memory, disk, fans, PSU overhead) will be higher, so this is a floor estimate, not the full bill.",
+          "description": "Extrapolated from trailing 7-day average cluster CPU power draw (Kepler), projected to a 30-day month. Kepler's kepler_node_cpu_watts covers CPU package power only  -  actual total node power (memory, disk, fans, PSU overhead) will be higher, so this is a floor estimate, not the full bill. Backed by the kepler:cluster_cpu_watts:avg7d recording rule (prometheusrule-cluster-health.yaml) -- computed once every 15m server-side instead of re-running a 7d subquery on every dashboard load.",
           "gridPos": {"x": 9, "y": 4, "w": 3, "h": 3},
           "datasource": "$datasource",
           "targets": [
-            {"expr": "avg_over_time((sum(kepler_node_cpu_watts))[7d:1m]) * 24 * 30 / 1000", "refId": "A"}
+            {"expr": "kepler:cluster_cpu_watts:avg7d * 24 * 30 / 1000", "refId": "A"}
           ],
           "fieldConfig": {"defaults": {"unit": "none", "decimals": 1, "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}]}}, "overrides": []},
           "options": {"colorMode": "value", "graphMode": "none", "textMode": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}}
@@ -107,11 +107,11 @@ data:
         {
           "type": "stat",
           "title": "Estimated Monthly Cost (SAR)",
-          "description": "Tiered SEC-style rate: 0.18 SAR/kWh up to 6000 kWh/month, 0.30 SAR/kWh above. Based on the same trailing 7-day average CPU power extrapolation as the kWh panel  -  CPU-only, so treat as a lower bound.",
+          "description": "Tiered SEC-style rate: 0.18 SAR/kWh up to 6000 kWh/month, 0.30 SAR/kWh above. Based on the same trailing 7-day average CPU power extrapolation as the kWh panel  -  CPU-only, so treat as a lower bound. Backed by the kepler:cluster_cpu_watts:avg7d recording rule, see that panel's description.",
           "gridPos": {"x": 12, "y": 4, "w": 3, "h": 3},
           "datasource": "$datasource",
           "targets": [
-            {"expr": "clamp_max(avg_over_time((sum(kepler_node_cpu_watts))[7d:1m]) * 24 * 30 / 1000, 6000) * 0.18 + clamp_min(avg_over_time((sum(kepler_node_cpu_watts))[7d:1m]) * 24 * 30 / 1000 - 6000, 0) * 0.30", "refId": "A"}
+            {"expr": "clamp_max(kepler:cluster_cpu_watts:avg7d * 24 * 30 / 1000, 6000) * 0.18 + clamp_min(kepler:cluster_cpu_watts:avg7d * 24 * 30 / 1000 - 6000, 0) * 0.30", "refId": "A"}
           ],
           "fieldConfig": {"defaults": {"unit": "SAR", "decimals": 2, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}}, "overrides": []},
           "options": {"colorMode": "value", "graphMode": "none", "textMode": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}}
@@ -178,7 +178,7 @@ data:
           "gridPos": {"x": 0, "y": 15, "w": 12, "h": 8},
           "datasource": "$datasource",
           "targets": [
-            {"expr": "100 * (1 - avg by (nodename) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m]) * on(instance) group_left(nodename) (max by(instance, nodename) (node_uname_info))))", "legendFormat": "{{nodename}}", "refId": "A"}
+            {"expr": "node:cpu_usage:percent", "legendFormat": "{{nodename}}", "refId": "A"}
           ],
           "fieldConfig": {"defaults": {"unit": "percent", "min": 0, "max": 100}, "overrides": []},
           "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"]}, "tooltip": {"mode": "multi", "sort": "desc"}}
@@ -189,7 +189,7 @@ data:
           "gridPos": {"x": 12, "y": 15, "w": 12, "h": 8},
           "datasource": "$datasource",
           "targets": [
-            {"expr": "100 * (1 - (node_memory_MemAvailable_bytes * on(instance) group_left(nodename) (max by(instance, nodename) (node_uname_info))) / (node_memory_MemTotal_bytes * on(instance) group_left(nodename) (max by(instance, nodename) (node_uname_info))))", "legendFormat": "{{nodename}}", "refId": "A"}
+            {"expr": "node:memory_usage:percent", "legendFormat": "{{nodename}}", "refId": "A"}
           ],
           "fieldConfig": {"defaults": {"unit": "percent", "min": 0, "max": 100}, "overrides": []},
           "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"]}, "tooltip": {"mode": "multi", "sort": "desc"}}
@@ -200,7 +200,7 @@ data:
           "gridPos": {"x": 0, "y": 23, "w": 12, "h": 8},
           "datasource": "$datasource",
           "targets": [
-            {"expr": "100 * (1 - (node_filesystem_avail_bytes{mountpoint=\"/var\"} / node_filesystem_size_bytes{mountpoint=\"/var\"})) * on(instance) group_left(nodename) (max by(instance, nodename) (node_uname_info))", "legendFormat": "{{nodename}}", "refId": "A"}
+            {"expr": "node:disk_usage_var:percent", "legendFormat": "{{nodename}}", "refId": "A"}
           ],
           "fieldConfig": {"defaults": {"unit": "percent", "min": 0, "max": 100}, "overrides": []},
           "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"]}, "tooltip": {"mode": "multi", "sort": "desc"}}
@@ -211,9 +211,9 @@ data:
           "gridPos": {"x": 12, "y": 23, "w": 12, "h": 8},
           "datasource": "$datasource",
           "targets": [
-            {"expr": "node_load1 * on(instance) group_left(nodename) (max by(instance, nodename) (node_uname_info))", "legendFormat": "1m {{nodename}}", "refId": "A"},
-            {"expr": "node_load5 * on(instance) group_left(nodename) (max by(instance, nodename) (node_uname_info))", "legendFormat": "5m {{nodename}}", "refId": "B"},
-            {"expr": "node_load15 * on(instance) group_left(nodename) (max by(instance, nodename) (node_uname_info))", "legendFormat": "15m {{nodename}}", "refId": "C"}
+            {"expr": "node:load1:nodename", "legendFormat": "1m {{nodename}}", "refId": "A"},
+            {"expr": "node:load5:nodename", "legendFormat": "5m {{nodename}}", "refId": "B"},
+            {"expr": "node:load15:nodename", "legendFormat": "15m {{nodename}}", "refId": "C"}
           ],
           "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
           "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull"]}, "tooltip": {"mode": "multi", "sort": "desc"}}
@@ -224,8 +224,8 @@ data:
           "gridPos": {"x": 0, "y": 31, "w": 12, "h": 8},
           "datasource": "$datasource",
           "targets": [
-            {"expr": "sum by (instance) (rate(node_network_receive_bytes_total{device!~\"lo|veth.*|cni.*|cilium.*|flannel.*\"}[5m])) * on(instance) group_left(nodename) (max by(instance, nodename) (node_uname_info))", "legendFormat": "RX {{nodename}}", "refId": "A"},
-            {"expr": "sum by (instance) (rate(node_network_transmit_bytes_total{device!~\"lo|veth.*|cni.*|cilium.*|flannel.*\"}[5m])) * on(instance) group_left(nodename) (max by(instance, nodename) (node_uname_info))", "legendFormat": "TX {{nodename}}", "refId": "B"}
+            {"expr": "node:network_receive_bytes:rate5m_nodename", "legendFormat": "RX {{nodename}}", "refId": "A"},
+            {"expr": "node:network_transmit_bytes:rate5m_nodename", "legendFormat": "TX {{nodename}}", "refId": "B"}
           ],
           "fieldConfig": {"defaults": {"unit": "Bps"}, "overrides": []},
           "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull"]}, "tooltip": {"mode": "multi", "sort": "desc"}}
@@ -248,7 +248,7 @@ data:
           "datasource": "$datasource",
           "targets": [
             {"expr": "100 * kepler_node_cpu_usage_ratio", "legendFormat": "kepler {{node_name}}", "refId": "A"},
-            {"expr": "100 * (1 - avg by (nodename) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m]) * on(instance) group_left(nodename) (max by(instance, nodename) (node_uname_info))))", "legendFormat": "node-exporter {{nodename}}", "refId": "B"}
+            {"expr": "node:cpu_usage:percent", "legendFormat": "node-exporter {{nodename}}", "refId": "B"}
           ],
           "fieldConfig": {"defaults": {"unit": "percent", "min": 0, "max": 100}, "overrides": []},
           "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull"]}, "tooltip": {"mode": "multi", "sort": "desc"}}
@@ -301,7 +301,7 @@ data:
           "gridPos": {"x": 4, "y": 52, "w": 20, "h": 8},
           "datasource": "$datasource",
           "targets": [
-            {"expr": "max by (nodename) (node_hwmon_temp_celsius * on(instance) group_left(nodename) (max by(instance, nodename) (node_uname_info)))", "legendFormat": "{{nodename}}", "refId": "A"}
+            {"expr": "node:hwmon_temp_celsius:max_nodename", "legendFormat": "{{nodename}}", "refId": "A"}
           ],
           "fieldConfig": {"defaults": {"unit": "celsius", "custom": {"thresholdsStyle": {"mode": "line"}}, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 75}, {"color": "red", "value": 90}]}}, "overrides": []},
           "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"]}, "tooltip": {"mode": "multi", "sort": "desc"}}
@@ -313,7 +313,7 @@ data:
           "gridPos": {"x": 0, "y": 60, "w": 24, "h": 8},
           "datasource": "$datasource",
           "targets": [
-            {"expr": "node_thermal_zone_temp * on(instance) group_left(nodename) (max by(instance, nodename) (node_uname_info))", "legendFormat": "{{nodename}} zone{{zone}}", "refId": "A"}
+            {"expr": "node:thermal_zone_temp:nodename", "legendFormat": "{{nodename}} zone{{zone}}", "refId": "A"}
           ],
           "fieldConfig": {"defaults": {"unit": "celsius", "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 75}, {"color": "red", "value": 90}]}}, "overrides": []},
           "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"]}, "tooltip": {"mode": "multi", "sort": "desc"}}
