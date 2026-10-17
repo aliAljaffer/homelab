@@ -687,7 +687,19 @@ alertmanager:
       # lets the Discord catch-all below also match. Watchdog (the 12h
       # deadman's-switch heartbeat) is excluded from email so it doesn't
       # generate a nightly message; it still goes to Discord.
+      #
+      # InfoInhibitor is pure bookkeeping -- its only job is to suppress other
+      # severity=info alerts in the same namespace via inhibit_rules above, it
+      # carries no actionable signal of its own. It flaps on/off with whatever
+      # info-level condition triggered it (e.g. CPUThrottlingHigh in
+      # node-feature-discovery), and send_resolved:true on both receivers
+      # turned every flap into a firing+resolved pair of notifications. Routed
+      # to null before the fan-out so it reaches neither channel; the
+      # inhibition itself happens regardless of notification routing.
       routes:
+        - receiver: 'null'
+          matchers:
+            - alertname = "InfoInhibitor"
         - receiver: 'email'
           matchers:
             - alertname != "Watchdog"
