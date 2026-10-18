@@ -684,9 +684,11 @@ alertmanager:
       repeat_interval: 12h
       receiver: 'discord'
       # Fan out to email as well as Discord. continue:true on the email route
-      # lets the Discord catch-all below also match. Watchdog (the 12h
-      # deadman's-switch heartbeat) is excluded from email so it doesn't
-      # generate a nightly message; it still goes to Discord.
+      # lets the Discord catch-all below also match.
+      #
+      # Watchdog (the always-firing deadman's-switch heartbeat) is routed to
+      # null alongside InfoInhibitor: no external dead-man receiver is wired
+      # up, so it only generated noise on Discord/email.
       #
       # InfoInhibitor is pure bookkeeping -- its only job is to suppress other
       # severity=info alerts in the same namespace via inhibit_rules above, it
@@ -699,7 +701,7 @@ alertmanager:
       routes:
         - receiver: 'null'
           matchers:
-            - alertname = "InfoInhibitor"
+            - alertname =~ "InfoInhibitor|Watchdog"
         - receiver: 'email'
           matchers:
             - alertname != "Watchdog"
