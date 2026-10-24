@@ -5,17 +5,22 @@ metadata:
   name: keycloak
   namespace: keycloak
   annotations:
-    external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
 spec:
   parentRefs:
-  - group: gateway.networking.k8s.io
-    kind: Gateway
-    name: homelab-gateway
-    namespace: kube-system
-    sectionName: https
+    - name: cloudflare-tunnel
+      namespace: cloudflare-tunnel-system
+      sectionName: https
   hostnames:
-  - kc.alialjaffer.com
+    - kc.alialjaffer.com
   rules:
-  - backendRefs:
-    - name: keycloak-service
-      port: 8080
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /realms/homelab
+        - path:
+            type: PathPrefix
+            value: /resources
+      backendRefs:
+        - name: keycloak-service
+          port: 8080
