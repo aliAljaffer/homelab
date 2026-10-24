@@ -79,44 +79,6 @@ spec:
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
-  name: keycloak-app-ingress
-  namespace: keycloak
-spec:
-  endpointSelector:
-    matchLabels:
-      app: keycloak
-      app.kubernetes.io/managed-by: keycloak-operator
-  ingress:
-    - fromEndpoints:
-        - matchLabels:
-            "k8s:io.kubernetes.pod.namespace": kube-system
-            app.kubernetes.io/name: cilium-gateway-controller
-      toPorts:
-        - ports:
-            - port: "8080"
-              protocol: TCP
-    - fromEndpoints:
-        - matchLabels:
-            "k8s:io.kubernetes.pod.namespace": cloudflare-tunnel-system
-      toPorts:
-        - ports:
-            - port: "8080"
-              protocol: TCP
-    - fromEndpoints:
-        - matchLabels:
-            app: grooszy-web
-            "k8s:io.kubernetes.pod.namespace": grooszy
-        - matchLabels:
-            app: grooszy-api
-            "k8s:io.kubernetes.pod.namespace": grooszy
-      toPorts:
-        - ports:
-            - port: "8080"
-              protocol: TCP
----
-apiVersion: cilium.io/v2
-kind: CiliumNetworkPolicy
-metadata:
   name: keycloak-db-default
   namespace: keycloak
 spec:
