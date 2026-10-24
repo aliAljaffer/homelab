@@ -34,3 +34,6 @@ spec:
     enabled: false
   proxy:
     headers: xforwarded
+  features:
+    enabled:
+      - client-admin-api:v2
