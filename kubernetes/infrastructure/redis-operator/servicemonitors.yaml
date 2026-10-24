@@ -10,9 +10,10 @@ spec:
   # The chart exposes controller-runtime metrics on container port 'metrics'
   # (:8080) but creates no Service for them; this fills that gap so Prometheus
   # can scrape the operator itself.
+  # Pod template labels are chart-legacy ('name: redis-operator'), not the
+  # recommended labels used on the Service itself.
   selector:
-    app.kubernetes.io/name: redis-operator
-    app.kubernetes.io/component: operator
+    name: redis-operator
   ports:
   - name: metrics
     port: 8080
