@@ -1,0 +1,59 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-operator-metrics
+  namespace: redis-operator
+  labels:
+    app.kubernetes.io/name: redis-operator
+spec:
+  # The chart exposes controller-runtime metrics on container port 'metrics'
+  # (:8080) but creates no Service for them; this fills that gap so Prometheus
+  # can scrape the operator itself.
+  selector:
+    app.kubernetes.io/name: redis-operator
+    app.kubernetes.io/component: operator
+  ports:
+  - name: metrics
+    port: 8080
+    targetPort: metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: redis-operator
+  namespace: redis-operator
+  labels:
+    release: monitoring
+spec:
+  endpoints:
+  - port: metrics
+    interval: 30s
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: redis-operator
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: valkey-instances
+  namespace: redis-operator
+  labels:
+    release: monitoring
+spec:
+  # The operator creates a '<cr-name>-metrics' Service per instance (oliver006
+  # redis_exporter sidecar on 9121) with exactly these labels and the
+  # redis-exporter port name, so one monitor covers every Redis/Valkey CR in
+  # the cluster regardless of namespace.
+  endpoints:
+  - port: redis-exporter
+    interval: 30s
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: metrics
+    matchExpressions:
+    - key: redis_setup_type
+      operator: Exists
+    - key: role
+      operator: Exists
+  namespaceSelector: {}
