@@ -11,9 +11,10 @@ to a restricted license in 2024).
   metrics on `:8080`, exposed through the `redis-operator-metrics` Service the
   chart does not create itself.
 - `valkey.yaml` - a standalone Valkey instance (CR kind `Redis`, apiVersion
-  `redis.redis.opstreelabs.in/v1beta2`). No password: cluster-internal only.
-  If anything ever needs to be exposed outside the cluster (Ingress,
-  LoadBalancer, port-forward by a third party), first set
+  `redis.redis.opstreelabs.in/v1beta2`). The CRD requires an explicit
+  `redisExporter.image` (no operator fallback exists). No password:
+  cluster-internal only. If anything ever needs to be exposed outside the
+  cluster (Ingress, LoadBalancer, port-forward by a third party), first set
   `kubernetesConfig.redisSecret`.
 
 ## Metrics
