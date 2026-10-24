@@ -27,6 +27,7 @@ spec:
   - https://charts.bitnami.com/bitnami
   - https://vmware-tanzu.github.io/helm-charts
   - https://cloudnative-pg.io/charts
+  - https://ot-container-kit.github.io/helm-charts/
   - https://helm.releases.hashicorp.com
   - https://kyverno.github.io/kyverno/
   - https://falcosecurity.github.io/charts
