@@ -1,0 +1,10 @@
+---
+redisOperator:
+  # Chart default is a flat 500m/500Mi request and 500Mi limit. The reconciles
+  # here manage a handful of small demo instances, so a thin request is fine.
+  resources:
+    requests:
+      cpu: 10m
+      memory: 104Mi
+    limits:
+      memory: 208Mi
