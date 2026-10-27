@@ -5,7 +5,8 @@ Personal task tracker / Kanban / notetaking app. Source: `github.com/alialjaffer
 
 Two containers (backend, frontend) + a dedicated CNPG Postgres cluster, following the
 `umami`/`catus-locatus` conventions. Auto-onboarded by the `workloads` ApplicationSet —
-no hand-written ArgoCD Application needed.
+no hand-written ArgoCD Application needed. Task/note attachments live on a
+`ReadWriteMany` Longhorn PVC (`fai-attachments`, mounted at `/data/attachments`).
 
 ## Auth
 
@@ -37,4 +38,12 @@ the deployment wiring differs.
   degrades gracefully when unset), the ntfy publisher credentials (shared with
   `kubernetes/infrastructure/ntfy`'s own sealed secret), and the
   `smtp-relay.mail.svc.cluster.local:587` settings used for reminder emails
-  (no SMTP credentials — the relay holds the upstream ones).
+  (no SMTP credentials — the relay holds the upstream ones), plus `ICS_TOKEN` and
+  `PUBLIC_URL` for the read-only calendar feed.
+
+## Calendar feed
+
+`GET /api/calendar.ics?token=<ICS_TOKEN>` is deliberately outside the OIDC middleware:
+Apple Calendar cannot complete a browser login. The unguessable token is the
+credential, and the authenticated Settings page exposes the full subscription URL.
+Rotating `ICS_TOKEN` invalidates existing subscriptions.

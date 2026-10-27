@@ -18,12 +18,14 @@ spec:
     spec:
       containers:
         - name: fai-backend
-          image: ghcr.io/alialjaffer/fai-backend@sha256:3d4e2d7ce48d147efa19fdda8a03a91d2a2302ea09a43f1007a6e9bf5b2f01a4
+          image: ghcr.io/alialjaffer/fai-backend@sha256:50f1789d07b10d6edb4215382884f2e428081672cb25c317a21ba45b6ccb3d1a
           ports:
             - containerPort: 8080
           env:
             - name: PORT
               value: "8080"
+            - name: ATTACHMENTS_DIR
+              value: /data/attachments
           envFrom:
             - secretRef:
                 name: fai-secret
@@ -45,3 +47,10 @@ spec:
               port: 8080
             initialDelaySeconds: 5
             periodSeconds: 10
+          volumeMounts:
+            - name: attachments
+              mountPath: /data/attachments
+      volumes:
+        - name: attachments
+          persistentVolumeClaim:
+            claimName: fai-attachments
