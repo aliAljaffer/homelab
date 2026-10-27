@@ -103,6 +103,10 @@ sidecar:
       memory: 208Mi
 
 lokiCanary:
+  # Query/push Loki directly, not through the nginx gateway, so a gateway DNS
+  # failure can't masquerade as a Loki query failure.
+  # host:port only; the canary prepends the scheme itself.
+  lokiurl: loki.monitoring.svc.cluster.local:3100
   resources:
     requests:
       cpu: 20m

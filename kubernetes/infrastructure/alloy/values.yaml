@@ -85,7 +85,10 @@ alloy:
 
       loki.write "default" {
         endpoint {
-          url = "http://loki-gateway.monitoring.svc.cluster.local/loki/api/v1/push"
+          // Push straight to Loki. The nginx gateway pins its resolver to the
+          // CoreDNS pod IPs it saw at startup; when CoreDNS reschedules, every
+          // push through the gateway times out until nginx is reloaded.
+          url = "http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push"
         }
       }
 
