@@ -32,6 +32,9 @@ the deployment wiring differs.
 - `fai-postgres.sealed.yaml` — CNPG bootstrap credentials (`username`/`password`).
 - `fai-secret.sealed.yaml` — `DATABASE_URL` (same password as above, a manually
   constructed connection string — CNPG's own bootstrap secret isn't referenced
-  directly, matching the `umami` convention), OIDC config, Jira/AI (blank —
-  optional, both degrade gracefully when unset), and the ntfy publisher
-  credentials (shared with `kubernetes/infrastructure/ntfy`'s own sealed secret).
+  directly, matching the `umami` convention), OIDC config, the live Jira
+  credentials + default project/status map, the optional AI settings (blank —
+  degrades gracefully when unset), the ntfy publisher credentials (shared with
+  `kubernetes/infrastructure/ntfy`'s own sealed secret), and the
+  `smtp-relay.mail.svc.cluster.local:587` settings used for reminder emails
+  (no SMTP credentials — the relay holds the upstream ones).
