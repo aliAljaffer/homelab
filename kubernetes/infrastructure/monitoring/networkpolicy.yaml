@@ -537,15 +537,14 @@ spec:
     - ports:
       - port: "9090"
         protocol: TCP
-  # loki-gateway Service is 80 -> targetPort http-metrics (8080);
-  # Cilium enforces the post-DNAT port.
+  # Query Loki directly (datasource URL) instead of via the nginx gateway.
   - toEndpoints:
     - matchLabels:
         app.kubernetes.io/name: loki
-        app.kubernetes.io/component: gateway
+        app.kubernetes.io/component: single-binary
     toPorts:
     - ports:
-      - port: "8080"
+      - port: "3100"
         protocol: TCP
   # Central rate-limited SMTP relay (grafana.ini smtp.host) for alerts/invites.
   - toEndpoints:
@@ -668,6 +667,20 @@ spec:
     - matchLabels:
         app.kubernetes.io/name: loki
         app.kubernetes.io/component: canary
+    toPorts:
+    - ports:
+      - port: "3100"
+        protocol: TCP
+  - fromEndpoints:
+    - matchLabels:
+        app.kubernetes.io/name: grafana
+    toPorts:
+    - ports:
+      - port: "3100"
+        protocol: TCP
+  - fromEndpoints:
+    - matchLabels:
+        app.kubernetes.io/name: alloy
     toPorts:
     - ports:
       - port: "3100"
@@ -844,13 +857,14 @@ spec:
   # loki.source.kubernetes reads pod logs via the apiserver's log subresource.
   - toEntities:
     - kube-apiserver
+  # Push straight to Loki; see alloy/values.yaml for why the gateway is skipped.
   - toEndpoints:
     - matchLabels:
         app.kubernetes.io/name: loki
-        app.kubernetes.io/component: gateway
+        app.kubernetes.io/component: single-binary
     toPorts:
     - ports:
-      - port: "8080"
+      - port: "3100"
         protocol: TCP
 ---
 apiVersion: cilium.io/v2
