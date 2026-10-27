@@ -6,6 +6,7 @@ resources:
   - cnpg-cluster.yaml
   - scheduled-backup.yaml
   - fai-postgres.sealed.yaml
+  - attachments-pvc.yaml
   - backend-deployment.yaml
   - backend-service.yaml
   - frontend-deployment.yaml
