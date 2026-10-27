@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fai-backend
+  namespace: fai
+spec:
+  selector:
+    app: fai-backend
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
