@@ -26,6 +26,8 @@ spec:
             "k8s:io.kubernetes.pod.namespace": vaultwarden
         - matchLabels:
             "k8s:io.kubernetes.pod.namespace": argocd
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": fai
       toPorts:
         - ports:
             - port: "587"

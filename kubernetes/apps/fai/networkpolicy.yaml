@@ -46,6 +46,16 @@ spec:
         - ports:
             - port: "80"
               protocol: TCP
+    # Cluster SMTP relay (plaintext, unauthenticated) for the same notifications
+    # by email; the relay holds the upstream credentials.
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": mail
+            app.kubernetes.io/name: smtp-relay
+      toPorts:
+        - ports:
+            - port: "587"
+              protocol: TCP
     # Keycloak's public FQDN, not an in-cluster Service address: go-oidc's discovery
     # hard-fails unless OIDC_ISSUER_URL matches the issuer in the discovery document,
     # and Keycloak's hostname is set to the public kc.alialjaffer.com. Accepting the
