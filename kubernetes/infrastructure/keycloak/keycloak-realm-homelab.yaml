@@ -51,3 +51,23 @@ spec:
           - "https://*.alialjaffer.com"
         attributes:
           pkce.code.challenge.method: S256
+      # fai does its own JWT validation (no oauth2-proxy in front of it — see
+      # kubernetes/apps/fai/README.md), so this is a public PKCE client, not a
+      # confidential one. Already created by hand in the admin console per the
+      # realm-already-exists caveat below; this entry documents it for a future
+      # from-scratch realm recreation.
+      - clientId: fai
+        name: fai
+        enabled: true
+        protocol: openid-connect
+        publicClient: true
+        standardFlowEnabled: true
+        implicitFlowEnabled: false
+        directAccessGrantsEnabled: false
+        serviceAccountsEnabled: false
+        redirectUris:
+          - "https://fai.alialjaffer.com/*"
+        webOrigins:
+          - "https://fai.alialjaffer.com"
+        attributes:
+          pkce.code.challenge.method: S256

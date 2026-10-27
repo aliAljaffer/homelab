@@ -1,0 +1,14 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ntfy-config
+  namespace: ntfy
+data:
+  server.yml: |
+    base-url: "https://ntfy.alialjaffer.com"
+    listen-http: ":80"
+    cache-file: "/var/lib/ntfy/cache.db"
+    auth-file: "/var/lib/ntfy/auth.db"
+    auth-default-access: "deny-all"
+    upstream-base-url: "https://ntfy.sh"

@@ -1,0 +1,48 @@
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: ntfy-default
+  namespace: ntfy
+spec:
+  endpointSelector:
+    matchLabels:
+      app: ntfy
+  ingress:
+    # public: iOS app subscribing, web push
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": cloudflare-tunnel-system
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+    # in-cluster: fai (and future apps) publishing
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": fai
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    # upstream relay for iOS push delivery (see README)
+    - toFQDNs:
+        - matchName: "ntfy.sh"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP

@@ -1,0 +1,47 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fai-backend
+  namespace: fai
+  labels:
+    app: fai-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fai-backend
+  template:
+    metadata:
+      labels:
+        app: fai-backend
+    spec:
+      containers:
+        - name: fai-backend
+          image: ghcr.io/alialjaffer/fai-backend@sha256:c0b46b74e04786e423955917049f8205607fd1fe3ab41f5553a9d1582e937e55
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PORT
+              value: "8080"
+          envFrom:
+            - secretRef:
+                name: fai-secret
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10

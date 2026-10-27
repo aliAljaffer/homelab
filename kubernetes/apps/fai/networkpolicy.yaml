@@ -1,0 +1,142 @@
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: fai-backend-default
+  namespace: fai
+spec:
+  endpointSelector:
+    matchLabels:
+      app: fai-backend
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": cloudflare-tunnel-system
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEndpoints:
+        - matchLabels:
+            cnpg.io/cluster: fai-db
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    # ntfy's in-cluster Service, for reminder/meeting-outcome push notifications.
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": ntfy
+            app: ntfy
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+    # Keycloak's public FQDN, not an in-cluster Service address: go-oidc's discovery
+    # hard-fails unless OIDC_ISSUER_URL matches the issuer in the discovery document,
+    # and Keycloak's hostname is set to the public kc.alialjaffer.com. Accepting the
+    # Cloudflare-tunnel hairpin here is correct and simpler than rewriting the dial
+    # target (see PLAN.md §7).
+    - toFQDNs:
+        - matchName: "kc.alialjaffer.com"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+    # Jira and AI providers are optional (unset by default) but need egress to
+    # work once configured; both are arbitrary external hosts so this is left
+    # permissive to any HTTPS destination rather than hardcoding one provider.
+    - toFQDNs:
+        - matchPattern: "*"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: fai-frontend-default
+  namespace: fai
+spec:
+  endpointSelector:
+    matchLabels:
+      app: fai-frontend
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": cloudflare-tunnel-system
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: fai-db-default
+  namespace: fai
+spec:
+  endpointSelector:
+    matchLabels:
+      cnpg.io/cluster: fai-db
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app: fai-backend
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": monitoring
+      toPorts:
+        - ports:
+            - port: "9187"
+              protocol: TCP
+    # CNPG operator -> instance traffic (failover/backup orchestration).
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": cnpg-system
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEndpoints:
+        - matchLabels:
+            cnpg.io/cluster: fai-db
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    - toEntities:
+        - kube-apiserver
