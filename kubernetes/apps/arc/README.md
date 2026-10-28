@@ -56,6 +56,10 @@ Scale sets are idle at zero (`minRunners: 0`), cap at two pods, and each pod is
 limited to 3Gi per container. The pod spec lives in
 `kubernetes/argocd/apps/workloads/arc-runners.yaml`.
 
+`arc-runners` is labelled `pod-security.kubernetes.io/enforce: privileged`
+because the cluster enforces `baseline` PodSecurity and the dind sidecar is
+privileged. Workflows already execute arbitrary code in that namespace.
+
 ## Metrics
 
 `podmonitor.yaml` scrapes the controller and every scale set listener. The
