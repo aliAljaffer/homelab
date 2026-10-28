@@ -7,3 +7,10 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: arc-runners
+  labels:
+    # Runner pods use a privileged docker-in-docker sidecar, which the
+    # cluster-wide baseline PodSecurity default rejects. Workflows already run
+    # arbitrary code as the `runner` user in this dedicated namespace.
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/audit: privileged
+    pod-security.kubernetes.io/warn: privileged
