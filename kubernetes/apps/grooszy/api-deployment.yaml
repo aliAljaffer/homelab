@@ -30,6 +30,8 @@ spec:
           envFrom:
             - secretRef:
                 name: grooszy-api
+            - secretRef:
+                name: grooszy-chat
           volumeMounts:
             - name: tmp
               mountPath: /tmp

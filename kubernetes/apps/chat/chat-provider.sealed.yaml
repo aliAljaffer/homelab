@@ -1,0 +1,13 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: chat-provider
+  namespace: chat
+spec:
+  encryptedData:
+    api-key: AgCDRFX0aKUoKRoPgb3nn3PaVdqt/LbRsKfPbr4vaAGiQsHCbq3/T8nC31v2tzLe3/FVpU3kjLHKPiHRjcnEj/0G6gPwzy+EnSHpa/THQ/BTx9wmoB+OYqPuRVQ0y/m3QsRsC6d2LZo3Ek65w2h7B7c9XGJYQcN/HdnS/kxiyicge+CfPcE+Eqo/vhUAtK2K85g5b6lCdiKdjrBPPlB7c1vYqPBn8Ugkw3MbSqntWhawMm99ZCYoHoybFrYR396ZG1j2cfQXDnaupWVUXWX/RN8tF93C9rJnXEJVx18FHUxvQfqnRDcMk+vjJIXiUwqzLUrM8CAuJxJ6iYum/NYb5/hqBhjWd5lBhGSfE0NqVIWuiMtHus8eN4QN77+zxOyri+1OM57guYPhV9qZDeJE+Y5oCVsCEwuc5xCM7g1kUVwDuuU3p4HRSbos7M0Qxz6R0raDTNoWVKVo4ceRsxTnQHL+u5+PqOeal+XriMydQLcChZ2s930fzciCWkSc9VfKRjkz+FlJIPgwqFIDQ+mFKI/UFUjb3Hd/IOoFHoSpIkYidUeRHUGNlEGmAioaqLcYP3mYlyLUch0tdSMZcvEj57wnsPpN+A/RTK6i2VmKAzz0h2F2EShNXCOj4GTbBpQrtxJH5K3II7rr/K2hUMjm8KMFdgG/42rL3MwUinxb4S6IWP1YJn7PalIYufD5Chta6dt9sJJ4nS1vhD4eXx0tPL7rTQvYoHJNeZOcK13TJuFCIfvJglpID5N7tcBdLfVKlSodKtY=
+  template:
+    metadata:
+      name: chat-provider
+      namespace: chat

@@ -5,6 +5,7 @@ resources:
   - namespace.yaml
   - grooszy-postgres.sealed.yaml
   - grooszy-api.sealed.yaml
+  - grooszy-chat.sealed.yaml
   - grooszy-web.sealed.yaml
   - cnpg-cluster.yaml
   - scheduled-backup.yaml
