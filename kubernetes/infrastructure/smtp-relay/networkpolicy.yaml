@@ -28,6 +28,8 @@ spec:
             "k8s:io.kubernetes.pod.namespace": argocd
         - matchLabels:
             "k8s:io.kubernetes.pod.namespace": fai
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": grooszy-dev
       toPorts:
         - ports:
             - port: "587"
