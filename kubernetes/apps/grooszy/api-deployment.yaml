@@ -1,0 +1,57 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grooszy-api
+  namespace: grooszy
+  labels:
+    app: grooszy-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grooszy-api
+  template:
+    metadata:
+      labels:
+        app: grooszy-api
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/alialjaffer/grooszy-api@sha256:f56dd0698eb031578b47c25877fcd36254b62755a3b0394e8d6c9b47d292f90f
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: LISTEN_ADDR
+              value: ":8080"
+            - name: OIDC_AUDIENCE
+              value: grooszy
+          envFrom:
+            - secretRef:
+                name: grooszy-api
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+      volumes:
+        - name: tmp
+          emptyDir: {}

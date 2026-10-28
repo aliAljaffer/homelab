@@ -1,0 +1,155 @@
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: grooszy-web-default
+  namespace: grooszy
+spec:
+  endpointSelector:
+    matchLabels:
+      app: grooszy-web
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            app.kubernetes.io/name: cilium-gateway-controller
+      toPorts:
+        - ports:
+            - port: "3000"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEndpoints:
+        - matchLabels:
+            app: grooszy-api
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+    - toFQDNs:
+        - matchName: "kc.alialjaffer.com"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: grooszy-api-default
+  namespace: grooszy
+spec:
+  endpointSelector:
+    matchLabels:
+      app: grooszy-api
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app: grooszy-web
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEndpoints:
+        - matchLabels:
+            cnpg.io/cluster: grooszy-db
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": mail
+            app.kubernetes.io/name: smtp-relay
+      toPorts:
+        - ports:
+            - port: "587"
+              protocol: TCP
+    - toFQDNs:
+        - matchName: "kc.alialjaffer.com"
+        - matchName: "opencode.ai"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: grooszy-db-default
+  namespace: grooszy
+spec:
+  endpointSelector:
+    matchLabels:
+      cnpg.io/cluster: grooszy-db
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app: grooszy-api
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": monitoring
+      toPorts:
+        - ports:
+            - port: "9187"
+              protocol: TCP
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": cnpg-system
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEndpoints:
+        - matchLabels:
+            cnpg.io/cluster: grooszy-db
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    - toEntities:
+        - kube-apiserver

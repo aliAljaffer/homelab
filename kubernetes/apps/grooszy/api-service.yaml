@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grooszy-api
+  namespace: grooszy
+spec:
+  selector:
+    app: grooszy-api
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
