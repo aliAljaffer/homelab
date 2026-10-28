@@ -1,16 +1,10 @@
 # Workload Applications
 
-- `arc.yaml`: ArgoCD only manages the namespaces and the `github-token`
-  SealedSecret. The `arc-controller` and `arc-runner-set` Helm releases are
-  installed via the Helm CLI, because ArgoCD 2.14 doesn't support OCI Helm
-  registries (`ghcr.io`). To upgrade either release:
-
-  ```bash
-  helm upgrade arc-controller \
-    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller \
-    --version <new-version> --namespace arc-systems
-
-  helm upgrade arc-runner-set \
-    oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set \
-    --version <new-version> --namespace arc-runners
-  ```
+- `arc.yaml`: manages ARC's controller, namespaces, GitHub App credential and
+  PodMonitors. The controller chart comes straight from the `ghcr.io` OCI
+  registry (ArgoCD 3.x supports OCI Helm; the old Helm-CLI exception is gone).
+- `arc-runners.yaml`: one `gha-runner-scale-set` Helm source per repository.
+  See `kubernetes/apps/arc/README.md` for the scale set names and the workflow
+  labels they map to.
+- `grooszy.yaml` / `nexotv.yaml`: applications outside the auto-discovered
+  `kubernetes/apps/*` ApplicationSet, or with custom sync settings.
