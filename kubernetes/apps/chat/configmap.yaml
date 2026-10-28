@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chat-config
+  namespace: chat
+data:
+  CF_ACCESS_TEAM_DOMAIN: ""
+  CF_ACCESS_AUD: ""
+  CHAT_OWNER_EMAIL: ""
+  CHAT_MODEL: "opencode-go/deepseek-v4.1-flash"
+  CHAT_PROVIDER_ID: "opencode-go"
+  opencode.json: |
+    {
+      "$schema": "https://opencode.ai/config.json",
+      "model": "opencode-go/deepseek-v4.1-flash",
+      "default_agent": "assistant",
+      "share": "disabled",
+      "update": "disable",
+      "autoupdate": false,
+      "snapshots": false,
+      "permission": "deny",
+      "tools": {
+        "bash": false,
+        "edit": false,
+        "write": false,
+        "read": false,
+        "grep": false,
+        "glob": false,
+        "list": false,
+        "webfetch": false,
+        "websearch": false,
+        "task": false,
+        "patch": false,
+        "todowrite": false,
+        "skill": false,
+        "question": false,
+        "lsp": false,
+        "batch": false
+      },
+      "agent": {
+        "assistant": {
+          "mode": "primary",
+          "description": "Text-only chat assistant",
+          "prompt": "You are a text-only assistant. Answer in plain text and never call a tool.",
+          "permission": "deny",
+          "tools": {
+            "*": false
+          }
+        }
+      }
+    }

@@ -1,0 +1,197 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chat
+  namespace: chat
+  labels:
+    app: chat
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: chat
+  template:
+    metadata:
+      labels:
+        app: chat
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: opencode
+          image: ghcr.io/alialjaffer/chat-gateway:latest
+          imagePullPolicy: Always
+          command: ["sh", "-ec"]
+          args:
+            - |
+              mkdir -p "$HOME" "$XDG_DATA_HOME/opencode" "$XDG_CONFIG_HOME" "$XDG_STATE_HOME" "$XDG_CACHE_HOME"
+              if [ -n "${CHAT_PROVIDER_API_KEY:-}" ]; then
+                node -e 'require("fs").writeFileSync(process.env.XDG_DATA_HOME + "/opencode/auth.json", JSON.stringify({ [process.env.CHAT_PROVIDER_ID]: { type: "api", key: process.env.CHAT_PROVIDER_API_KEY } }), { mode: 0o600 })'
+              fi
+              exec opencode serve --hostname 127.0.0.1 --port 4096
+          env:
+            - name: HOME
+              value: /opencode/home
+            - name: XDG_CONFIG_HOME
+              value: /opencode/config
+            - name: XDG_DATA_HOME
+              value: /opencode/data
+            - name: XDG_STATE_HOME
+              value: /opencode/state
+            - name: XDG_CACHE_HOME
+              value: /opencode/cache
+            - name: OPENCODE_CONFIG
+              value: /config/opencode.json
+            - name: CHAT_PROVIDER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: chat-provider
+                  key: api-key
+                  optional: true
+            - name: CHAT_PROVIDER_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: chat-config
+                  key: CHAT_PROVIDER_ID
+          ports:
+            - name: opencode
+              containerPort: 4096
+          readinessProbe:
+            exec:
+              command:
+                - node
+                - -e
+                - fetch('http://127.0.0.1:4096/global/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            timeoutSeconds: 5
+          livenessProbe:
+            exec:
+              command:
+                - node
+                - -e
+                - fetch('http://127.0.0.1:4096/global/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+            - name: opencode-data
+              mountPath: /opencode
+            - name: tmp
+              mountPath: /tmp
+            - name: workspace
+              mountPath: /workspace
+
+        - name: gateway
+          image: ghcr.io/alialjaffer/chat-gateway:latest
+          imagePullPolicy: Always
+          command: ["/usr/local/bin/chat-gateway"]
+          env:
+            - name: CHAT_ADDR
+              value: ":8080"
+            - name: CHAT_DB
+              value: /data/gateway.db
+            - name: CHAT_WORKSPACE
+              value: /workspace
+            - name: CHAT_TIMEOUT
+              value: "120"
+            - name: CHAT_RATE_PER_MINUTE
+              value: "30"
+            - name: OPENCODE_URL
+              value: http://127.0.0.1:4096
+            - name: OPENCODE_AGENT
+              value: assistant
+            - name: CF_ACCESS_TEAM_DOMAIN
+              valueFrom:
+                configMapKeyRef:
+                  name: chat-config
+                  key: CF_ACCESS_TEAM_DOMAIN
+            - name: CF_ACCESS_AUD
+              valueFrom:
+                configMapKeyRef:
+                  name: chat-config
+                  key: CF_ACCESS_AUD
+            - name: CHAT_OWNER_EMAIL
+              valueFrom:
+                configMapKeyRef:
+                  name: chat-config
+                  key: CHAT_OWNER_EMAIL
+            - name: CHAT_MODEL
+              valueFrom:
+                configMapKeyRef:
+                  name: chat-config
+                  key: CHAT_MODEL
+          ports:
+            - name: http
+              containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: workspace
+              mountPath: /workspace
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: config
+          configMap:
+            name: chat-config
+            items:
+              - key: opencode.json
+                path: opencode.json
+        - name: data
+          persistentVolumeClaim:
+            claimName: chat-data
+        - name: opencode-data
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+        - name: workspace
+          emptyDir: {}

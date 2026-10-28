@@ -91,6 +91,14 @@ spec:
         - ports:
             - port: "587"
               protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": chat
+            app: chat
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
     - toFQDNs:
         - matchName: "kc.alialjaffer.com"
         - matchName: "opencode.ai"
