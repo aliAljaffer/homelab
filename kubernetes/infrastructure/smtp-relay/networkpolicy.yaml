@@ -30,6 +30,8 @@ spec:
             "k8s:io.kubernetes.pod.namespace": fai
         - matchLabels:
             "k8s:io.kubernetes.pod.namespace": grooszy-dev
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": grooszy
       toPorts:
         - ports:
             - port: "587"
