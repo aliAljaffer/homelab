@@ -18,6 +18,16 @@ spec:
         app: chat
     spec:
       automountServiceAccountToken: false
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              preference:
+                matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - wrk1
       terminationGracePeriodSeconds: 30
       securityContext:
         runAsNonRoot: true
@@ -29,8 +39,8 @@ spec:
           type: RuntimeDefault
       containers:
         - name: opencode
-          image: ghcr.io/alialjaffer/chat-gateway:latest
-          imagePullPolicy: Always
+          image: ghcr.io/alialjaffer/chat-gateway@sha256:147ba4d5f8ee24cc074f51e2f8190361edb1c1df82878451c74be1d0c9175da2
+          imagePullPolicy: IfNotPresent
           command: ["sh", "-ec"]
           args:
             - |
@@ -107,8 +117,8 @@ spec:
               mountPath: /workspace
 
         - name: gateway
-          image: ghcr.io/alialjaffer/chat-gateway:latest
-          imagePullPolicy: Always
+          image: ghcr.io/alialjaffer/chat-gateway@sha256:147ba4d5f8ee24cc074f51e2f8190361edb1c1df82878451c74be1d0c9175da2
+          imagePullPolicy: IfNotPresent
           command: ["/usr/local/bin/chat-gateway"]
           env:
             - name: CHAT_ADDR
