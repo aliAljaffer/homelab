@@ -7,8 +7,8 @@ resources:
   - keycloak-realm-homelab.yaml
   - keycloak-realm-external-users.yaml
   - httproute-keycloak.yaml
-  - httproute-keycloak-public.yaml
   - keycloak-oidc-client-grooszy.yaml
+  - grooszy-oidc-secret.sealed.yaml
   - keycloak-smtp-secret.sealed.yaml
   - keycloak-oauth2-proxy-secret.sealed.yaml
   - networkpolicy.yaml
