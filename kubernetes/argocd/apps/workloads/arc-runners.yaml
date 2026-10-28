@@ -1,0 +1,63 @@
+---
+# One Helm source per repository. The Helm release name becomes the scale set
+# name, which is also the `runs-on:` label workflows use:
+#   arc-runner-set             -> aliAljaffer.github.io (legacy name, unused so far)
+#   arc-runner-fai             -> aliAljaffer/fai
+#   arc-runner-grooszy         -> aliAljaffer/grooszy
+#   arc-runner-chat-gateway    -> aliAljaffer/chat-gateway
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: arc-runners
+  namespace: argocd
+spec:
+  project: workloads
+  sources:
+    - repoURL: git@github.com:aliAljaffer/homelab.git
+      targetRevision: main
+      ref: values
+    - repoURL: oci://ghcr.io/actions/actions-runner-controller-charts
+      chart: gha-runner-scale-set
+      targetRevision: 0.14.2
+      helm:
+        releaseName: arc-runner-set
+        valueFiles:
+          - $values/kubernetes/apps/arc/runner-values.yaml
+        valuesObject:
+          githubConfigUrl: https://github.com/aliAljaffer/aliAljaffer.github.io
+    - repoURL: oci://ghcr.io/actions/actions-runner-controller-charts
+      chart: gha-runner-scale-set
+      targetRevision: 0.14.2
+      helm:
+        releaseName: arc-runner-fai
+        valueFiles:
+          - $values/kubernetes/apps/arc/runner-values.yaml
+        valuesObject:
+          githubConfigUrl: https://github.com/aliAljaffer/fai
+    - repoURL: oci://ghcr.io/actions/actions-runner-controller-charts
+      chart: gha-runner-scale-set
+      targetRevision: 0.14.2
+      helm:
+        releaseName: arc-runner-grooszy
+        valueFiles:
+          - $values/kubernetes/apps/arc/runner-values.yaml
+        valuesObject:
+          githubConfigUrl: https://github.com/aliAljaffer/grooszy
+    - repoURL: oci://ghcr.io/actions/actions-runner-controller-charts
+      chart: gha-runner-scale-set
+      targetRevision: 0.14.2
+      helm:
+        releaseName: arc-runner-chat-gateway
+        valueFiles:
+          - $values/kubernetes/apps/arc/runner-values.yaml
+        valuesObject:
+          githubConfigUrl: https://github.com/aliAljaffer/chat-gateway
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: arc-runners
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
