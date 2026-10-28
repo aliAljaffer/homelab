@@ -1,63 +1,118 @@
 ---
-# One Helm source per repository. The Helm release name becomes the scale set
-# name, which is also the `runs-on:` label workflows use:
-#   arc-runner-set             -> aliAljaffer.github.io (legacy name, unused so far)
-#   arc-runner-fai             -> aliAljaffer/fai
-#   arc-runner-grooszy         -> aliAljaffer/grooszy
-#   arc-runner-chat-gateway    -> aliAljaffer/chat-gateway
+# One Application per entry in kubernetes/apps/arc/runners.yaml. The Helm
+# release name is also the scale set name, i.e. the `runs-on:` label.
 apiVersion: argoproj.io/v1alpha1
-kind: Application
+kind: ApplicationSet
 metadata:
   name: arc-runners
   namespace: argocd
 spec:
-  project: workloads
-  sources:
-    - repoURL: git@github.com:aliAljaffer/homelab.git
-      targetRevision: main
-      ref: values
-    - repoURL: ghcr.io/actions/actions-runner-controller-charts
-      chart: gha-runner-scale-set
-      targetRevision: 0.14.2
-      helm:
-        releaseName: arc-runner-set
-        valueFiles:
-          - $values/kubernetes/apps/arc/runner-values.yaml
-        valuesObject:
-          githubConfigUrl: https://github.com/aliAljaffer/aliAljaffer.github.io
-    - repoURL: ghcr.io/actions/actions-runner-controller-charts
-      chart: gha-runner-scale-set
-      targetRevision: 0.14.2
-      helm:
-        releaseName: arc-runner-fai
-        valueFiles:
-          - $values/kubernetes/apps/arc/runner-values.yaml
-        valuesObject:
-          githubConfigUrl: https://github.com/aliAljaffer/fai
-    - repoURL: ghcr.io/actions/actions-runner-controller-charts
-      chart: gha-runner-scale-set
-      targetRevision: 0.14.2
-      helm:
-        releaseName: arc-runner-grooszy
-        valueFiles:
-          - $values/kubernetes/apps/arc/runner-values.yaml
-        valuesObject:
-          githubConfigUrl: https://github.com/aliAljaffer/grooszy
-    - repoURL: ghcr.io/actions/actions-runner-controller-charts
-      chart: gha-runner-scale-set
-      targetRevision: 0.14.2
-      helm:
-        releaseName: arc-runner-chat-gateway
-        valueFiles:
-          - $values/kubernetes/apps/arc/runner-values.yaml
-        valuesObject:
-          githubConfigUrl: https://github.com/aliAljaffer/chat-gateway
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: arc-runners
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
+  generators:
+    - git:
+        repoURL: git@github.com:aliAljaffer/homelab.git
+        revision: main
+        files:
+          - path: kubernetes/apps/arc/runners.yaml
+  template:
+    metadata:
+      name: '{{.name}}'
+      namespace: argocd
+    spec:
+      project: workloads
+      source:
+        repoURL: ghcr.io/actions/actions-runner-controller-charts
+        chart: gha-runner-scale-set
+        targetRevision: 0.14.2
+        helm:
+          releaseName: '{{.name}}'
+          valuesObject:
+            githubConfigUrl: '{{.url}}'
+            githubConfigSecret: github-app
+            minRunners: 0
+            maxRunners: 2
+            # ArgoCD renders the chart without the controller installed, so
+            # the chart's live lookup of the controller ServiceAccount fails.
+            controllerServiceAccount:
+              namespace: arc-systems
+              name: arc-controller-gha-rs-controller
+            # Docker-in-Docker, spelled out instead of containerMode.type=dind
+            # so the sidecar can carry its own resource limits.
+            template:
+              spec:
+                initContainers:
+                  - name: init-dind-externals
+                    image: ghcr.io/actions/actions-runner:2.334.0@sha256:b6614fce332517f74d0a76e7c762fb08e4f2ff13dcf333183397c8a5725b6e8e
+                    command: ["cp"]
+                    args: ["-r", "/home/runner/externals/.", "/home/runner/tmpDir/"]
+                    volumeMounts:
+                      - name: dind-externals
+                        mountPath: /home/runner/tmpDir
+                containers:
+                  - name: runner
+                    image: ghcr.io/actions/actions-runner:2.334.0@sha256:b6614fce332517f74d0a76e7c762fb08e4f2ff13dcf333183397c8a5725b6e8e
+                    command: ["/home/runner/run.sh"]
+                    env:
+                      - name: DOCKER_HOST
+                        value: "unix:///var/run/docker.sock"
+                      - name: RUNNER_WAIT_FOR_DOCKER_IN_SECONDS
+                        value: "120"
+                    resources:
+                      requests:
+                        cpu: 100m
+                        memory: 256Mi
+                      limits:
+                        memory: 3Gi
+                    volumeMounts:
+                      - name: work
+                        mountPath: /home/runner/_work
+                      - name: dind-sock
+                        mountPath: /var/run
+                  - name: dind
+                    image: docker:29.9.2-dind@sha256:9e79b879b177fbd72c34376a3dd3d91747da5db49e1f560f76aea59561471977
+                    args:
+                      - dockerd
+                      - --host=unix:///var/run/docker.sock
+                      - --group=$(DOCKER_GROUP_GID)
+                    env:
+                      - name: DOCKER_GROUP_GID
+                        value: "123"
+                    securityContext:
+                      privileged: true
+                    resources:
+                      requests:
+                        cpu: 100m
+                        memory: 512Mi
+                      limits:
+                        memory: 3Gi
+                    startupProbe:
+                      exec:
+                        command: ["docker", "info"]
+                      initialDelaySeconds: 0
+                      failureThreshold: 24
+                      periodSeconds: 5
+                    volumeMounts:
+                      - name: work
+                        mountPath: /home/runner/_work
+                      - name: dind-sock
+                        mountPath: /var/run
+                      - name: dind-externals
+                        mountPath: /home/runner/externals
+                volumes:
+                  - name: work
+                    emptyDir: {}
+                  - name: dind-sock
+                    emptyDir: {}
+                  - name: dind-externals
+                    emptyDir: {}
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: arc-runners
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

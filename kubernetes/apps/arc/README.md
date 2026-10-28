@@ -1,24 +1,29 @@
 # arc
 
-GitHub Actions self-hosted runners, now fully managed by ArgoCD:
+GitHub Actions self-hosted runners, managed by ArgoCD:
 
-- `arc` (Application, destination `arc-systems`): the controller Helm chart,
-  `gha-runner-scale-set-controller` 0.14.2 from `ghcr.io`, plus the namespaces,
-  the app credential and the PodMonitors from this directory.
-- `arc-runners` (Application, destination `arc-runners`): one
-  `gha-runner-scale-set` 0.14.2 Helm source per repository. The Helm release
-  name is the scale set name and therefore the `runs-on:` label:
+- `arc` (Application, destination `arc-systems`): the
+  `gha-runner-scale-set-controller` 0.14.2 Helm chart from `ghcr.io`, plus the
+  namespaces, the GitHub App credential and the PodMonitors in this directory.
+- `arc-runners` (ApplicationSet, destination `arc-runners`): one
+  `gha-runner-scale-set` 0.14.2 Application per entry in `runners.yaml`. The
+  entry name is the Helm release name, the scale set name, and therefore the
+  `runs-on:` label:
 
-  | Release name              | Repository                        |
-  | ------------------------- | --------------------------------- |
-  | `arc-runner-set`          | `aliAljaffer/aliAljaffer.github.io` |
-  | `arc-runner-fai`          | `aliAljaffer/fai`                 |
-  | `arc-runner-grooszy`      | `aliAljaffer/grooszy`             |
-  | `arc-runner-chat-gateway` | `aliAljaffer/chat-gateway`        |
+  | Scale set / `runs-on`      | Repository                          |
+  | -------------------------- | ----------------------------------- |
+  | `arc-runner-set`           | `aliAljaffer/aliAljaffer.github.io` |
+  | `arc-runner-fai`           | `aliAljaffer/fai`                   |
+  | `arc-runner-grooszy`       | `aliAljaffer/grooszy`               |
+  | `arc-runner-chat-gateway`  | `aliAljaffer/chat-gateway`          |
 
-  Add a repository by adding another Helm source to
-  `kubernetes/argocd/apps/workloads/arc-runners.yaml` and using its release name
-  as `runs-on:` in that repo's workflows.
+  Add a repository by appending `{name, url}` to `runners.yaml`, then use that
+  name as `runs-on:` in the repo's workflows.
+
+Both charts are OCI artifacts. ArgoCD needs the scheme-less repo URL
+(`ghcr.io/actions/actions-runner-controller-charts`) in the Application; the
+`oci://` prefix makes it treat the repo root as a chart. The project also
+permits that URL.
 
 ## Authentication
 
@@ -41,19 +46,19 @@ kubectl create secret generic github-app -n arc-runners \
 
 ## Runner pods
 
-`runner-values.yaml` is shared by every scale set. Runners use the official
-`ghcr.io/actions/actions-runner` image (pinned by digest) with a privileged
-`docker:*-dind` sidecar, so `docker build`, `buildx` and GitHub service
-containers work. The image is deliberately minimal: workflows install their own
-toolchain (`setup-go`, `setup-node`, `python3`/`gh` via apt). The old custom
-`arc-runner-aws` image and `runner-aws-image/` are gone.
+Runners use the official `ghcr.io/actions/actions-runner` image (pinned by
+digest) with a privileged `docker:*-dind` sidecar, so `docker build`, `buildx`
+and GitHub service containers work. The image is deliberately minimal:
+workflows install their own toolchain (`setup-go`, `setup-node`, `python3` via
+apt). The old custom `arc-runner-aws` image and `runner-aws-image/` are gone.
 
 Scale sets are idle at zero (`minRunners: 0`), cap at two pods, and each pod is
-limited to 3Gi per container.
+limited to 3Gi per container. The pod spec lives in
+`kubernetes/argocd/apps/workloads/arc-runners.yaml`.
 
 ## Metrics
 
 `podmonitor.yaml` scrapes the controller and every scale set listener. The
 controller's `metrics:` block is undocumented (`helm show values` omits it, only
 `templates/deployment.yaml` has it) and without it the chart hardcodes metrics
-off. It lives in `arc-controller-values.yaml`.
+off. It is set inline in the `arc` Application.
