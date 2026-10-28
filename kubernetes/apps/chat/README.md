@@ -41,15 +41,13 @@ in [aliAljaffer/chat-gateway](https://github.com/aliAljaffer/chat-gateway). Its
 push by hand, clone that repository and run `bash build.sh latest`.
 
 The image is about 202 MiB compressed. Most of it is the Node 22 base and the
-OpenCode package. The deployment uses `imagePullPolicy: Always`, so run a rollout
-after a new image:
+OpenCode package. The deployment pins the digest with
+`imagePullPolicy: IfNotPresent` and prefers `wrk2`, the node that has this build
+cached. Remove the affinity once every worker has pulled the image.
 
-```bash
-kubectl rollout restart deployment/chat -n chat
-```
-
-The image is cached per node after the first pull. A slow first pull is usually
-the GHCR blob CDN or an IPv6 path, not the pod.
+To move to a new build, update the digest in `deployment.yaml`, let one node pull
+it, then point the affinity at that node. A slow first pull is usually the GHCR
+blob CDN or an IPv6 path, not the pod.
 
 ## Provider key
 

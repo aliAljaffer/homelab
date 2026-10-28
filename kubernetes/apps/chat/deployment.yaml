@@ -27,7 +27,7 @@ spec:
                   - key: kubernetes.io/hostname
                     operator: In
                     values:
-                      - wrk1
+                      - wrk2
       terminationGracePeriodSeconds: 30
       securityContext:
         runAsNonRoot: true
@@ -39,7 +39,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: opencode
-          image: ghcr.io/alialjaffer/chat-gateway@sha256:147ba4d5f8ee24cc074f51e2f8190361edb1c1df82878451c74be1d0c9175da2
+          image: ghcr.io/alialjaffer/chat-gateway@sha256:d0c3b310f605b9432fcfb04c17641eda8d2420b85bf56c2a1ba04e4a45105ff5
           imagePullPolicy: IfNotPresent
           command: ["sh", "-ec"]
           args:
@@ -117,7 +117,7 @@ spec:
               mountPath: /workspace
 
         - name: gateway
-          image: ghcr.io/alialjaffer/chat-gateway@sha256:147ba4d5f8ee24cc074f51e2f8190361edb1c1df82878451c74be1d0c9175da2
+          image: ghcr.io/alialjaffer/chat-gateway@sha256:d0c3b310f605b9432fcfb04c17641eda8d2420b85bf56c2a1ba04e4a45105ff5
           imagePullPolicy: IfNotPresent
           command: ["/usr/local/bin/chat-gateway"]
           env:
