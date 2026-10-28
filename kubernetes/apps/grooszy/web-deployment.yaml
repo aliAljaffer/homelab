@@ -1,0 +1,46 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grooszy-web
+  namespace: grooszy
+  labels:
+    app: grooszy-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grooszy-web
+  template:
+    metadata:
+      labels:
+        app: grooszy-web
+    spec:
+      containers:
+        - name: web
+          image: ghcr.io/alialjaffer/grooszy-web@sha256:c10b7859e689ffd15ff736f4a68876955ae31c09077ca90b1e4b26f211f4a2c3
+          ports:
+            - containerPort: 3000
+              name: http
+          envFrom:
+            - secretRef:
+                name: grooszy-web
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
