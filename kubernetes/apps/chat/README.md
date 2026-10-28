@@ -45,9 +45,11 @@ OpenCode package. The deployment pins the digest with
 `imagePullPolicy: IfNotPresent` and prefers `wrk2`, the node that has this build
 cached. Remove the affinity once every worker has pulled the image.
 
-To move to a new build, update the digest in `deployment.yaml`, let one node pull
-it, then point the affinity at that node. A slow first pull is usually the GHCR
-blob CDN or an IPv6 path, not the pod.
+The `image` workflow also checks out this repository with the
+`update-manifests-homelab` GitHub App and commits the new digest to
+`kubernetes/apps/chat/deployment.yaml`. ArgoCD then rolls the pod. Manual digest
+edits are only needed if the App is unavailable. A slow first pull is usually the
+GHCR blob CDN or an IPv6 path, not the pod.
 
 ## Provider key
 
