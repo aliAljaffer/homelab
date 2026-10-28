@@ -16,7 +16,7 @@ spec:
     - repoURL: git@github.com:aliAljaffer/homelab.git
       targetRevision: main
       ref: values
-    - repoURL: oci://ghcr.io/actions/actions-runner-controller-charts
+    - repoURL: ghcr.io/actions/actions-runner-controller-charts
       chart: gha-runner-scale-set
       targetRevision: 0.14.2
       helm:
@@ -25,7 +25,7 @@ spec:
           - $values/kubernetes/apps/arc/runner-values.yaml
         valuesObject:
           githubConfigUrl: https://github.com/aliAljaffer/aliAljaffer.github.io
-    - repoURL: oci://ghcr.io/actions/actions-runner-controller-charts
+    - repoURL: ghcr.io/actions/actions-runner-controller-charts
       chart: gha-runner-scale-set
       targetRevision: 0.14.2
       helm:
@@ -34,7 +34,7 @@ spec:
           - $values/kubernetes/apps/arc/runner-values.yaml
         valuesObject:
           githubConfigUrl: https://github.com/aliAljaffer/fai
-    - repoURL: oci://ghcr.io/actions/actions-runner-controller-charts
+    - repoURL: ghcr.io/actions/actions-runner-controller-charts
       chart: gha-runner-scale-set
       targetRevision: 0.14.2
       helm:
@@ -43,7 +43,7 @@ spec:
           - $values/kubernetes/apps/arc/runner-values.yaml
         valuesObject:
           githubConfigUrl: https://github.com/aliAljaffer/grooszy
-    - repoURL: oci://ghcr.io/actions/actions-runner-controller-charts
+    - repoURL: ghcr.io/actions/actions-runner-controller-charts
       chart: gha-runner-scale-set
       targetRevision: 0.14.2
       helm:

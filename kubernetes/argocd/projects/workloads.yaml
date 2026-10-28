@@ -11,6 +11,9 @@ spec:
   sourceRepos:
   - git@github.com:aliAljaffer/homelab.git
   - https://openziti.io/helm-charts/ # ziti-controller + ziti-router charts
+  # ArgoCD resolves OCI Helm charts from the scheme-less repo URL; keep the
+  # oci:// form too for repository-scoped tooling.
+  - ghcr.io/actions/actions-runner-controller-charts
   - oci://ghcr.io/actions/actions-runner-controller-charts
   destinations:
   - server: https://kubernetes.default.svc
