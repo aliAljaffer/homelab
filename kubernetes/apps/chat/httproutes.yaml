@@ -1,25 +1,6 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: chat
-  namespace: chat
-  annotations:
-    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
-spec:
-  parentRefs:
-    - name: cloudflare-tunnel
-      namespace: cloudflare-tunnel-system
-      sectionName: https
-  hostnames:
-    - chat.alialjaffer.com
-  rules:
-    - backendRefs:
-        - name: chat
-          port: 80
----
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
   name: chat-api
   namespace: chat
   annotations:

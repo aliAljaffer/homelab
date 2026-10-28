@@ -4,10 +4,6 @@ metadata:
   name: chat-config
   namespace: chat
 data:
-  CF_ACCESS_TEAM_DOMAIN: ""
-  CF_ACCESS_AUD: ""
-  CHAT_OWNER_EMAIL: ""
-  CHAT_MODEL: "opencode-go/deepseek-v4.1-flash"
   CHAT_PROVIDER_ID: "opencode-go"
   opencode.json: |
     {

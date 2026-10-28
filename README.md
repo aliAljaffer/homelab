@@ -71,7 +71,7 @@ AMD Ryzen 7 7800X3D, 32GB RAM, RTX 4070 Ti Super, 3x 2TB NVMe, dual-boots Fedora
 - **stremio** - self-hosted Stremio, GPU-transcoded. I'm running the `nightly` image because I needed a WASM build my LG TV's old webOS browser could actually run, and even then I ended up sideloading it onto the TV as a native app instead, the browser route just never worked out (see [docs/lg-tv-sideload.md](docs/lg-tv-sideload.md))
 - **nexotv** - Stremio addon I use for an IPTV catalog over Xtream Codes. It lives in the `stremio` namespace, I applied it manually for now, no ArgoCD Application yet
 - **umami** - self-hosted analytics (CNPG-backed Postgres)
-- **chat** - one private chat service for every app: a hosted UI plus an API that other apps call with a per-app key. Runs OpenCode as a text-only agent. See [kubernetes/apps/chat](kubernetes/apps/chat/README.md) and [aliAljaffer/chat-gateway](https://github.com/aliAljaffer/chat-gateway).
+- **chat** - one private chat API for every app: each app wraps its own UI and calls the API with a per-app key. Runs OpenCode as a text-only agent. See [kubernetes/apps/chat](kubernetes/apps/chat/README.md) and [aliAljaffer/chat-gateway](https://github.com/aliAljaffer/chat-gateway).
 - **cloudflared** - Cloudflare Tunnel for public traffic
 - **arc** - GitHub Actions self-hosted runners
 - **longhorn-backup** - scheduled PV backups to GCS (Longhorn RecurringJob)

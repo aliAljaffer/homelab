@@ -7,8 +7,6 @@ metadata:
     app: chat
 spec:
   replicas: 1
-  strategy:
-    type: Recreate
   selector:
     matchLabels:
       app: chat
@@ -39,7 +37,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: opencode
-          image: ghcr.io/alialjaffer/chat-gateway@sha256:865ad2ffa1798cb7c9b3d9022a2b0d7e6c9bee272c7bf3f01665d650bfdbe768
+          image: ghcr.io/alialjaffer/chat-gateway@sha256:20c964c871ff38f8ad92d34c6a3e5018f7fd68e43cb99c92c2ee82d929bf1708
           imagePullPolicy: IfNotPresent
           command: ["sh", "-ec"]
           args:
@@ -117,16 +115,14 @@ spec:
               mountPath: /workspace
 
         - name: gateway
-          image: ghcr.io/alialjaffer/chat-gateway@sha256:865ad2ffa1798cb7c9b3d9022a2b0d7e6c9bee272c7bf3f01665d650bfdbe768
+          image: ghcr.io/alialjaffer/chat-gateway@sha256:20c964c871ff38f8ad92d34c6a3e5018f7fd68e43cb99c92c2ee82d929bf1708
           imagePullPolicy: IfNotPresent
           command: ["/usr/local/bin/chat-gateway"]
           env:
             - name: CHAT_ADDR
               value: ":8080"
-            - name: CHAT_DB
-              value: /data/gateway.db
-            - name: CHAT_WORKSPACE
-              value: /workspace
+            - name: CHAT_APPS_FILE
+              value: /apps/apps.json
             - name: CHAT_TIMEOUT
               value: "120"
             - name: CHAT_RATE_PER_MINUTE
@@ -135,26 +131,6 @@ spec:
               value: http://127.0.0.1:4096
             - name: OPENCODE_AGENT
               value: assistant
-            - name: CF_ACCESS_TEAM_DOMAIN
-              valueFrom:
-                configMapKeyRef:
-                  name: chat-config
-                  key: CF_ACCESS_TEAM_DOMAIN
-            - name: CF_ACCESS_AUD
-              valueFrom:
-                configMapKeyRef:
-                  name: chat-config
-                  key: CF_ACCESS_AUD
-            - name: CHAT_OWNER_EMAIL
-              valueFrom:
-                configMapKeyRef:
-                  name: chat-config
-                  key: CHAT_OWNER_EMAIL
-            - name: CHAT_MODEL
-              valueFrom:
-                configMapKeyRef:
-                  name: chat-config
-                  key: CHAT_MODEL
           ports:
             - name: http
               containerPort: 8080
@@ -183,10 +159,9 @@ spec:
             capabilities:
               drop: ["ALL"]
           volumeMounts:
-            - name: data
-              mountPath: /data
-            - name: workspace
-              mountPath: /workspace
+            - name: apps
+              mountPath: /apps
+              readOnly: true
             - name: tmp
               mountPath: /tmp
       volumes:
@@ -196,9 +171,9 @@ spec:
             items:
               - key: opencode.json
                 path: opencode.json
-        - name: data
-          persistentVolumeClaim:
-            claimName: chat-data
+        - name: apps
+          secret:
+            secretName: chat-apps
         - name: opencode-data
           emptyDir: {}
         - name: tmp
