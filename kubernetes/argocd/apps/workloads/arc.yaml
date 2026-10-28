@@ -15,6 +15,10 @@ spec:
       targetRevision: 0.14.2
       helm:
         releaseName: arc-controller
+        # The chart bundles large CRDs; kubectl-style apply exceeds the 256KB
+        # annotation limit and the CRDs are already installed by the chart.
+        # Reinstall CRDs manually when bumping the chart version.
+        skipCrds: true
         valuesObject:
           # Undocumented in `helm show values` (only templates/deployment.yaml
           # has it); without it the chart hardcodes metrics off.
