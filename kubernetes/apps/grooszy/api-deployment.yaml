@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: ghcr.io/alialjaffer/grooszy-api@sha256:9db33576c8e9bd1d364165928afdf2164d2432d2a99f1ef527aac31aaaf6d90c
+          image: ghcr.io/alialjaffer/grooszy-api@sha256:5a79fbba628635b1f129c8bf5aca7ad0ad12afde06229d0fb790c152f9f6714b
           ports:
             - containerPort: 8080
               name: http
