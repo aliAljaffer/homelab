@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: ghcr.io/alialjaffer/grooszy-web@sha256:9fae82ec8c6156f7583358553804e0386b8446c7036f2cba557fd951f379c580
+          image: ghcr.io/alialjaffer/grooszy-web@sha256:c4af371ca02df76dd95cdddc0d5ce55c00a907737a2948c9689d1da8af5eb500
           ports:
             - containerPort: 3000
               name: http
