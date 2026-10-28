@@ -13,9 +13,11 @@ spec:
       - STANDARD
     redirectUris:
       - https://grooszy.alialjaffer.com/api/auth/callback
+      - https://grooszy-dev.alialjaffer.com/api/auth/callback
       - http://127.0.0.1:3000/api/auth/callback
     webOrigins:
       - https://grooszy.alialjaffer.com
+      - https://grooszy-dev.alialjaffer.com
       - http://127.0.0.1:3000
     auth:
       method: client-secret
