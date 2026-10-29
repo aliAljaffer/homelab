@@ -1,0 +1,123 @@
+---
+# The KeycloakOIDCClient CRD is broken on operator 26.7.1 with
+# client-admin-api:v2 (NPE in the client proxy), so create Harbor's client,
+# groups mapper and admin group through the admin API instead.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: harbor-client-setup
+  namespace: keycloak
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 20
+  activeDeadlineSeconds: 1800
+  template:
+    metadata:
+      labels:
+        app: harbor-client-setup
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: setup
+          image: alpine:3.21
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+              apk add --no-cache curl jq >/dev/null
+
+              KC=http://keycloak-service:8080
+              until TOKEN=$(curl -fsS -X POST "$KC/realms/master/protocol/openid-connect/token" \
+                  -d grant_type=password -d client_id=admin-cli \
+                  -d username="$ADMIN_USER" \
+                  --data-urlencode "password=$ADMIN_PASS" | jq -r '.access_token // empty') \
+                  && [ -n "$TOKEN" ]; do
+                echo "waiting for keycloak..."
+                sleep 5
+              done
+
+              AUTH="Authorization: Bearer $TOKEN"
+              H="$KC/admin/realms/homelab"
+
+              CID=$(curl -fsS -H "$AUTH" "$H/clients?clientId=harbor" | jq -r '.[0].id // empty')
+              if [ -z "$CID" ]; then
+                jq -n --arg secret "$CLIENT_SECRET" '{
+                  clientId: "harbor",
+                  name: "Harbor",
+                  enabled: true,
+                  protocol: "openid-connect",
+                  publicClient: false,
+                  standardFlowEnabled: true,
+                  implicitFlowEnabled: false,
+                  directAccessGrantsEnabled: false,
+                  serviceAccountsEnabled: false,
+                  secret: $secret,
+                  redirectUris: ["https://harbor.alialjaffer.com/c/oidc/callback"],
+                  webOrigins: ["https://harbor.alialjaffer.com"],
+                  attributes: {"pkce.code.challenge.method": "S256"}
+                }' > /tmp/client.json
+                curl -fsS -H "$AUTH" -H 'Content-Type: application/json' \
+                  -X POST --data @/tmp/client.json "$H/clients" >/dev/null
+                CID=$(curl -fsS -H "$AUTH" "$H/clients?clientId=harbor" | jq -r '.[0].id')
+              fi
+
+              if [ "$(curl -fsS -H "$AUTH" "$H/clients/$CID/protocol-mappers/models" \
+                    | jq '[.[] | select(.name == "groups")] | length')" -eq 0 ]; then
+                curl -fsS -H "$AUTH" -H 'Content-Type: application/json' \
+                  -X POST --data '{
+                    "name": "groups",
+                    "protocol": "openid-connect",
+                    "protocolMapper": "oidc-group-membership-mapper",
+                    "config": {
+                      "claim.name": "groups",
+                      "full.path": "false",
+                      "id.token.claim": "true",
+                      "access.token.claim": "true",
+                      "userinfo.token.claim": "true"
+                    }
+                  }' "$H/clients/$CID/protocol-mappers/models" >/dev/null
+              fi
+
+              GID=$(curl -fsS -H "$AUTH" "$H/groups?search=harbor-admins" \
+                | jq -r '.[] | select(.name == "harbor-admins") | .id' | head -1)
+              if [ -z "$GID" ]; then
+                curl -fsS -H "$AUTH" -H 'Content-Type: application/json' \
+                  -X POST --data '{"name":"harbor-admins"}' "$H/groups" >/dev/null
+                GID=$(curl -fsS -H "$AUTH" "$H/groups?search=harbor-admins" \
+                  | jq -r '.[] | select(.name == "harbor-admins") | .id' | head -1)
+              fi
+
+              UID=$(curl -fsS -H "$AUTH" "$H/users?username=ali&exact=true" | jq -r '.[0].id // empty')
+              if [ -n "$UID" ]; then
+                curl -fsS -H "$AUTH" -X PUT "$H/users/$UID/groups/$GID" >/dev/null || true
+              fi
+
+              echo "harbor client, mapper and admin group are ready"
+          env:
+            - name: ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-initial-admin
+                  key: username
+            - name: ADMIN_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-initial-admin
+                  key: password
+            - name: CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: harbor-oidc-secret
+                  key: CLIENT_SECRET
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
