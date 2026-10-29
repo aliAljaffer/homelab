@@ -8,6 +8,8 @@ resources:
   - keycloak-realm-external-users.yaml
   - httproute-keycloak.yaml
   - keycloak-oidc-client-grooszy.yaml
+  - keycloak-oidc-client-harbor.yaml
+  - harbor-oidc-secret.sealed.yaml
   - grooszy-oidc-secret.sealed.yaml
   - keycloak-smtp-secret.sealed.yaml
   - keycloak-oauth2-proxy-secret.sealed.yaml
