@@ -27,24 +27,32 @@ Cilium upgrades.
 
 The OIDC client is declared in the `homelab` realm
 (`kubernetes/infrastructure/keycloak/keycloak-realm-homelab.yaml`): client id
-`oauth2-proxy`, wildcard redirect `https://*.alialjaffer.com/oauth2/callback`,
-secret from the `keycloak-oauth2-proxy-secret` SealedSecret. All instances share
-it, so every app gets SSO off the same session cookie.
+`oauth2-proxy`, secret from the `keycloak-oauth2-proxy-secret` SealedSecret.
+Keycloak matches redirect URIs **exactly** (wildcards in the host are not
+supported), so each app registers its own
+`https://<app>.alialjaffer.com/oauth2/callback` — currently only `ntfy`. All
+instances share the client, so every app gets SSO off the same session cookie.
 
 > **Re-import caveat.** A `KeycloakRealmImport` only creates a realm that does
 > not exist yet (`kc.sh import --override=false`); it never updates one. On a
 > cluster where the `homelab` realm already exists, adding this client to the
 > import in Git does nothing until you either add the client by hand in the
 > Keycloak admin console (Clients -> Create client -> OpenID Connect, id
-> `oauth2-proxy`, confidential, standard flow, PKCE S256, redirect
-> `https://*.alialjaffer.com/oauth2/callback`, then set the secret to
+> `oauth2-proxy`, confidential, standard flow, PKCE S256, redirect URI
+> `https://<app>.alialjaffer.com/oauth2/callback`, then set the secret to
 > `keycloak-oauth2-proxy-secret`'s `CLIENT_SECRET`), or delete the realm *and*
 > its `KeycloakRealmImport` CR so ArgoCD recreates both — that wipes any users or
 > edits that exist only in Keycloak. Fresh installs get the client automatically.
 
 ## Adding it to an app
 
-1. Include the component and add the two resources it expects in the app's
+1. Add `https://<app>.alialjaffer.com/oauth2/callback` to the shared client's
+   valid redirect URIs — both in `keycloak-realm-homelab.yaml` (for a future
+   from-scratch realm) **and** in the live realm via the admin console or
+   `kcadm`, per the re-import caveat above. Skipping this gives
+   `Invalid parameter: redirect_uri` at login.
+
+2. Include the component and add the two resources it expects in the app's
    `kustomization.yaml` (plus `namespace:`, so the component's Deployment and
    Service land in the app's namespace):
 
@@ -57,7 +65,7 @@ it, so every app gets SSO off the same session cookie.
      - ../../components/oauth2-proxy
    ```
 
-2. `oauth2-proxy-config.yaml` — non-secret, per-app settings:
+3. `oauth2-proxy-config.yaml` — non-secret, per-app settings:
 
    ```yaml
    ---
@@ -73,7 +81,7 @@ it, so every app gets SSO off the same session cookie.
      OAUTH2_PROXY_EMAIL_DOMAINS: "*"
    ```
 
-3. `oauth2-proxy-secret.sealed.yaml` — seal the shared credentials into the
+4. `oauth2-proxy-secret.sealed.yaml` — seal the shared credentials into the
    **app's** namespace (SealedSecrets are namespaced). The canonical values live
    in `keycloak-oauth2-proxy-secret` in the `keycloak` namespace, so read them
    out and re-seal:
@@ -96,7 +104,7 @@ it, so every app gets SSO off the same session cookie.
    The cookie secret is the same across apps on purpose: it is what makes one
    login work for every `*.alialjaffer.com` app. Rotating it logs everyone out.
 
-4. Point the app's HTTPRoute at the proxy, and update the app's NetworkPolicy:
+5. Point the app's HTTPRoute at the proxy, and update the app's NetworkPolicy:
 
    ```yaml
    rules:
@@ -107,9 +115,9 @@ it, so every app gets SSO off the same session cookie.
 
    The app pod must accept its port from `app.kubernetes.io/name: oauth2-proxy`,
    and the proxy needs egress to the upstream, DNS, and
-   `kc.alialjaffer.com:443`. The proxy itself needs ingress on 4180 from
-   `fromEntities: [ingress]` (the Cilium Gateway) plus `host`/`health` for the
-   kubelet probes.
+   `kc.alialjaffer.com:443`. The proxy itself needs ingress on 4180 from the
+   `cloudflare-tunnel-system` namespace (the tunnel → Cilium Gateway path) plus
+   from `host` for the kubelet probes — see `infrastructure/ntfy/networkpolicy.yaml`.
 
 ## When not to use this
 
@@ -123,5 +131,7 @@ Umami) already have a gate and generally do not need this.
 - The proxy trusts `X-Forwarded-*` only from `192.168.8.0/24` (the Cilium Envoy
   DaemonSet is host-networked, so it connects from a node IP). If node addresses
   change, update `--trusted-proxy-ip` in `deployment.yaml`.
-- The shared OIDC client uses a wildcard redirect. To lock it down, replace the
-  wildcard in `keycloak-realm-homelab.yaml` with explicit per-app callback URIs.
+- Each app's callback URI is registered explicitly on the shared `oauth2-proxy`
+  client: Keycloak does not support wildcards in the host part of a redirect
+  URI. Adding an app means updating both `keycloak-realm-homelab.yaml` and the
+  live realm (see the re-import caveat).

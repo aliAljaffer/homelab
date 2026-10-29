@@ -40,5 +40,6 @@
   placeholder. Same re-import rule as the SMTP block: because realm import skips
   an existing realm, the client only lands automatically on a fresh `homelab`
   realm. On a live one, add it by hand (Clients -> Create client, id
-  `oauth2-proxy`, redirect `https://*.alialjaffer.com/oauth2/callback`, PKCE
-  S256) or recreate the realm.
+  `oauth2-proxy`, redirect URI `https://<app>.alialjaffer.com/oauth2/callback`
+  — exact URIs only, Keycloak has no host wildcards — PKCE S256) or recreate the
+  realm.

@@ -31,9 +31,10 @@ spec:
       starttls: "false"
       ssl: "false"
     # Shared OIDC client for the per-app oauth2-proxy reverse proxies. See
-    # kubernetes/components/oauth2-proxy/README.md. The wildcard redirect lets
-    # any *.alialjaffer.com app use one client; replace it with explicit
-    # per-app callback URIs to lock that down.
+    # kubernetes/components/oauth2-proxy/README.md. Keycloak matches redirect
+    # URIs exactly — a wildcard in the host is NOT supported — so every app that
+    # includes the component needs its own callback entry here and in the live
+    # realm (realm import skips an existing realm, see the caveat below).
     clients:
       - clientId: oauth2-proxy
         name: oauth2-proxy
@@ -46,9 +47,9 @@ spec:
         serviceAccountsEnabled: false
         secret: "${OAUTH2_PROXY_CLIENT_SECRET}"
         redirectUris:
-          - "https://*.alialjaffer.com/oauth2/callback"
+          - "https://ntfy.alialjaffer.com/oauth2/callback"
         webOrigins:
-          - "https://*.alialjaffer.com"
+          - "https://ntfy.alialjaffer.com"
         attributes:
           pkce.code.challenge.method: S256
       # fai does its own JWT validation (no oauth2-proxy in front of it — see
