@@ -57,7 +57,7 @@ spec:
 
               ensure_project dockerhub "$(ensure_registry dockerhub docker-hub https://hub.docker.com)"
               ensure_project ghcr "$(ensure_registry ghcr github-ghcr https://ghcr.io)"
-              ensure_project quay "$(ensure_registry quay quay https://quay.io)"
+              ensure_project quay "$(ensure_registry quay docker-registry https://quay.io)"
               ensure_project k8s "$(ensure_registry k8s docker-registry https://registry.k8s.io)"
 
               echo "proxy cache projects are ready"
