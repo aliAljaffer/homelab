@@ -26,7 +26,7 @@ spec:
           spec:
             initContainers:
               - name: init-dind-externals
-                image: harbor.alialjaffer.com/mirror/runner-toolchain@sha256:69a8a3d8df40dcd7661c97f1d235330381655cd6ff208d29a041355fa3093051
+                image: harbor.alialjaffer.com/mirror/runner-toolchain@sha256:cf6c82dd5b69e9a811266bc96a5a1356eb31e1c842e3f06ce9ed363bfc155abd
                 command: ["cp"]
                 args: ["-r", "/home/runner/externals/.", "/home/runner/tmpDir/"]
                 volumeMounts:
@@ -34,7 +34,7 @@ spec:
                     mountPath: /home/runner/tmpDir
             containers:
               - name: runner
-                image: harbor.alialjaffer.com/mirror/runner-toolchain@sha256:69a8a3d8df40dcd7661c97f1d235330381655cd6ff208d29a041355fa3093051
+                image: harbor.alialjaffer.com/mirror/runner-toolchain@sha256:cf6c82dd5b69e9a811266bc96a5a1356eb31e1c842e3f06ce9ed363bfc155abd
                 command: ["/home/runner/run.sh"]
                 env:
                   - name: DOCKER_HOST
