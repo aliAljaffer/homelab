@@ -74,7 +74,7 @@ AMD Ryzen 7 7800X3D, 32GB RAM, RTX 4070 Ti Super, 3x 2TB NVMe, dual-boots Fedora
 - **umami** - self-hosted analytics (CNPG-backed Postgres)
 - **chat** - one private chat API for every app: each app wraps its own UI and calls the API with a per-app key. Runs OpenCode as a text-only agent. See [kubernetes/apps/chat](kubernetes/apps/chat/README.md) and [aliAljaffer/chat-gateway](https://github.com/aliAljaffer/chat-gateway).
 - **cloudflared** - Cloudflare Tunnel for public traffic
-- **arc** - GitHub Actions self-hosted runner (staged on `chat-gateway`; images mirrored through Harbor)
+- **arc** - GitHub Actions self-hosted runner for `chat-gateway` (fai/grooszy still on GitHub-hosted runners; images mirrored through Harbor)
 - **longhorn-backup** - scheduled PV backups to GCS (Longhorn RecurringJob)
 - **monitoring** - Grafana, Prometheus, Thanos, Loki, Alloy
 
