@@ -1,0 +1,81 @@
+---
+# Harbor has no declarative setting for the OIDC client secret, so configure it
+# through the API from a sealed secret. PostSync + idempotent; runs after Harbor
+# is healthy. The local `admin` account keeps API/basic-auth access in OIDC mode.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: harbor-oidc-setup
+  namespace: harbor
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 20
+  activeDeadlineSeconds: 1800
+  template:
+    metadata:
+      labels:
+        app: harbor-oidc-setup
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: setup
+          image: alpine:3.21
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+              apk add --no-cache curl jq >/dev/null
+
+              until curl -fsS -u "admin:$ADMIN_PASSWORD" "$HARBOR/api/v2.0/systeminfo" >/dev/null 2>&1; do
+                echo "waiting for harbor..."
+                sleep 5
+              done
+
+              jq -n \
+                --arg endpoint "https://kc.alialjaffer.com/realms/homelab" \
+                --arg client "harbor" \
+                --arg secret "$OIDC_CLIENT_SECRET" \
+                '{
+                  auth_mode: "oidc_auth",
+                  oidc_endpoint: $endpoint,
+                  oidc_client_id: $client,
+                  oidc_client_secret: $secret,
+                  oidc_scope: "openid,profile,email",
+                  oidc_user_claim: "preferred_username",
+                  oidc_groups_claim: "groups",
+                  oidc_admin_group: "harbor-admins",
+                  oidc_auto_onboard: true,
+                  oidc_verify_cert: true
+                }' > /tmp/oidc.json
+
+              curl -fsS -u "admin:$ADMIN_PASSWORD" \
+                -X PUT -H 'Content-Type: application/json' \
+                --data @/tmp/oidc.json \
+                "$HARBOR/api/v2.0/configurations" >/dev/null
+
+              echo "harbor OIDC configured"
+          env:
+            - name: HARBOR
+              value: http://harbor-core
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: harbor-admin
+                  key: HARBOR_ADMIN_PASSWORD
+            - name: OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: harbor-oidc
+                  key: OIDC_CLIENT_SECRET
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]

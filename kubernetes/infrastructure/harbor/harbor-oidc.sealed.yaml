@@ -1,0 +1,17 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  annotations:
+    sealedsecrets.bitnami.com/namespace-wide: "true"
+  name: harbor-oidc
+  namespace: harbor
+spec:
+  encryptedData:
+    OIDC_CLIENT_SECRET: AgCnEcauAm8FXdjPdI4FBnDakp076UeHWjwE76eYBCXKl2lCEMB1QvEtm6Rsu1uqXY2tMacwbNhRj0qG/78EZ+lHqT4bCPgl0q6dtW3GyqOl9fBw7DzZVaAC3BAIeF1+nwROG+fRrAtRUHDzenKPEUpb3MLrz6Fg7UWIigBti6bvr5R4XAhBfj7r5M951oDrl7qJkC6ivJOx0tEdkvS6QmHWouOWQSkhRPsOs3HTAJCUE1rXrzGKkbFNcTRGonJjeCxhiMH6UtPNe2GuDWwxIYcGBt8s3lX7rELs+s2GbnFQke4dv0CMctHFgEPii/W58cwfV8K4z3VOabziakyPMv1ylLpMbTy4kSVlt1yhY4Cqa7u8KCqxibMYvX1Q9KiTXCB6CqeAczS9jdA/W2b8CIH/GCuFMg6I0zoYMlH46y9E4QKH9BnfMdSAFLo9MEa/cjenFVQtenJrW/bkIeC7KjCqHgUIxxn8wq7DF7uMMUv9DhYFkWwgUcBA/8tNNWqoLnD4avWW3/LPe8VmW0vvOdtmZqCzVekhuFWdZgOgCwAhzt2//Df+zpp2J/h3fThX0nsBOy8lzsRhvOFfIY2SQKWnRdel1zRWKY5/ochEXrj7pyZ7XczYQKU4VYB5DrZICgwDolJxpIejkfkGWEgHnVyBA5d0KZ3rBDHtJfMo9rBkuvGSFjPfuLdukUpUXcsjk12dac6H1SOr5lcfPUuWrWd5SIuYHFMYHDs/wyBPsIkOSA==
+  template:
+    metadata:
+      annotations:
+        sealedsecrets.bitnami.com/namespace-wide: "true"
+      name: harbor-oidc
+      namespace: harbor
