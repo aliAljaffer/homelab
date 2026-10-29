@@ -9,10 +9,19 @@ spec:
     matchLabels:
       app: ntfy
   ingress:
-    # public: iOS app subscribing, web push
+    # public: ntfy-api.alialjaffer.com, the iOS app (ntfy's own auth applies)
     - fromEndpoints:
         - matchLabels:
             "k8s:io.kubernetes.pod.namespace": cloudflare-tunnel-system
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+    # public: ntfy.alialjaffer.com, browser traffic after Keycloak login
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": ntfy
+            app.kubernetes.io/name: oauth2-proxy
       toPorts:
         - ports:
             - port: "80"
@@ -42,6 +51,61 @@ spec:
     # upstream relay for iOS push delivery (see README)
     - toFQDNs:
         - matchName: "ntfy.sh"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: ntfy-oauth2-proxy
+  namespace: ntfy
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: oauth2-proxy
+  ingress:
+    # Cilium Gateway (cloudflared reaches the gateway, the gateway reaches here)
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": cloudflare-tunnel-system
+      toPorts:
+        - ports:
+            - port: "4180"
+              protocol: TCP
+    # kubelet readiness/liveness probes come from the node
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "4180"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": ntfy
+            app: ntfy
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+    # OIDC discovery + token exchange against the public issuer
+    - toFQDNs:
+        - matchName: "kc.alialjaffer.com"
       toPorts:
         - ports:
             - port: "443"

@@ -1,0 +1,83 @@
+---
+# Harbor has no declarative representation for proxy-cache registries/projects,
+# so this one-shot Job creates them through the API. It is idempotent.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: harbor-proxy-cache-setup
+  namespace: harbor
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  backoffLimit: 20
+  activeDeadlineSeconds: 1800
+  template:
+    metadata:
+      labels:
+        app: harbor-proxy-cache-setup
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: setup
+          image: alpine:3.21
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+              apk add --no-cache curl jq >/dev/null
+
+              until curl -fsS -u "$USER:$PASS" "$HARBOR/api/v2.0/systeminfo" >/dev/null 2>&1; do
+                echo "waiting for harbor..."
+                sleep 5
+              done
+
+              registry_id() {
+                curl -fsS -u "$USER:$PASS" "$HARBOR/api/v2.0/registries?page_size=100" \
+                  | jq -r --arg n "$1" 'map(select(.name == $n))[0].id // empty'
+              }
+
+              ensure_registry() {
+                id=$(registry_id "$1")
+                if [ -z "$id" ]; then
+                  curl -fsS -u "$USER:$PASS" -X POST -H 'Content-Type: application/json' \
+                    -d "{\"name\":\"$1\",\"type\":\"$2\",\"url\":\"$3\",\"insecure\":false}" \
+                    "$HARBOR/api/v2.0/registries" >/dev/null
+                  id=$(registry_id "$1")
+                fi
+                printf '%s' "$id"
+              }
+
+              ensure_project() {
+                if [ "$(curl -fsS -u "$USER:$PASS" "$HARBOR/api/v2.0/projects?name=$1" | jq 'length')" -eq 0 ]; then
+                  curl -fsS -u "$USER:$PASS" -X POST -H 'Content-Type: application/json' \
+                    -d "{\"project_name\":\"$1\",\"public\":true,\"registry_id\":$2,\"metadata\":{\"public\":\"true\"}}" \
+                    "$HARBOR/api/v2.0/projects" >/dev/null
+                fi
+              }
+
+              ensure_project dockerhub "$(ensure_registry dockerhub docker-hub https://hub.docker.com)"
+              ensure_project ghcr "$(ensure_registry ghcr github-ghcr https://ghcr.io)"
+              ensure_project quay "$(ensure_registry quay quay https://quay.io)"
+              ensure_project k8s "$(ensure_registry k8s docker-registry https://registry.k8s.io)"
+
+              echo "proxy cache projects are ready"
+          env:
+            - name: HARBOR
+              value: http://harbor-core
+            - name: USER
+              value: admin
+            - name: PASS
+              valueFrom:
+                secretKeyRef:
+                  name: harbor-admin
+                  key: HARBOR_ADMIN_PASSWORD
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]

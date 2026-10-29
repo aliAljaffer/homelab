@@ -1,0 +1,16 @@
+---
+# Non-secret settings for the reusable oauth2-proxy component
+# (kubernetes/components/oauth2-proxy). Only the browser-facing hostname goes
+# through this; the iOS app uses ntfy-api.alialjaffer.com directly because it
+# cannot follow an OIDC redirect.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oauth2-proxy-config
+  namespace: ntfy
+data:
+  OAUTH2_PROXY_UPSTREAMS: "http://ntfy.ntfy.svc.cluster.local:80"
+  OAUTH2_PROXY_REDIRECT_URL: "https://ntfy.alialjaffer.com/oauth2/callback"
+  OAUTH2_PROXY_COOKIE_DOMAINS: ".alialjaffer.com"
+  OAUTH2_PROXY_WHITELIST_DOMAINS: ".alialjaffer.com"
+  OAUTH2_PROXY_EMAIL_DOMAINS: "*"

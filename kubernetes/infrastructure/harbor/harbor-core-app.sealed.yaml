@@ -1,0 +1,18 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  annotations:
+    sealedsecrets.bitnami.com/namespace-wide: "true"
+  name: harbor-core-app
+  namespace: harbor
+spec:
+  encryptedData:
+    CSRF_KEY: AgAiJxx/l5cgSo6wtvVtYl+MGcAZpjiZec4RRYDL5l1ubhY822xMP19+xWXsAWNcbJUdXcg0G37f3ewinX87RQ+WqTs4hZfU4dTiHNN0xLcqgzkjI+4tDeLifs2aBekpO5GlyCZ5dJhg023/8C+KB3C8hMm0uYRxqp84fTNXBVrvY8sPthu+Ta4y9t/Za8cX/0q3k+l9NyDXXoUR7NwBJoezOcKMDKVX7JIj+gNzqaDMlBqxb/cm+af/e6wAoQph3uxE4AhViSkBegYdpB4Kxr5orP0FWNxYlxvF1GpYIoPA6h7e6ltAegNtzw0hjEdO0k9x/+e212+ObuWSX1dIklgIob9gozr7o3hhab6/pOeD/0zXQfgY5PuL6oSen6Oh99To5rf8aNUaJrXymVhX8RqkfUl3+P424o4BL8YpL86IqkomUKAHJveTHbHBCk1r5YpXLcs39ekVuxjsc4Te+SDzT1oduJpV/DwQ0I6REcUvcdxScgkXYQDojXxTShB1Sx7b99w85jHy8qyrd9IRfUIcnzRZPVO9U4o8b/FMTx9CIc55dMNa4h3GntME5yaE62NxvJtZJ8doIgkva+kHFskR7FyKw+xuUDUPmM23FMlIKv71do7t6TBw/AeVJ+rapG8u+SuWDwM1Vzx5J99J+pVAzr5kcIYu7vrvr47zwA3QkojgdSnerS0r4+NaA5OX7HLq9N/K2r5GbJeMcInz3NfcEsOTt2/yx27hSFT552fqBA==
+    secret: AgA01wH2lRstX8nRzQbP1hyciiigemiKRHK/fA+pHggr4kHZL3sYL0Lol9ii7Mzas/WwDKpxnRa8eQKcL8lKd+lESmq56TVR5e8nK8mKF+je8SBNL04lVx53muwSGBGS1cd/ZsmUXjKtTilB/yyd0UZlyW7Dzk3fwfsZyyWfwzYEbYtIpp1J5jYXozhq6KPvSdQ7ok4G2SclZ4RemxihcVVtIN4IY30ypKr7kYG3wiUefd/H3ebkyDaPRy9e/9UGY0lGQxRC12ni8bSEbxkg7hJdr91zB1G5Y+jTuiEsNvg71ommfVxUTzrTUbbXuJ08R+74ZNxdh0baMBov8mqnv8YGoVAiikGVYzGqq8mCi6hG6n6UHPTNqpvHQJMePwrPQCWr8aIIC1Bi5/TG/6T+gWbQ4lCTpklp9Qon/WJUnfbgDaI/opELRcOH2p/t0Kxpau/TZ/c4Y+ssNJZn/5YhNVr0QE1KK49uJelDQO+rz/sdcyuSR3kvdxhuA5tCMX9q4AAxS2DfkaEGpNtvwpxYpm4pwn8pe2CK6ifabAkkX/aH6pr1TQq0qgGoI0XTcuOAFWvHb/hfZ7eTfN4VwqGgglkXsHamWOjWtnZ2zv5W1LV1q1dMBL6VXmfivGUrt1YkhjjZDTE4xuyi+MXji+8inxVmv6WIfwsWjuRs+F1lIct3WQ0JXOLy8RJ6AaRxsDgXFjy6dYSv1lIiGNeWIjMitEsF
+  template:
+    metadata:
+      annotations:
+        sealedsecrets.bitnami.com/namespace-wide: "true"
+      name: harbor-core-app
+      namespace: harbor
