@@ -1,0 +1,37 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["^kubernetes/apps/arc/runner-image/versions\\.env$"],
+      "matchStrings": ["GO_VERSION=(?<currentValue>\\S+)"],
+      "depNameTemplate": "go",
+      "datasourceTemplate": "golang-version"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": ["^kubernetes/apps/arc/runner-image/versions\\.env$"],
+      "matchStrings": ["NODE_VERSION=(?<currentValue>\\S+)"],
+      "depNameTemplate": "node",
+      "datasourceTemplate": "node-version"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": ["^kubernetes/apps/arc/runner-image/versions\\.env$"],
+      "matchStrings": ["GH_VERSION=(?<currentValue>\\S+)"],
+      "depNameTemplate": "cli/cli",
+      "datasourceTemplate": "github-releases"
+    }
+  ],
+  "packageRules": [
+    {
+      "matchDatasources": ["golang-version"],
+      "allowedVersions": "/^1\\.27\\./"
+    },
+    {
+      "matchDatasources": ["node-version"],
+      "allowedVersions": "/^22\\./"
+    }
+  ]
+}

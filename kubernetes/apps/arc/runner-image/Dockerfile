@@ -43,16 +43,20 @@ RUN curl -fsSL "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_$
 
 COPY go/grooszy/go.mod go/grooszy/go.sum /tmp/go-cache/grooszy/
 COPY go/chat/go.mod go/chat/go.sum /tmp/go-cache/chat/
+COPY go/fai/go.mod go/fai/go.sum /tmp/go-cache/fai/
 RUN cd /tmp/go-cache/grooszy && go mod download \
     && cd /tmp/go-cache/chat && go mod download \
+    && cd /tmp/go-cache/fai && go mod download \
     && rm -rf /tmp/go-cache
 
 COPY root/package.json root/package-lock.json /tmp/npm-root/
 COPY web/package.json web/package-lock.json /tmp/npm-web/
+COPY fai/frontend/package.json fai/frontend/package-lock.json /tmp/npm-fai/
 RUN cd /tmp/npm-root && npm ci --cache /home/runner/.npm --no-audit --no-fund \
     && npx playwright install --with-deps chromium \
     && cd /tmp/npm-web && npm ci --cache /home/runner/.npm --no-audit --no-fund \
-    && rm -rf /tmp/npm-root /tmp/npm-web
+    && cd /tmp/npm-fai && npm ci --cache /home/runner/.npm --no-audit --no-fund \
+    && rm -rf /tmp/npm-root /tmp/npm-web /tmp/npm-fai
 
 RUN chown -R runner:docker /home/runner/go /home/runner/.npm /home/runner/.cache \
     && mkdir -p /opt/hostedtoolcache \

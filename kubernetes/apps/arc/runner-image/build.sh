@@ -8,11 +8,13 @@ trap 'rm -rf "$tmp"' EXIT
 for repo in grooszy chat-gateway fai; do
   git clone --depth 1 "git@github.com:aliAljaffer/$repo.git" "$tmp/apps/$repo"
 done
-mkdir -p "$tmp/context"/{go/grooszy,go/chat,root,web}
+mkdir -p "$tmp/context"/{go/grooszy,go/chat,go/fai,root,web,fai/frontend}
 cp "$tmp/apps/grooszy/go.mod" "$tmp/apps/grooszy/go.sum" "$tmp/context/go/grooszy/"
 cp "$tmp/apps/chat-gateway/go.mod" "$tmp/apps/chat-gateway/go.sum" "$tmp/context/go/chat/"
+cp "$tmp/apps/fai/backend/go.mod" "$tmp/apps/fai/backend/go.sum" "$tmp/context/go/fai/"
 cp "$tmp/apps/grooszy/package.json" "$tmp/apps/grooszy/package-lock.json" "$tmp/context/root/"
 cp "$tmp/apps/grooszy/web/package.json" "$tmp/apps/grooszy/web/package-lock.json" "$tmp/context/web/"
+cp "$tmp/apps/fai/frontend/package.json" "$tmp/apps/fai/frontend/package-lock.json" "$tmp/context/fai/frontend/"
 docker build --platform linux/amd64 --provenance=false --sbom=false \
   --build-arg BASE_IMAGE="$BASE_IMAGE" \
   --build-arg GO_VERSION="$GO_VERSION" \
