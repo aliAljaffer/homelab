@@ -13,11 +13,17 @@ Staged self-hosted runner, currently only for `aliAljaffer/chat-gateway`.
   It needs **Administration: Read and write** and must be installed on the repo.
 - `arc-runners` is labelled `pod-security.kubernetes.io/enforce: privileged`
   because the dind sidecar is privileged.
-- Both the runner and dind images are pushed to Harbor's `mirror` project
-  (`harbor.alialjaffer.com/mirror/actions-runner:2.338.2` and
-  `.../mirror/dind:29.9.2`) and pre-pulled on the workers, so runner pods start
-  without a GHCR cold pull. Use a current runner image: 2.334.0 exits with code
-  7 ("outdated") and sends ARC into its outdated loop.
+- Both the runner and dind images are pushed to Harbor's `mirror` project and
+  pre-pulled on the workers, so runner pods start without a GHCR cold pull:
+  `harbor.alialjaffer.com/mirror/actions-runner@sha256:0ce3288e...` and
+  `.../mirror/dind@sha256:97545b7...`. Harbor did not persist the pushed tags,
+  so the scale set uses digest-only refs. Use a current runner image: 2.334.0
+  exits with code 7 ("outdated") and sends ARC into its outdated loop.
+- The `chat-gateway` workflow installs `gcc`/`libc6-dev` because the official
+  image has no C compiler for `go test -race`; `setup-go` also downloads the Go
+  toolchain per ephemeral runner (the bulk of the 4-minute test job). A thin
+  image with Go/gcc preinstalled would cut that, at the cost of maintaining an
+  image.
 
 To add another repo: add an Application like
 `arc-runner-chat-gateway.yaml` with a different release name and
