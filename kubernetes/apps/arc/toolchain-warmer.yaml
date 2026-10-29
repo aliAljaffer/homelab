@@ -1,0 +1,32 @@
+---
+# Keeps the toolchain and dind images hot on every worker, so a fresh runner
+# pod never waits on a 6.5 GB image pull. The build workflow bumps both digests.
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: arc-toolchain-warmer
+  namespace: arc-runners
+spec:
+  selector:
+    matchLabels:
+      app: arc-toolchain-warmer
+  template:
+    metadata:
+      labels:
+        app: arc-toolchain-warmer
+    spec:
+      containers:
+        - name: runner
+          image: harbor.alialjaffer.com/mirror/runner-toolchain@sha256:cf6c82dd5b69e9a811266bc96a5a1356eb31e1c842e3f06ce9ed363bfc155abd
+          command: ["sleep", "infinity"]
+          resources:
+            requests:
+              cpu: 1m
+              memory: 8Mi
+        - name: dind
+          image: harbor.alialjaffer.com/mirror/dind@sha256:97545b7bab66319a476800a85b008b25c06681733d484909e2a776281e41574f
+          command: ["sleep", "infinity"]
+          resources:
+            requests:
+              cpu: 1m
+              memory: 8Mi

@@ -1,0 +1,243 @@
+name: Build runner toolchain
+
+on:
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Rebuild even if nothing changed
+        type: boolean
+        default: false
+  schedule:
+    - cron: "0 3 * * 1"
+  push:
+    paths:
+      - "kubernetes/apps/arc/runner-image/**"
+      - ".github/workflows/build-runner-image.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: runner-toolchain
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.diff.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Mint app token
+        id: app
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.HOMELAB_APP_ID }}
+          private-key: ${{ secrets.HOMELAB_APP_PRIVATE_KEY }}
+          owner: aliAljaffer
+          repositories: grooszy,chat-gateway,fai
+
+      - uses: actions/checkout@v4
+        with:
+          repository: aliAljaffer/grooszy
+          token: ${{ steps.app.outputs.token }}
+          path: apps/grooszy
+      - uses: actions/checkout@v4
+        with:
+          repository: aliAljaffer/chat-gateway
+          token: ${{ steps.app.outputs.token }}
+          path: apps/chat-gateway
+      - uses: actions/checkout@v4
+        with:
+          repository: aliAljaffer/fai
+          token: ${{ steps.app.outputs.token }}
+          path: apps/fai
+
+      - name: Resolve versions and hashes
+        run: |
+          set -euo pipefail
+          source kubernetes/apps/arc/runner-image/versions.env
+          maxgo=$(find apps -name go.mod -print0 | xargs -0 grep -h '^go ' | awk '{print $2}' | sort -V | tail -1)
+          echo "Image Go=$GO_VERSION, highest repo go directive=$maxgo"
+          if [ "$(printf '%s\n%s\n' "$GO_VERSION" "$maxgo" | sort -V | tail -1)" != "$GO_VERSION" ]; then
+            echo "::error::Runner image Go ($GO_VERSION) is older than a repo's go directive ($maxgo). Bump GO_VERSION in versions.env."
+            exit 1
+          fi
+
+          dockerfile_sha=$(sha256sum kubernetes/apps/arc/runner-image/Dockerfile | awk '{print $1}')
+          lock_hash=$(sha256sum \
+            apps/grooszy/go.mod apps/grooszy/go.sum \
+            apps/grooszy/package.json apps/grooszy/package-lock.json \
+            apps/grooszy/web/package.json apps/grooszy/web/package-lock.json \
+            apps/chat-gateway/go.mod apps/chat-gateway/go.sum \
+            apps/fai/backend/go.mod apps/fai/backend/go.sum \
+            | sha256sum | awk '{print $1}')
+
+          {
+            echo "GO_VERSION=$GO_VERSION"
+            echo "NODE_VERSION=$NODE_VERSION"
+            echo "GH_VERSION=$GH_VERSION"
+            echo "BASE_IMAGE=$BASE_IMAGE"
+            echo "DOCKERFILE_SHA=$dockerfile_sha"
+            echo "LOCK_HASH=$lock_hash"
+          } > desired.env
+          cat desired.env
+
+      - name: Compare with last build
+        id: diff
+        run: |
+          if [ "${{ inputs.force }}" = "true" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ ! -f kubernetes/apps/arc/runner-image/versions.lock ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if diff -q desired.env kubernetes/apps/arc/runner-image/versions.lock >/dev/null; then
+            echo "No version, Dockerfile, base-image or lockfile changes; skipping."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            diff -u kubernetes/apps/arc/runner-image/versions.lock desired.env || true
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desired-env
+          path: desired.env
+          retention-days: 1
+
+  build:
+    needs: check
+    if: needs.check.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Mint app token
+        id: app
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.HOMELAB_APP_ID }}
+          private-key: ${{ secrets.HOMELAB_APP_PRIVATE_KEY }}
+          owner: aliAljaffer
+          repositories: grooszy,chat-gateway,fai
+
+      - uses: actions/checkout@v4
+        with:
+          repository: aliAljaffer/grooszy
+          token: ${{ steps.app.outputs.token }}
+          path: apps/grooszy
+      - uses: actions/checkout@v4
+        with:
+          repository: aliAljaffer/chat-gateway
+          token: ${{ steps.app.outputs.token }}
+          path: apps/chat-gateway
+      - uses: actions/checkout@v4
+        with:
+          repository: aliAljaffer/fai
+          token: ${{ steps.app.outputs.token }}
+          path: apps/fai
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: desired-env
+          path: .
+
+      - name: Assemble build context
+        run: |
+          set -euo pipefail
+          ctx="$RUNNER_TEMP/runner-image-context"
+          mkdir -p "$ctx"/go/grooszy "$ctx"/go/chat "$ctx"/root "$ctx"/web
+          cp apps/grooszy/go.mod apps/grooszy/go.sum "$ctx/go/grooszy/"
+          cp apps/chat-gateway/go.mod apps/chat-gateway/go.sum "$ctx/go/chat/"
+          cp apps/grooszy/package.json apps/grooszy/package-lock.json "$ctx/root/"
+          cp apps/grooszy/web/package.json apps/grooszy/web/package-lock.json "$ctx/web/"
+          echo "CONTEXT=$ctx" >> "$GITHUB_ENV"
+
+      - name: Read versions
+        run: |
+          set -euo pipefail
+          set -a
+          source desired.env
+          set +a
+          {
+            echo "GO_VERSION=$GO_VERSION"
+            echo "NODE_VERSION=$NODE_VERSION"
+            echo "GH_VERSION=$GH_VERSION"
+            echo "BASE_IMAGE=$BASE_IMAGE"
+          } >> "$GITHUB_ENV"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: harbor.alialjaffer.com
+          username: ${{ secrets.HARBOR_USERNAME }}
+          password: ${{ secrets.HARBOR_PASSWORD }}
+
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ env.CONTEXT }}
+          file: kubernetes/apps/arc/runner-image/Dockerfile
+          platforms: linux/amd64
+          push: true
+          provenance: false
+          sbom: false
+          build-args: |
+            BASE_IMAGE=${{ env.BASE_IMAGE }}
+            GO_VERSION=${{ env.GO_VERSION }}
+            NODE_VERSION=${{ env.NODE_VERSION }}
+            GH_VERSION=${{ env.GH_VERSION }}
+          tags: |
+            harbor.alialjaffer.com/mirror/runner-toolchain:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Smoke test
+        run: |
+          set -euo pipefail
+          image="harbor.alialjaffer.com/mirror/runner-toolchain@${{ steps.build.outputs.digest }}"
+          docker run --rm --entrypoint bash "$image" -lc '
+            set -e
+            go version
+            node --version
+            gh --version
+            gcc --version | head -1
+            python3 --version
+            test -d /home/runner/.cache/ms-playwright
+            test -w /opt/hostedtoolcache
+          '
+
+      - name: Update lock, runner sets and warmer
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          set -euo pipefail
+          cp desired.env kubernetes/apps/arc/runner-image/versions.lock
+          for f in kubernetes/argocd/apps/workloads/arc-runner-*.yaml kubernetes/apps/arc/toolchain-warmer.yaml; do
+            [ -f "$f" ] || continue
+            sed -i -E "s|(harbor\.alialjaffer\.com/mirror/runner-toolchain)@sha256:[0-9a-f]{64}|\1@${DIGEST}|g" "$f"
+          done
+
+          git config user.name "runner-image-bot"
+          git config user.email "runner-image-bot@users.noreply.github.com"
+          git add kubernetes/apps/arc/runner-image/versions.lock \
+            kubernetes/argocd/apps/workloads/arc-runner-*.yaml \
+            kubernetes/apps/arc/toolchain-warmer.yaml
+          if git diff --cached --quiet; then
+            echo "Nothing changed."
+            exit 0
+          fi
+          git commit -m "arc: bump runner toolchain image to ${DIGEST:0:12} [skip ci]"
+          for _ in 1 2 3; do
+            if git push; then
+              exit 0
+            fi
+            git pull --rebase origin main
+          done
+          exit 1
