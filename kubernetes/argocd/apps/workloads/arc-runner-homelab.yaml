@@ -1,0 +1,100 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: arc-runner-homelab
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: workloads
+  source:
+    repoURL: ghcr.io/actions/actions-runner-controller-charts
+    chart: gha-runner-scale-set
+    targetRevision: 0.14.2
+    helm:
+      releaseName: arc-runner-homelab
+      valuesObject:
+        githubConfigUrl: https://github.com/aliAljaffer/homelab
+        githubConfigSecret: github-app
+        minRunners: 0
+        maxRunners: 1
+        controllerServiceAccount:
+          namespace: arc-systems
+          name: arc-controller-gha-rs-controller
+        template:
+          spec:
+            initContainers:
+              - name: init-dind-externals
+                image: harbor.alialjaffer.com/mirror/runner-toolchain@sha256:cf6c82dd5b69e9a811266bc96a5a1356eb31e1c842e3f06ce9ed363bfc155abd
+                command: ["cp"]
+                args: ["-r", "/home/runner/externals/.", "/home/runner/tmpDir/"]
+                volumeMounts:
+                  - name: dind-externals
+                    mountPath: /home/runner/tmpDir
+            containers:
+              - name: runner
+                image: harbor.alialjaffer.com/mirror/runner-toolchain@sha256:cf6c82dd5b69e9a811266bc96a5a1356eb31e1c842e3f06ce9ed363bfc155abd
+                command: ["/home/runner/run.sh"]
+                env:
+                  - name: DOCKER_HOST
+                    value: "unix:///var/run/docker.sock"
+                  - name: RUNNER_WAIT_FOR_DOCKER_IN_SECONDS
+                    value: "120"
+                resources:
+                  requests:
+                    cpu: 100m
+                    memory: 256Mi
+                  limits:
+                    memory: 3Gi
+                volumeMounts:
+                  - name: work
+                    mountPath: /home/runner/_work
+                  - name: dind-sock
+                    mountPath: /var/run
+              - name: dind
+                image: harbor.alialjaffer.com/mirror/dind@sha256:97545b7bab66319a476800a85b008b25c06681733d484909e2a776281e41574f
+                args:
+                  - dockerd
+                  - --host=unix:///var/run/docker.sock
+                  - --group=$(DOCKER_GROUP_GID)
+                env:
+                  - name: DOCKER_GROUP_GID
+                    value: "123"
+                securityContext:
+                  privileged: true
+                resources:
+                  requests:
+                    cpu: 100m
+                    memory: 512Mi
+                  limits:
+                    memory: 8Gi
+                startupProbe:
+                  exec:
+                    command: ["docker", "info"]
+                  initialDelaySeconds: 0
+                  failureThreshold: 24
+                  periodSeconds: 5
+                volumeMounts:
+                  - name: work
+                    mountPath: /home/runner/_work
+                  - name: dind-sock
+                    mountPath: /var/run
+                  - name: dind-externals
+                    mountPath: /home/runner/externals
+            volumes:
+              - name: work
+                emptyDir: {}
+              - name: dind-sock
+                emptyDir: {}
+              - name: dind-externals
+                emptyDir: {}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: arc-runners
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
