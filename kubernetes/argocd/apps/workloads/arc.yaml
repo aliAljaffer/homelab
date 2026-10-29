@@ -1,0 +1,40 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: arc
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: workloads
+  sources:
+    - repoURL: git@github.com:aliAljaffer/homelab.git
+      targetRevision: main
+      path: kubernetes/apps/arc
+    - repoURL: ghcr.io/actions/actions-runner-controller-charts
+      chart: gha-runner-scale-set-controller
+      targetRevision: 0.14.2
+      helm:
+        releaseName: arc-controller
+        valuesObject:
+          metrics:
+            controllerManagerAddr: ":8080"
+            listenerAddr: ":8080"
+            listenerEndpoint: "/metrics"
+          resources:
+            requests:
+              cpu: 5m
+              memory: 88Mi
+            limits:
+              memory: 176Mi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: arc-systems
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
