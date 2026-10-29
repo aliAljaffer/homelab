@@ -58,7 +58,7 @@ spec:
               echo "harbor OIDC configured"
           env:
             - name: HARBOR
-              value: http://harbor-core
+              value: https://harbor.alialjaffer.com
             - name: ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
