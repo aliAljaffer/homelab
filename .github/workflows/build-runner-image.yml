@@ -72,6 +72,7 @@ jobs:
             apps/grooszy/web/package.json apps/grooszy/web/package-lock.json \
             apps/chat-gateway/go.mod apps/chat-gateway/go.sum \
             apps/fai/backend/go.mod apps/fai/backend/go.sum \
+            apps/fai/frontend/package.json apps/fai/frontend/package-lock.json \
             | sha256sum | awk '{print $1}')
 
           {
@@ -150,11 +151,13 @@ jobs:
         run: |
           set -euo pipefail
           ctx="$RUNNER_TEMP/runner-image-context"
-          mkdir -p "$ctx"/go/grooszy "$ctx"/go/chat "$ctx"/root "$ctx"/web
+          mkdir -p "$ctx"/go/grooszy "$ctx"/go/chat "$ctx"/go/fai "$ctx"/root "$ctx"/web "$ctx"/fai/frontend
           cp apps/grooszy/go.mod apps/grooszy/go.sum "$ctx/go/grooszy/"
           cp apps/chat-gateway/go.mod apps/chat-gateway/go.sum "$ctx/go/chat/"
+          cp apps/fai/backend/go.mod apps/fai/backend/go.sum "$ctx/go/fai/"
           cp apps/grooszy/package.json apps/grooszy/package-lock.json "$ctx/root/"
           cp apps/grooszy/web/package.json apps/grooszy/web/package-lock.json "$ctx/web/"
+          cp apps/fai/frontend/package.json apps/fai/frontend/package-lock.json "$ctx/fai/frontend/"
           echo "CONTEXT=$ctx" >> "$GITHUB_ENV"
 
       - name: Read versions
