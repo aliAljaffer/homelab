@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: fai-frontend
-          image: ghcr.io/alialjaffer/fai-frontend@sha256:633c316977c7765b81b6411ed8a607aff6a96557880dc7efec2c4fd820c79ccd
+          image: ghcr.io/alialjaffer/fai-frontend@sha256:486d3c389e98a0de3b08ea66d6f5b4d67b1e901cbda765c41297baaac38b25b7
           ports:
             - containerPort: 80
           resources:
