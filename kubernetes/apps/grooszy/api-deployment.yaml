@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: harbor.alialjaffer.com/mirror/grooszy-api@sha256:e5d74dfae85d9196a159988e6576ff7f87d77bad10c5f4f1206b3c750951d7e4
+          image: harbor.alialjaffer.com/mirror/grooszy-api@sha256:90b8a4c9e211f544879b96cd27bbc4f02a5a11c98be6e71cf7c8aba9b712c245
           ports:
             - containerPort: 8080
               name: http
