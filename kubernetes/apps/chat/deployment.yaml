@@ -37,7 +37,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: opencode
-          image: ghcr.io/alialjaffer/chat-gateway@sha256:ff57c1fee4064bc84278513d1dd46723499db43f6730e2d36541b8e14008fc47
+          image: ghcr.io/alialjaffer/chat-gateway@sha256:b58e0b58323f47eeee1a9eaca490913b3136535129b6a3fcbf17de476055c54f
           imagePullPolicy: IfNotPresent
           command: ["sh", "-ec"]
           args:
@@ -115,7 +115,7 @@ spec:
               mountPath: /workspace
 
         - name: gateway
-          image: ghcr.io/alialjaffer/chat-gateway@sha256:ff57c1fee4064bc84278513d1dd46723499db43f6730e2d36541b8e14008fc47
+          image: ghcr.io/alialjaffer/chat-gateway@sha256:b58e0b58323f47eeee1a9eaca490913b3136535129b6a3fcbf17de476055c54f
           imagePullPolicy: IfNotPresent
           command: ["/usr/local/bin/chat-gateway"]
           env:
