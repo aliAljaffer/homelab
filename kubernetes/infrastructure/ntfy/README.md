@@ -43,6 +43,12 @@ auth (ntfy#1971), so a reverse proxy can never become ntfy's identity source:
   exposure as before: publish/subscribe are `deny-all`, `/` and `/v1/health` are
   public.
 
+Both hostnames serve the same ntfy process, so `https://ntfy-api.../` also loads
+the web app shell. Gating the UI is therefore per-hostname and cosmetic; the data
+is protected by ntfy's auth on both. To hide it on the api host too you'd need a
+Cloudflare WAF rule (not managed in this repo) — ntfy's `web-root: disable` would
+also kill the UI on the gated hostname.
+
 `base-url` stays on the UI hostname. That does not affect iOS push: the relay's
 poll request carries only topic + id, and the app polls the server URL configured
 in the app (the api host).
