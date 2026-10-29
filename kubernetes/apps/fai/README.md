@@ -43,7 +43,9 @@ the deployment wiring differs.
   assistant credentials: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_ALLOWED_USER_ID`, and
   `TELEGRAM_ALLOWED_CHAT_ID`. `TELEGRAM_STATE_FILE` points at
   `/data/attachments/telegram-offset` so the update offset survives restarts on
-  the attachments PVC.
+  the attachments PVC. `ELEVENLABS_API_KEY` (with the `speech_to_text`
+  permission) and `ELEVENLABS_STT_MODEL=scribe_v2` enable voice-note
+  transcription.
 
 ## Calendar feed
 
