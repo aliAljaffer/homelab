@@ -1,0 +1,17 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  annotations:
+    sealedsecrets.bitnami.com/namespace-wide: "true"
+  name: harbor-global
+  namespace: harbor
+spec:
+  encryptedData:
+    secretKey: AgDO5FQ5rw/Xs6OEJLLszORG4Tn79ORyNEGe3W8mRsRTlNp3ola5D6UM9Xq2PsjQ2NawEkljr3x3B2G0tctXmMhV+aMJILb37/6/7CKpocqlBgv6Esf8Q7QCGIRgdCP/qAjte4S6nFwuNxlP+Xh3BuiEH8LHfTZES6KNZTDcAFZZUsdzlzZj7SHW0ykyUH4mU3Iv+pi+VOLADlAUYiEyK10GOmAfIshg8ysRpMVj/UhIq2XmjFfDMapLrzMamXfPNKvRB9FVZqvwV4r1+S7C+pM9Gv5XOTbsYPSHnSj8t53fIUGV49rvu5XKeZJdcTMcHaVnyjA6klJxReKXg/KCICYZEvntVTDEL88XzHLy8hVHShHoJblI4RfzEe3ZajlbnyESUi3icoE/B1eAkN5VsyFJWeze0P/1rH+6YQHmo+gB+ygWB53jJP2iTwnhyDmhLbQYOFMd9FDO391znN1sMmwp/W9CYO+b/mMlYrgMF5NwI6uN9WuAUu6n93lNjiRd4IwvHoFV5zdFZvuTE0ueq3WBGNdBqGvfKRrtriBJIZ/0fQLOfcjmKEUVuYhCaNtYio1j1iWGfg57OwncggCtl+8Fb8+7J+Ogdp2y1KFvulYQUuIjx88DtNnsyObeU1287pQgpgIXMkIPeReJ6rfffLJpJv5cihJOy4zApl8ftd/6TqYFt8/+mEhU5fy5wnaVC6Z+5bA05b8veup8Fk+7Z53e
+  template:
+    metadata:
+      annotations:
+        sealedsecrets.bitnami.com/namespace-wide: "true"
+      name: harbor-global
+      namespace: harbor

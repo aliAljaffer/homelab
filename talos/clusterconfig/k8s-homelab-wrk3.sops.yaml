@@ -3,7 +3,7 @@ debug: false
 persist: true
 machine:
     type: worker
-    token: ENC[AES256_GCM,data:kbMi4foTnGakFx+w2NGwckj78+Bxtm0=,iv:kBKi6LZubfuGPqNxGRhqrpq1GuMOuMLzSpKWVv43FVs=,tag:hmz1QWfowI/XDQWFgVxpnQ==,type:str]
+    token: ENC[AES256_GCM,data:C6+pjP2rQtFdn6Pmd5pmRtxohZYReIQ=,iv:qOfhInw2bvZMcNgbH+HPr26rLzOuWpLVNax6yrywc7o=,tag:UyIm7Gv/Y52udw9cZ1Jq1Q==,type:str]
     ca:
         crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJQakNCOGFBREFnRUNBaEJJLzhPcVIyWGpZWDZZOWJXZzFCMmJNQVVHQXl0bGNEQVFNUTR3REFZRFZRUUsKRXdWMFlXeHZjekFlRncweU5qQTNNamd4TlRFd01ERmFGdzB6TmpBM01qVXhOVEV3TURGYU1CQXhEakFNQmdOVgpCQW9UQlhSaGJHOXpNQ293QlFZREsyVndBeUVBUFlKMW1hc2RtdlpLQzFwUmg5Z3pFMkJaMjUwalo0RGgvcE11ClcrS0NCbHVqWVRCZk1BNEdBMVVkRHdFQi93UUVBd0lDaERBZEJnTlZIU1VFRmpBVUJnZ3JCZ0VGQlFjREFRWUkKS3dZQkJRVUhBd0l3RHdZRFZSMFRBUUgvQkFVd0F3RUIvekFkQmdOVkhRNEVGZ1FVSHZQOFpYQjBjWWtPKzlvOAorLzZFSUx1RkV5Y3dCUVlESzJWd0EwRUFESE5TWHJ5MW9LWVpNTFc0VWNKV3RtenlhMEs4ZUxKNDVBbG9LakdxCkYzaTVYWmhWS0ZOTlUvaUN0TnZQdWdJL3pXYkIyVlo0bUsyaUloYlEvanZoREE9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
         key: ""
@@ -37,7 +37,7 @@ machine:
             forwardKubeDNSToHost: true
 cluster:
     id: hPEZEXUQ2jkxmyO6ueDejoY9OkCLFGOFjqLpas6WNug=
-    secret: ENC[AES256_GCM,data:wZHrOzsISHP5+KILu4ev7OZzBHEitYmhkN/U5Wuvm+39Mk9+5MJLFr7LbMs=,iv:GpWm93x2PmF04y9yZxrWjnhH7dqVkM/1OEViDoWHCQ4=,tag:qdcPfXS2A+MH2uF1uKRPOg==,type:str]
+    secret: ENC[AES256_GCM,data:zHtKPIH4/vNFj8aAJd9LyhezloaFAfKNsPN6kdiRNU2oxpLtgL3nyasrgos=,iv:si9TYxgx4RbwpTHRMxmoqXtC7JOBmrMBSTCNRvEbXLA=,tag:aNz+b9mH0ukn3g6uGIOGBA==,type:str]
     controlPlane:
         endpoint: https://api.alialjaffer.com:6443
     clusterName: k8s-homelab
@@ -47,7 +47,7 @@ cluster:
             - 10.244.0.0/16
         serviceSubnets:
             - 10.96.0.0/12
-    token: ENC[AES256_GCM,data:6FG95UM9NNppDABUNgEvJo9kYlhQF1k=,iv:HuehAkSyeTqMrFCyW9Ys1h7G7//a3G6Nleof3/2LwFs=,tag:rRje9VonmISzhJN/ZR7ndA==,type:str]
+    token: ENC[AES256_GCM,data:9P76TXIHOoyCHj5ljnLprlkloVdhPR8=,iv:VnvDkFpesdZkNzxdiUqr991X/OQmGxkUsYxvoDaEiHw=,tag:5iHPpe1LatTR5TNGOUPpGg==,type:str]
     ca:
         crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJpekNDQVRDZ0F3SUJBZ0lSQUpvOXhydHpaemVrQ3FTNVAray9ZR1V3Q2dZSUtvWkl6ajBFQXdJd0ZURVQKTUJFR0ExVUVDaE1LYTNWaVpYSnVaWFJsY3pBZUZ3MHlOakEzTWpneE5URXdNREZhRncwek5qQTNNalV4TlRFdwpNREZhTUJVeEV6QVJCZ05WQkFvVENtdDFZbVZ5Ym1WMFpYTXdXVEFUQmdjcWhrak9QUUlCQmdncWhrak9QUU1CCkJ3TkNBQVJMNUltUjNnTzNnN2ZyQWJKb2pkRmJmckZPTUIwYitTK3QwbjBxazh4ZTI3NDk0SXY5bXZqVGFQb28KTUxHclVKcFlWTStiQmEyQTRnY1Z6bFpHVWNmR28yRXdYekFPQmdOVkhROEJBZjhFQkFNQ0FvUXdIUVlEVlIwbApCQll3RkFZSUt3WUJCUVVIQXdFR0NDc0dBUVVGQndNQ01BOEdBMVVkRXdFQi93UUZNQU1CQWY4d0hRWURWUjBPCkJCWUVGR3lrOVQ4U1M1YURZWFFWM2VDSEFCNmtXdlRTTUFvR0NDcUdTTTQ5QkFNQ0Ewa0FNRVlDSVFDMVBTQ1IKL0pzK0RZbS9sZjNOM2NISGNWRTZZYVh1bisrWldrVjd3d2JUVFFJaEFMZkRWb29vaUp0VjUwb0NWaUxtSUhQVwpMUmNnVnlOUkdBNUE5V0g5KzZFdgotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
         key: ""
@@ -68,14 +68,14 @@ sops:
         - recipient: age1vum76hps9al4v9y76md3v4ndc35v2w23qc3v0gvzpwyt500ltvaq7ns2tr
           enc: |
             -----BEGIN AGE ENCRYPTED FILE-----
-            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBvTWp4RUw3bGtYdzVXRDcx
-            REtRMXBubXJDdmt0ZkJSVkhONHhsRVhDTzIwCkh3NitXYWlFbmZOMnFwRVpuZ1ZI
-            dlBxbjBOYXNMbHBwbWFTb0l1NGEvQkEKLS0tIDA3eHhhZitQOE5DMENvL0xQZ0ky
-            OUgraVZ2cmswQzdudUp2MHUyWk1KOVkKGhS052VJUU99IFN0QsgQ5GIzRZPDqMFP
-            z/q40TL/BfucqA8HBZbGfMq5gTXvzWDdqBwTPoK/16xcF5Sz6viWGw==
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBDdXgyei9ZR0h2bG9hUElC
+            clRtbkZPRlZWSGFHakFybTFjYURtTnJSWmljCnU1Wi8yOHhkbEhWbzV2OTNVQmdK
+            U1FWdWc3RkVLdktvdVZENkYxeUhmR00KLS0tIHNTaXRmN1kzbmthYm5KdU1YeThy
+            cWtJdE5yZXg5TjV5Wm9qeUZzSHBCWEUKlTBjKEoD3ni/r39IMIcFEhxJGokMPkJA
+            XCnfRonlnO7vuf1faQ5Wbkl4ELlq/B5D5H+8B9cvKkv8OXOzDI6nxg==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-10-16T07:27:06Z"
-    mac: ENC[AES256_GCM,data:14C7aZQYNLJvwAiVIVy7MR7m6DeMPtHLr/8II6JPIz5D6R9RHfD7aYI7C0eM2//PV56HnBEaJa/um71PEZjYGiGg0sdkNVo3bLqWnbMISdYQ+jslPMe5OaPI69MeG1Sg6OtDUH91lGhWEmilscfIDlgFGG9v1dsdxs2jz54YjNU=,iv:xc73zj1gT2N3CY8jEdZDy3a+WeQnUEePgtp7pStsgQ0=,tag:bGIWNRxDlFavqhbYFRR03Q==,type:str]
+    lastmodified: "2026-10-29T11:44:39Z"
+    mac: ENC[AES256_GCM,data:qYA/w+VIXCYqWRp0kRZy16t1AsvkOuTOFMmlMZiUm4WF2/Zw3a3scFSdJTV9FlKD/4n6EapMQ7F6VT6B+NPQys9fXduf7ACXkTJ9XvbRaLn+G37w7WaWCVAUatNDWyTFnc5wAhjHvfQ5BvZjmmZKpIeMPO1aM9OTyxqoagJJonQ=,iv:NNTs/ON4ODzmK+QzgpQDo1vYtJbSYpn9blhHs2h1Img=,tag:HIGi7JWYTASiOIOgfaTYWA==,type:str]
     pgp: []
     encrypted_regex: ^(key|token|secret|secretboxEncryptionSecret)$
     version: 3.9.1
@@ -92,14 +92,122 @@ sops:
         - recipient: age1vum76hps9al4v9y76md3v4ndc35v2w23qc3v0gvzpwyt500ltvaq7ns2tr
           enc: |
             -----BEGIN AGE ENCRYPTED FILE-----
-            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBvTWp4RUw3bGtYdzVXRDcx
-            REtRMXBubXJDdmt0ZkJSVkhONHhsRVhDTzIwCkh3NitXYWlFbmZOMnFwRVpuZ1ZI
-            dlBxbjBOYXNMbHBwbWFTb0l1NGEvQkEKLS0tIDA3eHhhZitQOE5DMENvL0xQZ0ky
-            OUgraVZ2cmswQzdudUp2MHUyWk1KOVkKGhS052VJUU99IFN0QsgQ5GIzRZPDqMFP
-            z/q40TL/BfucqA8HBZbGfMq5gTXvzWDdqBwTPoK/16xcF5Sz6viWGw==
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBDdXgyei9ZR0h2bG9hUElC
+            clRtbkZPRlZWSGFHakFybTFjYURtTnJSWmljCnU1Wi8yOHhkbEhWbzV2OTNVQmdK
+            U1FWdWc3RkVLdktvdVZENkYxeUhmR00KLS0tIHNTaXRmN1kzbmthYm5KdU1YeThy
+            cWtJdE5yZXg5TjV5Wm9qeUZzSHBCWEUKlTBjKEoD3ni/r39IMIcFEhxJGokMPkJA
+            XCnfRonlnO7vuf1faQ5Wbkl4ELlq/B5D5H+8B9cvKkv8OXOzDI6nxg==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-10-16T07:27:06Z"
-    mac: ENC[AES256_GCM,data:14C7aZQYNLJvwAiVIVy7MR7m6DeMPtHLr/8II6JPIz5D6R9RHfD7aYI7C0eM2//PV56HnBEaJa/um71PEZjYGiGg0sdkNVo3bLqWnbMISdYQ+jslPMe5OaPI69MeG1Sg6OtDUH91lGhWEmilscfIDlgFGG9v1dsdxs2jz54YjNU=,iv:xc73zj1gT2N3CY8jEdZDy3a+WeQnUEePgtp7pStsgQ0=,tag:bGIWNRxDlFavqhbYFRR03Q==,type:str]
+    lastmodified: "2026-10-29T11:44:39Z"
+    mac: ENC[AES256_GCM,data:qYA/w+VIXCYqWRp0kRZy16t1AsvkOuTOFMmlMZiUm4WF2/Zw3a3scFSdJTV9FlKD/4n6EapMQ7F6VT6B+NPQys9fXduf7ACXkTJ9XvbRaLn+G37w7WaWCVAUatNDWyTFnc5wAhjHvfQ5BvZjmmZKpIeMPO1aM9OTyxqoagJJonQ=,iv:NNTs/ON4ODzmK+QzgpQDo1vYtJbSYpn9blhHs2h1Img=,tag:HIGi7JWYTASiOIOgfaTYWA==,type:str]
+    pgp: []
+    encrypted_regex: ^(key|token|secret|secretboxEncryptionSecret)$
+    version: 3.9.1
+---
+apiVersion: v1alpha1
+kind: RegistryMirrorConfig
+name: docker.io
+endpoints:
+    - url: https://harbor.alialjaffer.com/v2/dockerhub/
+      overridePath: true
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age:
+        - recipient: age1vum76hps9al4v9y76md3v4ndc35v2w23qc3v0gvzpwyt500ltvaq7ns2tr
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBDdXgyei9ZR0h2bG9hUElC
+            clRtbkZPRlZWSGFHakFybTFjYURtTnJSWmljCnU1Wi8yOHhkbEhWbzV2OTNVQmdK
+            U1FWdWc3RkVLdktvdVZENkYxeUhmR00KLS0tIHNTaXRmN1kzbmthYm5KdU1YeThy
+            cWtJdE5yZXg5TjV5Wm9qeUZzSHBCWEUKlTBjKEoD3ni/r39IMIcFEhxJGokMPkJA
+            XCnfRonlnO7vuf1faQ5Wbkl4ELlq/B5D5H+8B9cvKkv8OXOzDI6nxg==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-10-29T11:44:39Z"
+    mac: ENC[AES256_GCM,data:qYA/w+VIXCYqWRp0kRZy16t1AsvkOuTOFMmlMZiUm4WF2/Zw3a3scFSdJTV9FlKD/4n6EapMQ7F6VT6B+NPQys9fXduf7ACXkTJ9XvbRaLn+G37w7WaWCVAUatNDWyTFnc5wAhjHvfQ5BvZjmmZKpIeMPO1aM9OTyxqoagJJonQ=,iv:NNTs/ON4ODzmK+QzgpQDo1vYtJbSYpn9blhHs2h1Img=,tag:HIGi7JWYTASiOIOgfaTYWA==,type:str]
+    pgp: []
+    encrypted_regex: ^(key|token|secret|secretboxEncryptionSecret)$
+    version: 3.9.1
+---
+apiVersion: v1alpha1
+kind: RegistryMirrorConfig
+name: ghcr.io
+endpoints:
+    - url: https://harbor.alialjaffer.com/v2/ghcr/
+      overridePath: true
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age:
+        - recipient: age1vum76hps9al4v9y76md3v4ndc35v2w23qc3v0gvzpwyt500ltvaq7ns2tr
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBDdXgyei9ZR0h2bG9hUElC
+            clRtbkZPRlZWSGFHakFybTFjYURtTnJSWmljCnU1Wi8yOHhkbEhWbzV2OTNVQmdK
+            U1FWdWc3RkVLdktvdVZENkYxeUhmR00KLS0tIHNTaXRmN1kzbmthYm5KdU1YeThy
+            cWtJdE5yZXg5TjV5Wm9qeUZzSHBCWEUKlTBjKEoD3ni/r39IMIcFEhxJGokMPkJA
+            XCnfRonlnO7vuf1faQ5Wbkl4ELlq/B5D5H+8B9cvKkv8OXOzDI6nxg==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-10-29T11:44:39Z"
+    mac: ENC[AES256_GCM,data:qYA/w+VIXCYqWRp0kRZy16t1AsvkOuTOFMmlMZiUm4WF2/Zw3a3scFSdJTV9FlKD/4n6EapMQ7F6VT6B+NPQys9fXduf7ACXkTJ9XvbRaLn+G37w7WaWCVAUatNDWyTFnc5wAhjHvfQ5BvZjmmZKpIeMPO1aM9OTyxqoagJJonQ=,iv:NNTs/ON4ODzmK+QzgpQDo1vYtJbSYpn9blhHs2h1Img=,tag:HIGi7JWYTASiOIOgfaTYWA==,type:str]
+    pgp: []
+    encrypted_regex: ^(key|token|secret|secretboxEncryptionSecret)$
+    version: 3.9.1
+---
+apiVersion: v1alpha1
+kind: RegistryMirrorConfig
+name: quay.io
+endpoints:
+    - url: https://harbor.alialjaffer.com/v2/quay/
+      overridePath: true
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age:
+        - recipient: age1vum76hps9al4v9y76md3v4ndc35v2w23qc3v0gvzpwyt500ltvaq7ns2tr
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBDdXgyei9ZR0h2bG9hUElC
+            clRtbkZPRlZWSGFHakFybTFjYURtTnJSWmljCnU1Wi8yOHhkbEhWbzV2OTNVQmdK
+            U1FWdWc3RkVLdktvdVZENkYxeUhmR00KLS0tIHNTaXRmN1kzbmthYm5KdU1YeThy
+            cWtJdE5yZXg5TjV5Wm9qeUZzSHBCWEUKlTBjKEoD3ni/r39IMIcFEhxJGokMPkJA
+            XCnfRonlnO7vuf1faQ5Wbkl4ELlq/B5D5H+8B9cvKkv8OXOzDI6nxg==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-10-29T11:44:39Z"
+    mac: ENC[AES256_GCM,data:qYA/w+VIXCYqWRp0kRZy16t1AsvkOuTOFMmlMZiUm4WF2/Zw3a3scFSdJTV9FlKD/4n6EapMQ7F6VT6B+NPQys9fXduf7ACXkTJ9XvbRaLn+G37w7WaWCVAUatNDWyTFnc5wAhjHvfQ5BvZjmmZKpIeMPO1aM9OTyxqoagJJonQ=,iv:NNTs/ON4ODzmK+QzgpQDo1vYtJbSYpn9blhHs2h1Img=,tag:HIGi7JWYTASiOIOgfaTYWA==,type:str]
+    pgp: []
+    encrypted_regex: ^(key|token|secret|secretboxEncryptionSecret)$
+    version: 3.9.1
+---
+apiVersion: v1alpha1
+kind: RegistryMirrorConfig
+name: registry.k8s.io
+endpoints:
+    - url: https://harbor.alialjaffer.com/v2/k8s/
+      overridePath: true
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age:
+        - recipient: age1vum76hps9al4v9y76md3v4ndc35v2w23qc3v0gvzpwyt500ltvaq7ns2tr
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBDdXgyei9ZR0h2bG9hUElC
+            clRtbkZPRlZWSGFHakFybTFjYURtTnJSWmljCnU1Wi8yOHhkbEhWbzV2OTNVQmdK
+            U1FWdWc3RkVLdktvdVZENkYxeUhmR00KLS0tIHNTaXRmN1kzbmthYm5KdU1YeThy
+            cWtJdE5yZXg5TjV5Wm9qeUZzSHBCWEUKlTBjKEoD3ni/r39IMIcFEhxJGokMPkJA
+            XCnfRonlnO7vuf1faQ5Wbkl4ELlq/B5D5H+8B9cvKkv8OXOzDI6nxg==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-10-29T11:44:39Z"
+    mac: ENC[AES256_GCM,data:qYA/w+VIXCYqWRp0kRZy16t1AsvkOuTOFMmlMZiUm4WF2/Zw3a3scFSdJTV9FlKD/4n6EapMQ7F6VT6B+NPQys9fXduf7ACXkTJ9XvbRaLn+G37w7WaWCVAUatNDWyTFnc5wAhjHvfQ5BvZjmmZKpIeMPO1aM9OTyxqoagJJonQ=,iv:NNTs/ON4ODzmK+QzgpQDo1vYtJbSYpn9blhHs2h1Img=,tag:HIGi7JWYTASiOIOgfaTYWA==,type:str]
     pgp: []
     encrypted_regex: ^(key|token|secret|secretboxEncryptionSecret)$
     version: 3.9.1

@@ -1,12 +1,18 @@
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: ntfy
 resources:
   - namespace.yaml
   - configmap.yaml
   - ntfy-credentials.sealed.yaml
+  - oauth2-proxy-config.yaml
+  - oauth2-proxy-secret.sealed.yaml
   - pvc.yaml
   - deployment.yaml
   - service.yaml
   - httproute-ntfy.yaml
+  - httproute-ntfy-api.yaml
   - networkpolicy.yaml
+components:
+  - ../../components/oauth2-proxy

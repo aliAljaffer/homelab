@@ -6,3 +6,6 @@ metadata:
 data:
   02-custom.conf: |
     cache-size=10000
+    # Harbor is only reachable on the LAN; keep the public wildcard cert valid
+    # by pointing LAN clients at the homelab gateway.
+    address=/harbor.alialjaffer.com/192.168.8.129

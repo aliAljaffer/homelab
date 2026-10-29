@@ -29,6 +29,29 @@ not the `workloads` ApplicationSet — that only covers `kubernetes/apps/*`. Syn
 - Plain `Deployment` + PVC + `Recreate` strategy (not a StatefulSet) — single
   replica, same shape as `vaultwarden`'s.
 
+## Public exposure
+
+Two hostnames, because ntfy has no OIDC support (ntfy#1596) and no trusted-header
+auth (ntfy#1971), so a reverse proxy can never become ntfy's identity source:
+
+- `ntfy.alialjaffer.com` → `oauth2-proxy` (shared Keycloak `homelab` realm client,
+  see `kubernetes/components/oauth2-proxy`) → ntfy. Hides the public web UI shell
+  behind a Keycloak login. The web app still asks for the `ali` ntfy credentials
+  once afterwards — double auth is unavoidable without header auth in ntfy.
+- `ntfy-api.alialjaffer.com` → ntfy directly, ntfy's own auth only. This is what
+  the iOS app must be configured with; it cannot follow an OIDC redirect. Same
+  exposure as before: publish/subscribe are `deny-all`, `/` and `/v1/health` are
+  public.
+
+`base-url` stays on the UI hostname. That does not affect iOS push: the relay's
+poll request carries only topic + id, and the app polls the server URL configured
+in the app (the api host).
+
+The `oauth2-proxy` Keycloak client already existed as a declaration in
+`keycloak-realm-homelab.yaml` but not live (the realm predates it), so it was
+created by hand with the same settings — see the re-import caveat in
+`kubernetes/components/oauth2-proxy/README.md`.
+
 ## How an app publishes
 
 In-cluster, via the Service — not the public hostname, to avoid a pointless hairpin

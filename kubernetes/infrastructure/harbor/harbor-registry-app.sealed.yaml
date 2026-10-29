@@ -1,0 +1,17 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  annotations:
+    sealedsecrets.bitnami.com/namespace-wide: "true"
+  name: harbor-registry-app
+  namespace: harbor
+spec:
+  encryptedData:
+    REGISTRY_HTTP_SECRET: AgAA5rsRJ1AIiIiFkj0TMUX7vIhhot0G/BAZAU4o446C/5Z+0D+iw4fVPd3IY2xbeIei8HLzhUcyTl/MhQoAyXO+v6nPkzdQRD+SboA6a7Lvsm+A2LdEGhpbGoJliVLt00wEwnv6cbjQyWeRSXhkWRooEEz34rQiD3VyKbKGfmgOpk4IlIqkxjfuPLVXi03q4861y++Yt0ZMZChcCXyr9w9qcEn5v/490UmgOM7FBEYdALztsA26k7QypfRbQ5O5X0SOm69IC/ghvq5PlP5aQXYFEcJX4OEhmDFaAsASm5QJ4d5+3SEIBvMvoPf70qlIeciOzoeWTIQAYP0moMYuVhepn/hXIXN2dzFA0lrZe19ovVlYIbwXqbAboVGYDYJRHgi4HqLv/SxrZwypj4oQufcVpymhd6Kc7nPfDZP83e3Sv0HYbGSB2fPbGULnpMxs3eLLkLU0HPM5eRIYIwo6datB89W2KpP6u9KbdlyqEfVhal2K2YZ8YEwPCnjXQXso8hp5QJ4s1IYBte3plsBQIc2AofuugaUXO90JM1N4qRpNTE6K73EbQZ3y9KUpIHyrg2PpHYmLJaWuICzPYKa/0E4TMu2TbhbfyhOIR4hs35E32g+0rQ3ciYq6w8oBvGKiam/Zf4NQbdphJ0Fygz+lxgbyy6JB1I8Bv8YxM5ToPTJGkNXtgqLj9vCrtEx0+bLd5qB1IC6wHvd6a73IoUTPHuXF
+  template:
+    metadata:
+      annotations:
+        sealedsecrets.bitnami.com/namespace-wide: "true"
+      name: harbor-registry-app
+      namespace: harbor

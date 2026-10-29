@@ -1,0 +1,17 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  annotations:
+    sealedsecrets.bitnami.com/namespace-wide: "true"
+  name: harbor-jobservice-app
+  namespace: harbor
+spec:
+  encryptedData:
+    JOBSERVICE_SECRET: AgBXmEyt3QtHj/EesC4PXz0RRsVDYmWyl4SqFCwPCakEoIHtxLHxmM+RCK+BlXsP+3AHgHnw1CmoD4xVgrCSeSYt8k7U8KW44Cm+sLZMfebTJ5at8/oVn5nT/ad8+onhiCQoUh+3kiG/BeITzK8Yedm0v/zP1cyuwkomot0mfxAt2cu2W3FIGwj3K33mJhnxWSTzu2B7pmccjQehCwD41a9hO+/FYjZctt3cRBeRtENJUO0eCrllbw4aiOebJ6MXtGPDHHmF1Yca5lYKv/mNexde2BtDwTHyIf5PgZr3DZq5LLUvautlH1YQcXvDFniLVurK61KkHTtRi5XEmv4mjN1+Kev5Xt9TN9B32kpxfb4isVyGxO+ORjsNRho4XapbBqQjXwOMKR8QmE+GjzO8NhpbIY2wXY/7Od0+JrfmFFv+TXoMjgxrk0kOm++WzNINbhXiuxbYsUhJ29o6HM6kpny7zY2LNk9LKvqY5QWFv4yvuHAn9aatIsTpWsinJ3NHi1Sr2H+EhhF41n7o5pVESQ+EVUZ9GYiWBEbSAdJcTDEkvpqWHA+icRNqVEGClz0MU6wwUElTP0yhpw75clcSjmy/MmHI2m0yN9V+utgA3CrI+zatEY3tHuVbLPYMzDeFQTksG44nGM2mqC9evboPmxG/qFplkMUYzFq+inPRVOOGffSHURwwP6nKzFtyijxwoY7XGi1oRtskBF46aRhO3Spv
+  template:
+    metadata:
+      annotations:
+        sealedsecrets.bitnami.com/namespace-wide: "true"
+      name: harbor-jobservice-app
+      namespace: harbor
