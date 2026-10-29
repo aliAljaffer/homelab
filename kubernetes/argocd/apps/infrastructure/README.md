@@ -12,6 +12,9 @@ these bullets capture the _why_ behind that ordering.
 - `cloudnative-pg.yaml`: needed before any Postgres Cluster CR (e.g. Keycloak's DB).
 - `falco.yaml`: needs `monitoring` (wave 0) synced first for the ServiceMonitor CRD.
 - `gateway-api.yaml`: CRDs must exist before Cilium's Gateway controller starts.
+- `harbor.yaml`: LAN pull-through cache; the Pi-hole record for
+  `harbor.alialjaffer.com` and the node mirrors are described in
+  `kubernetes/infrastructure/harbor/README.md`.
 - `keycloak-operator.yaml`: must exist before the `keycloak` Application (wave 1).
 - `keycloak.yaml`: needs `cloudnative-pg` (wave -2) and `keycloak-operator`
   (wave -1) healthy first.
