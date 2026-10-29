@@ -39,7 +39,11 @@ the deployment wiring differs.
   `kubernetes/infrastructure/ntfy`'s own sealed secret), and the
   `smtp-relay.mail.svc.cluster.local:587` settings used for reminder emails
   (no SMTP credentials — the relay holds the upstream ones), plus `ICS_TOKEN` and
-  `PUBLIC_URL` for the read-only calendar feed.
+  `PUBLIC_URL` for the read-only calendar feed. It also holds the Telegram
+  assistant credentials: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_ALLOWED_USER_ID`, and
+  `TELEGRAM_ALLOWED_CHAT_ID`. `TELEGRAM_STATE_FILE` points at
+  `/data/attachments/telegram-offset` so the update offset survives restarts on
+  the attachments PVC.
 
 ## Calendar feed
 
