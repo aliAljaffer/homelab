@@ -8,6 +8,8 @@ metadata:
   namespace: harbor
   annotations:
     argocd.argoproj.io/sync-wave: "2"
+    # Jobs are immutable; Replace lets a script change resync cleanly.
+    argocd.argoproj.io/sync-options: Replace=true
 spec:
   backoffLimit: 20
   activeDeadlineSeconds: 1800
