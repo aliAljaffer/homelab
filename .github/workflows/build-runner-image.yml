@@ -195,8 +195,8 @@ jobs:
             GH_VERSION=${{ env.GH_VERSION }}
           tags: |
             harbor.alialjaffer.com/mirror/runner-toolchain:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=registry,ref=harbor.alialjaffer.com/mirror/runner-toolchain:buildcache
+          cache-to: type=registry,ref=harbor.alialjaffer.com/mirror/runner-toolchain:buildcache,mode=max
 
       - name: Smoke test
         run: |
