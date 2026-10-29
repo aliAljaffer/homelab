@@ -15,6 +15,24 @@ LAN-only Harbor, used as a **pull-through cache** for the whole cluster.
   It is the password Harbor was initialised with; changing it in the UI will
   drift from the secret (the chart only uses it on first start).
 
+## Authentication
+
+Harbor uses Keycloak OIDC (`auth_mode: oidc_auth`) against the `homelab` realm:
+
+- Client: `harbor`, confidential, redirect
+  `https://harbor.alialjaffer.com/c/oidc/callback`, PKCE S256.
+- `oidc_groups_claim: groups`, `oidc_admin_group: harbor-admins`; members of
+  that Keycloak group become Harbor administrators. `ali` is in the group.
+- `oidc_user_claim: preferred_username`, auto-onboard on first login.
+- The local `admin` user still works for API/basic auth and emergency access.
+  Do not delete it until you have verified an OIDC admin login.
+
+The Keycloak client, the `groups` mapper and the `harbor-admins` group are
+created by `harbor-client-setup.yaml` in the **keycloak** app (a PostSync hook
+using the admin API; the `KeycloakOIDCClient` CRD NPEs on operator 26.7.1 with
+`client-admin-api:v2`). Harbor itself is configured by `oidc-job.yaml` in this
+app, using the `harbor-oidc` sealed secret.
+
 ## Proxy cache projects
 
 `setup-job.yaml` is a PostSync hook that creates the remote registries and

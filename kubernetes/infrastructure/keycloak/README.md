@@ -23,6 +23,13 @@
   The keycloak-operator chart already ships an ingress-only NetworkPolicy for the
   app pods. Kubernetes NetworkPolicies are additive, so this file only adds Egress.
 
+- `harbor-client-setup.yaml`: PostSync hook that creates Harbor's OIDC client,
+  the `groups` mapper and the `harbor-admins` group through the admin API. The
+  `KeycloakOIDCClient` CRD is broken on operator 26.7.1 with
+  `client-admin-api:v2` (NPE in the client proxy), so do not use that CRD for
+  new clients until the operator is upgraded. The pre-existing `grooszy` client
+  CR still reports the same error; its client exists and works.
+
 ## Re-install notes
 
 - Both realms get SMTP (`smtp.resend.com:587`, STARTTLS, from
