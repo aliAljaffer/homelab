@@ -116,9 +116,9 @@ lokiCanary:
 
 # The chart deploys memcached cache pods by default even in SingleBinary mode,
 # sized by allocatedMemory (rendered as x1.2, so the 8192 default became a
-# 9830Mi request). Chunks live in GCS here and both caches sat at <100Mi used,
-# so right-size them to 256 (-> ~307Mi). The results cache was still holding
-# the 1229Mi default request.
+# 9830Mi request). Chunks live in GCS here. 30d history: the results cache
+# peaked at 16Mi, the chunks cache at 4.8GiB under the old 8GiB allocation, so
+# right-size both to 256 (-> ~307Mi hard cap on what memcached will hold).
 chunksCache:
   allocatedMemory: 256
 

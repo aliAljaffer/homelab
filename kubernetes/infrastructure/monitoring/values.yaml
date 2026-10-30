@@ -29,22 +29,25 @@ prometheus:
         limits:
           memory: 352Mi
 
+    # Sized from the 30d Thanos history: avg 2.9GiB, p95 3.6GiB, peak 5.2GiB
+    # (post-restart WAL replay). Request tracks the 7d average; the limit sits
+    # above the observed peak. Post-cleanup head series are ~1/3 of that peak,
+    # so this leaves plenty of room.
     resources:
       requests:
         cpu: 180m
-        memory: 2560Mi
+        memory: 3072Mi
       limits:
-        memory: 5120Mi
+        memory: 6144Mi
 
-    # Safety net for the Go heap now that head series are back under control
-    # (Kyverno CRDs gone, apiserver histograms dropped). GOMEMLIMIT only covers
-    # the Go heap, so leave ~1Gi below the container limit for the TSDB mmap
-    # and non-heap allocations; the kubelet stays the hard backstop.
+    # Safety net for the Go heap. GOMEMLIMIT only covers the Go heap, so leave
+    # ~1Gi below the container limit for the TSDB mmap and non-heap allocations;
+    # the kubelet stays the hard backstop.
     containers:
       - name: prometheus
         env:
           - name: GOMEMLIMIT
-            value: 4096MiB
+            value: 5120MiB
 
     additionalScrapeConfigs:
       - job_name: "catus-locatus-backend"
@@ -143,16 +146,17 @@ grafana:
     storageClassName: longhorn
     size: 5Gi
 
-  # Grafana idles around 500Mi. The chart sets GOMEMLIMIT to 90% of the limit,
-  # so 1152Mi caps the GC target at ~1036MiB (was 1584MiB off a 1760Mi limit)
-  # while still leaving room for the known goroutine leak until the weekly
-  # restart fires. See grafana-restart.yaml.
+  # Grafana idles around 350-500Mi but leaks ~30Mi/hour: the previous pod went
+  # 404Mi -> 1.6GiB in under two days and then sat at GOMEMLIMIT. 30d peak is
+  # 1735MiB, so the limit has to stay high enough to hold the plateau until the
+  # weekly restart (grafana-restart.yaml) fires; the chart derives
+  # GOMEMLIMIT=1584MiB from it. Only the request is lowered to the idle size.
   resources:
     requests:
       cpu: 50m
       memory: 512Mi
     limits:
-      memory: 1152Mi
+      memory: 1760Mi
 
   grafana.ini:
     server:
