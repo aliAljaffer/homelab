@@ -8,10 +8,6 @@ falco:
   webserver:
     prometheus_metrics_enabled: true
 
-# Local rule overrides, loaded after the upstream ruleset (the chart mounts this
-# under /etc/falco/rules.d, which rules_files loads last). Without these,
-# "Drop and execute new binary in container" (CRITICAL) fires on every pod start
-# and floods the falcosidekick SMTP output.
 customRules:
   falco_rules.local.yaml: |-
     # The container plugin tags host container-runtime processes (CNI plugins,
@@ -28,8 +24,6 @@ customRules:
       override:
         items: append
 
-# Falco's own engine-health metrics (event/drop counts, CPU/RSS, rule matches),
-# separate from serviceMonitor and falcosidekick's metrics below.
 metrics:
   enabled: true
 
@@ -38,7 +32,6 @@ serviceMonitor:
   labels:
     release: monitoring
 
-# Dashboard ConfigMap lives in monitoring namespace (like other components) so Grafana's sidecar picks it up.
 grafana:
   dashboards:
     enabled: true
@@ -47,7 +40,6 @@ grafana:
         namespace: monitoring
         folder: Falco
 
-# Routes Falco alerts to outputs and exposes its own alert-volume/delivery metrics.
 falcosidekick:
   enabled: true
   serviceMonitor:
@@ -61,9 +53,6 @@ falcosidekick:
         falcosidekick:
           namespace: monitoring
           folder: Falco
-  # Email Falco runtime-security events. Mail goes through the cluster's
-  # rate-limited relay (mail/smtp-relay), which forwards to Resend and holds the
-  # API key, so no SMTP credentials are configured here.
   config:
     smtp:
       hostport: "smtp-relay.mail.svc.cluster.local:587"

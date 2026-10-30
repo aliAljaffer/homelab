@@ -19,7 +19,7 @@ spec:
     namespace: longhorn-system
   syncPolicy:
     automated:
-      prune: false # Longhorn needs this SA, don't prune it
+      prune: false
       selfHeal: true
     syncOptions:
     - CreateNamespace=true

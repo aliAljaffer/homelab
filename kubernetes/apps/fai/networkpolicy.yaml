@@ -37,7 +37,6 @@ spec:
         - ports:
             - port: "5432"
               protocol: TCP
-    # ntfy's in-cluster Service, for reminder/meeting-outcome push notifications.
     - toEndpoints:
         - matchLabels:
             "k8s:io.kubernetes.pod.namespace": ntfy
@@ -46,8 +45,6 @@ spec:
         - ports:
             - port: "80"
               protocol: TCP
-    # Cluster SMTP relay (plaintext, unauthenticated) for the same notifications
-    # by email; the relay holds the upstream credentials.
     - toEndpoints:
         - matchLabels:
             "k8s:io.kubernetes.pod.namespace": mail
@@ -56,20 +53,12 @@ spec:
         - ports:
             - port: "587"
               protocol: TCP
-    # Keycloak's public FQDN, not an in-cluster Service address: go-oidc's discovery
-    # hard-fails unless OIDC_ISSUER_URL matches the issuer in the discovery document,
-    # and Keycloak's hostname is set to the public kc.alialjaffer.com. Accepting the
-    # Cloudflare-tunnel hairpin here is correct and simpler than rewriting the dial
-    # target (see PLAN.md §7).
     - toFQDNs:
         - matchName: "kc.alialjaffer.com"
       toPorts:
         - ports:
             - port: "443"
               protocol: TCP
-    # Jira and AI providers are optional (unset by default) but need egress to
-    # work once configured; both are arbitrary external hosts so this is left
-    # permissive to any HTTPS destination rather than hardcoding one provider.
     - toFQDNs:
         - matchPattern: "*"
       toPorts:
@@ -119,7 +108,6 @@ spec:
         - ports:
             - port: "9187"
               protocol: TCP
-    # CNPG operator -> instance traffic (failover/backup orchestration).
     - fromEndpoints:
         - matchLabels:
             "k8s:io.kubernetes.pod.namespace": cnpg-system

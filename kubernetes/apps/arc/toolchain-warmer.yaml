@@ -1,6 +1,4 @@
 ---
-# Keeps the toolchain and dind images hot on every worker, so a fresh runner
-# pod never waits on a 6.5 GB image pull. The build workflow bumps both digests.
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:

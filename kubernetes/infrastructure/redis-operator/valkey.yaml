@@ -14,9 +14,6 @@ spec:
         memory: 64Mi
       limits:
         memory: 256Mi
-  # The exporter sidecar (and its 'valkey-metrics' Service) is what the
-  # prometheus ServiceMonitor scrapes. CRD requires image; pinned digest
-  # quay.io/opstree/redis-exporter:v1.89.0 (oci index, amd64+arm64).
   redisExporter:
     enabled: true
     image: quay.io/opstree/redis-exporter:v1.89.0@sha256:00a3628bdd3bb3423a15c5daefa328c471ee609798eed1744fe578c906d20cab

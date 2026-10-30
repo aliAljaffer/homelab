@@ -5,7 +5,7 @@ image:
   tag: v0.11.4@sha256:45571f233951fb96c3a2900e1d5e4cbb4ade9cd36ed419dcd87661e067168fdf
 
 namespace:
-  create: false   # namespace.yaml in this kustomization creates it
+  create: false
   name: kepler
 
 serviceAccount:
@@ -28,8 +28,6 @@ daemonset:
       operator: Exists
       effect: NoSchedule
 
-  # Needs host /proc and /sys, reachable only via the talosctl mount patch.
-  # The chart bind-mounts them into the pod from there.
   hostPID: true
   hostUsers: true
   securityContext:
@@ -51,6 +49,7 @@ daemonset:
     periodSeconds: 60
     timeoutSeconds: 10
 
+# Do not add kube.enabled; the chart hardcodes --kube.enable and nodeName is empty here.
 config:
   log:
     level: info
@@ -61,9 +60,6 @@ config:
   monitor:
     interval: 5s
     staleness: 500ms
-  # Do NOT set kube.enabled here. The chart hardcodes --kube.enable
-  # --kube.node-name=$(NODE_NAME) as CLI args on the DaemonSet. Setting it
-  # in the ConfigMap fails validation because nodeName is empty in the YAML.
   exporter:
     prometheus:
       enabled: true

@@ -55,7 +55,6 @@ spec:
         - ports:
             - port: "5432"
               protocol: TCP
-    # Intra-realm Infinispan clustering (DNS_PING + JGroups).
     - toEndpoints:
         - matchLabels:
             app: keycloak
@@ -66,7 +65,6 @@ spec:
               protocol: TCP
             - port: "57800"
               protocol: TCP
-    # Central rate-limited SMTP relay for notification emails. See README.
     - toEndpoints:
         - matchLabels:
             "k8s:io.kubernetes.pod.namespace": mail
@@ -105,8 +103,6 @@ spec:
         - ports:
             - port: "9187"
               protocol: TCP
-    # CNPG operator -> instance (failover/switchover/backup) wasn't observed
-    # live. Pre-allowed rather than confirmed.
     - fromEndpoints:
         - matchLabels:
             "k8s:io.kubernetes.pod.namespace": cnpg-system
@@ -114,7 +110,6 @@ spec:
         - ports:
             - port: "8000"
               protocol: TCP
-    # kubelet liveness/readiness/startup probe (httpGet :8000 /healthz, /readyz, /startupz).
     - fromEntities:
         - host
       toPorts:
@@ -142,6 +137,5 @@ spec:
         - ports:
             - port: "5432"
               protocol: TCP
-    # CNPG instances and the initdb Job call the apiserver directly.
     - toEntities:
         - kube-apiserver

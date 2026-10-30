@@ -1,5 +1,4 @@
-# Grafana leaks goroutine stacks (about 1 GiB after 2 weeks). Restart weekly
-# until the cause is found. The Role can only get/patch this one Deployment.
+# Restart Grafana weekly; it leaks goroutine stacks (~1GiB after 2 weeks).
 ---
 apiVersion: v1
 kind: ServiceAccount

@@ -8,8 +8,6 @@ kind: Namespace
 metadata:
   name: arc-runners
   labels:
-    # dind needs a privileged sidecar; workflows already run arbitrary code in
-    # this dedicated namespace.
     pod-security.kubernetes.io/enforce: privileged
     pod-security.kubernetes.io/audit: privileged
     pod-security.kubernetes.io/warn: privileged

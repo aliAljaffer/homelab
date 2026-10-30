@@ -1,7 +1,4 @@
 ---
-# Plain-text copy of the Postfix mail log for postfix_exporter to tail. rsyslog
-# still writes JSON to stdout (LOG_FORMAT=json); this second action mirrors the
-# postfix facilities to a real file, which is what the exporter reads.
 apiVersion: v1
 kind: ConfigMap
 metadata:

@@ -1,6 +1,4 @@
 ---
-# Front door for the protected app: the app's HTTPRoute targets this Service,
-# not the app's own Service. Port 80 keeps existing backendRefs unchanged.
 apiVersion: v1
 kind: Service
 metadata:

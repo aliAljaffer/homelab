@@ -48,8 +48,6 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 15
           env:
-            # env wins over envFrom, so this overrides the stale DB_* keys
-            # in catus-locatus-secrets. Points at the CNPG cluster instead.
             - name: DB_HOST
               valueFrom:
                 secretKeyRef:

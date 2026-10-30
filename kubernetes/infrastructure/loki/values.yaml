@@ -10,13 +10,13 @@ loki:
   commonConfig:
     replication_factor: 1
 
+  # The chart has no storage.secretName; credentials come from extraEnv/extraVolumes below.
   storage:
     type: gcs
     bucketNames:
       chunks: alialjaffer-homelab
       ruler: alialjaffer-homelab
       admin: alialjaffer-homelab
-    # Credentials mounted via singleBinary.extraEnv/extraVolumes below (chart has no storage.secretName field).
 
   schemaConfig:
     configs:
@@ -30,9 +30,6 @@ loki:
 
   limits_config:
     retention_period: 168h
-    # Alloy replays full pod log files on startup; rejecting >168h-old entries
-    # wedges that replay into an infinite 400 loop (never catches up). Accepting
-    # lets it drain at line speed, retention compacts the stale lines away.
     reject_old_samples: false
     ingestion_rate_mb: 16
     ingestion_burst_size_mb: 32
@@ -57,15 +54,13 @@ singleBinary:
   replicas: 1
   persistence:
     storageClass: longhorn
-    size: 5Gi # WAL + temp storage; actual data is in GCS
+    size: 5Gi
   resources:
     requests:
       cpu: 70m
       memory: 560Mi
     limits:
       memory: 1120Mi
-  # Chart has no storage.secretName field; GCS SDK reads GOOGLE_APPLICATION_CREDENTIALS.
-  # Secret: loki-gcs-credentials SealedSecret, key service_account.json
   extraEnv:
     - name: GOOGLE_APPLICATION_CREDENTIALS
       value: /etc/loki/gcs-credentials/service_account.json
@@ -93,7 +88,6 @@ gateway:
     limits:
       memory: 48Mi
 
-# sidecar here is the k8s-sidecar container (loki-sc-rules) that loads alerting/recording rules from ConfigMaps
 sidecar:
   resources:
     requests:
@@ -103,9 +97,6 @@ sidecar:
       memory: 208Mi
 
 lokiCanary:
-  # Query/push Loki directly, not through the nginx gateway, so a gateway DNS
-  # failure can't masquerade as a Loki query failure.
-  # host:port only; the canary prepends the scheme itself.
   lokiurl: loki.monitoring.svc.cluster.local:3100
   resources:
     requests:
@@ -114,18 +105,12 @@ lokiCanary:
     limits:
       memory: 128Mi
 
-# The chart deploys memcached cache pods by default even in SingleBinary mode,
-# sized by allocatedMemory (rendered as x1.2, so the 8192 default became a
-# 9830Mi request). Chunks live in GCS here. 30d history: the results cache
-# peaked at 16Mi, the chunks cache at 4.8GiB under the old 8GiB allocation, so
-# right-size both to 256 (-> ~307Mi hard cap on what memcached will hold).
 chunksCache:
   allocatedMemory: 256
 
 resultsCache:
   allocatedMemory: 256
 
-# selfMonitoring off: Alloy handles this instead of the chart's bundled agent
 monitoring:
   selfMonitoring:
     enabled: false

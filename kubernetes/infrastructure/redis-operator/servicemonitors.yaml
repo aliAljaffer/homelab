@@ -7,11 +7,6 @@ metadata:
   labels:
     app.kubernetes.io/name: redis-operator
 spec:
-  # The chart exposes controller-runtime metrics on container port 'metrics'
-  # (:8080) but creates no Service for them; this fills that gap so Prometheus
-  # can scrape the operator itself.
-  # Pod template labels are chart-legacy ('name: redis-operator'), not the
-  # recommended labels used on the Service itself.
   selector:
     name: redis-operator
   ports:
@@ -42,10 +37,6 @@ metadata:
   labels:
     release: monitoring
 spec:
-  # The operator creates a '<cr-name>-metrics' Service per instance (oliver006
-  # redis_exporter sidecar on 9121) with exactly these labels and the
-  # redis-exporter port name, so one monitor covers every Redis/Valkey CR in
-  # the cluster regardless of namespace.
   endpoints:
   - port: redis-exporter
     interval: 30s

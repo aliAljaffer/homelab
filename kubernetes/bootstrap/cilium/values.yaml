@@ -1,13 +1,8 @@
 ---
 kubeProxyReplacement: true
-# Talos floating API VIP (shared by cp0/wrk0/wrk1), not a single node IP, so
-# cilium-agents survive losing any one control plane. See docs/api-endpoint.md.
 k8sServiceHost: 192.168.8.250
 k8sServicePort: 6443
 
-# Logs policy drops without enforcing them, needed before default-deny
-# NetworkPolicies go live. Flip back to false once enforce mode is
-# confirmed safe.
 policyAuditMode: true
 
 ipam:
@@ -16,8 +11,6 @@ ipam:
 gatewayAPI:
   enabled: true
 
-# Wider margin than the standard 2.6x formula: a cilium-agent OOMKill
-# breaks node networking for every pod on that node.
 resources:
   requests:
     cpu: 125m
@@ -33,9 +26,6 @@ envoy:
     limits:
       memory: 176Mi
 
-# Agent + operator Prometheus metrics, with ServiceMonitors labeled for the
-# kube-prometheus-stack selector (release=monitoring). The ServiceMonitors land
-# in kube-system and are picked up by the monitoring Prometheus.
 prometheus:
   enabled: true
   serviceMonitor:
@@ -77,8 +67,6 @@ operator:
       enabled: true
       labels:
         release: monitoring
-  # Gateway API reconciliation for the whole cluster stalls under this if
-  # starved (rate-limiter Wait() context-cancels mid-reconcile).
   resources:
     requests:
       cpu: 50m
@@ -86,13 +74,11 @@ operator:
     limits:
       memory: 384Mi
 
-# Talos handles cgroup auto-mount itself.
 cgroup:
   autoMount:
     enabled: false
   hostRoot: /sys/fs/cgroup
 
-# Capabilities Talos requires for the Cilium agent.
 securityContext:
   capabilities:
     ciliumAgent:

@@ -1,6 +1,5 @@
-# Harbor as a LAN pull-through cache for docker.io, ghcr.io, quay.io and
-# registry.k8s.io. TLS is terminated by homelab-gateway; Harbor itself speaks
-# HTTP inside the cluster.
+# ArgoCD's Helm render has no lookup: every generated secret/cert must be sealed, or it churns on each sync.
+
 expose:
   type: clusterIP
   tls:
@@ -12,9 +11,6 @@ expose:
 
 externalURL: https://harbor.alialjaffer.com
 
-# All component secrets are SealedSecrets; the chart must not generate random
-# values (ArgoCD's Helm render has no lookup, so randAlphaNum drifts on every
-# sync).
 existingSecretAdminPassword: harbor-admin
 existingSecretAdminPasswordKey: HARBOR_ADMIN_PASSWORD
 existingSecretSecretKey: harbor-global
@@ -23,8 +19,6 @@ core:
   existingSecret: harbor-core-app
   existingXsrfSecret: harbor-core-app
   existingXsrfSecretKey: CSRF_KEY
-  # Token-service signing cert; without this the chart calls genCA on every
-  # render and the certificate churns.
   secretName: harbor-core-tls
 
 jobservice:
@@ -35,12 +29,9 @@ registry:
   existingSecret: harbor-registry-app
   existingSecretKey: REGISTRY_HTTP_SECRET
   credentials:
-    # The chart otherwise calls htpasswd() with a random salt on every render,
-    # which makes ArgoCD flap on the registry-htpasswd Secret.
     password: harbor_registry_password
     htpasswdString: "harbor_registry_user:$2b$10$y/KFS8pwVtaRx0Wg1f6c1uBPRqnER10bWb/cwqjTTM.0lWqXTZtPa"
 
-# Cache only; losing the volume just means re-pulling. Longhorn keeps it.
 persistence:
   enabled: true
   persistentVolumeClaim:
@@ -68,11 +59,8 @@ redis:
     trivyAdapterIndex: "5"
     password: ""
 
-# jobservice's jobLog volume is RWO, so a surging pod strands the old one on the
-# other node's Multi-Attach error and the rollout never finishes.
 updateStrategy:
   type: Recreate
 
-# Not a security scanner box; disable Trivy for now.
 trivy:
   enabled: false

@@ -67,7 +67,6 @@ spec:
     matchLabels:
       app: cl-fe
   ingress:
-    # cl-fe-svc maps 80 -> 8080; Cilium enforces on the post-DNAT port (confirmed via Hubble).
     - fromEndpoints:
         - matchLabels:
             "k8s:io.kubernetes.pod.namespace": cloudflared
@@ -164,7 +163,6 @@ spec:
         - ports:
             - port: "5432"
               protocol: TCP
-    # CNPG operator -> instance traffic (failover/backup orchestration).
     - fromEndpoints:
         - matchLabels:
             "k8s:io.kubernetes.pod.namespace": cnpg-system

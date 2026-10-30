@@ -3,7 +3,6 @@ global:
   domain: argocd.alialjaffer.com
 
 server:
-  # --insecure is safe: TLS terminates at the Gateway, not here.
   extraArgs:
   - --insecure
   metrics:
@@ -12,11 +11,6 @@ server:
       enabled: true
       additionalLabels:
         release: monitoring
-  # The liveness path is /healthz?full=true, which queries repo-server and the
-  # app controller too. Under a cluster-wide refresh storm (e.g. a push that
-  # makes all apps re-evaluate) that can exceed the chart's default 1s timeout,
-  # so the kubelet kills a healthy server - observed as 6 restarts. Give the
-  # probes breathing room and let the startup probe absorb slow warm-ups.
   readinessProbe:
     timeoutSeconds: 3
   livenessProbe:
@@ -25,8 +19,6 @@ server:
     enabled: true
     failureThreshold: 30
     timeoutSeconds: 3
-  # No CPU limit: a 20m cap (2ms per 100ms CFS period) throttled this pod in
-  # ~80% of periods and stalled the UI. CPU is compressible; cap memory only.
   resources:
     requests:
       cpu: 100m
@@ -55,9 +47,6 @@ repoServer:
       enabled: true
       additionalLabels:
         release: monitoring
-  # Wider margin than the standard 2.6x formula. repo-server memory spikes
-  # hard templating the heavy kube-prometheus-stack chart, and an OOMKill
-  # here stalls GitOps reconciliation cluster-wide.
   resources:
     requests:
       cpu: 250m
@@ -92,11 +81,6 @@ notifications:
       memory: 88Mi
     limits:
       memory: 176Mi
-  # Email notifications via the cluster's rate-limited relay (mail/smtp-relay).
-  # The relay holds the Resend API key, so no credentials are configured here.
-  # Named notifier: the key is service.<type>, the block is the SMTP options.
-  # The notifier is registered as "email", which is what the subscription
-  # recipients below reference (email:<address>).
   notifiers:
     service.email: |
       host: smtp-relay.mail.svc.cluster.local
@@ -141,9 +125,6 @@ notifications:
 dex:
   image:
     tag: v2.45.1-alpine@sha256:f5f9fb373188b0f701b80edd68b3f4745ced69306c9d382999f11b7774335a98
-  # Dex 2.45 no longer serves Prometheus metrics, so the chart's metrics
-  # ServiceMonitor scrapes a dead port (5558). Disable it to stop the
-  # TargetDown alert.
   metrics:
     enabled: false
     serviceMonitor:
@@ -179,11 +160,11 @@ redis:
     limits:
       memory: 240Mi
 
+# Do not add configs.repositories here; it conflicts with the argocd-repo-homelab-ssh credential Secret.
 configs:
   params:
     server.insecure: "true"
   cm:
-    # Excludes CiliumIdentity: it's managed by Talos bootstrap, not ArgoCD.
     resource.exclusions: |
       - apiGroups:
           - cilium.io
@@ -191,11 +172,3 @@ configs:
           - CiliumIdentity
         clusters:
           - "*"
-  # NOTE: do not register the homelab repo here. The chart renders
-  # `configs.repositories` into a credential-less Secret (no sshPrivateKey),
-  # which then competes with the real SSH credential Secret
-  # (`argocd-repo-homelab-ssh`) for the same git URL. ArgoCD picks one at
-  # random, so ~half of ls-remote calls fail with:
-  #   "error creating SSH agent: SSH_AUTH_SOCK not-specified"
-  # The SSH-key Secret is the single source of truth; keep it as the only
-  # repository credential for this URL.

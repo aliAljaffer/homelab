@@ -1,7 +1,4 @@
 ---
-# Browser-facing hostname, gated by Keycloak through the shared oauth2-proxy
-# component. ntfy cannot consume the OIDC identity itself, so the web app still
-# asks for ntfy credentials once; this only hides the public UI shell.
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:

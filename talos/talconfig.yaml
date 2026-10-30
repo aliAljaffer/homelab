@@ -3,15 +3,13 @@ clusterName: k8s-homelab
 talosVersion: v1.13.7
 kubernetesVersion: v1.36.2
 endpoint: https://api.alialjaffer.com:6443
-# Extra SANs for the kube-apiserver serving certificate: the API DNS name and
-# the floating VIP. See docs/api-endpoint.md.
 additionalApiServerCertSans:
 - api.alialjaffer.com
 - 192.168.8.250
 allowSchedulingOnControlPlanes: true
 
 cniConfig:
-  name: none # Cilium installed via bootstrap, not Talos default (Flannel)
+  name: none
 
 clusterPodNets:
 - 10.244.0.0/16
@@ -19,9 +17,6 @@ clusterSvcNets:
 - 10.96.0.0/12
 
 nodes:
-# MacBook Pro (Mid-2012, 13"). See the topology-change note above and
-# docs/talos-intel-mac.md  -  do not treat this entry as a fresh-install
-# source of truth without following that doc.
 - hostname: cp0
   ipAddress: 192.168.8.99
   installDisk: /dev/sda
@@ -30,7 +25,6 @@ nodes:
   - deviceSelector:
       hardwareAddr: "*"
     dhcp: true
-    # Floating API VIP (shared with wrk0/wrk1); see docs/api-endpoint.md
     vip:
       ip: 192.168.8.250
 
@@ -42,7 +36,6 @@ nodes:
   - deviceSelector:
       hardwareAddr: "*"
     dhcp: true
-    # Floating API VIP (shared with cp0/wrk1); see docs/api-endpoint.md
     vip:
       ip: 192.168.8.250
 
@@ -54,7 +47,6 @@ nodes:
   - deviceSelector:
       hardwareAddr: "*"
     dhcp: true
-    # Floating API VIP (shared with cp0/wrk0); see docs/api-endpoint.md
     vip:
       ip: 192.168.8.250
 
@@ -67,7 +59,6 @@ nodes:
       hardwareAddr: "*"
     dhcp: true
 
-# M920q Tiny that used to be cp0, repurposed as a worker (2026-08-08).
 - hostname: wrk3
   ipAddress: 192.168.8.100
   installDisk: /dev/nvme0n1
@@ -77,10 +68,6 @@ nodes:
       hardwareAddr: "*"
     dhcp: true
 
-# NOTE: cp0 is now Mac hardware and does not need/want intel-ucode via this
-# blanket section for a standard install (moot anyway since cp0 can't use
-# the standard install path  -  see the topology note above). Left in place
-# for if another M920q ever becomes an additional control-plane node.
 controlPlane:
   extensions:
   - image: ghcr.io/siderolabs/intel-ucode:20250211
@@ -92,9 +79,7 @@ controlPlane:
           name: none
       proxy:
         disabled: true
-      # Bind controller-manager/scheduler to all interfaces so the
-      # kube-prometheus-stack can scrape :10257/:10259 (Talos defaults to
-      # loopback only). Applied live via `talosctl patch machineconfig`.
+      # Exposed so kube-prometheus-stack can scrape :10257/:10259.
       controllerManager:
         extraArgs:
           bind-address: 0.0.0.0
@@ -105,15 +90,7 @@ controlPlane:
       kubelet:
         extraArgs:
           rotate-server-certificates: "true"
-        # Kepler (https://sustainable-computing.io/kepler/) reads RAPL powercap
-        # from /sys and CPU info from /proc via hostPath volumes. Talos kubelet
-        # has its own mount namespace, so those paths must be bind-mounted
-        # explicitly. See talos/patches/kepler-kubelet-extraMounts.yaml for
-        # the standalone version applied with `talosctl patch mc`.
-        #
-        # /sys is intentionally omitted. Binding /sys with rshared back-propagates
-        # into the host namespace and corrupts the cgroup2 mount, breaking the
-        # kubelet. Only /proc (rprivate) is safe to add here.
+        # /sys must not be mounted: rshared back-propagates and corrupts the host cgroup2 mount.
         extraMounts:
           - destination: /proc
             type: bind
@@ -123,7 +100,6 @@ controlPlane:
               - ro
               - rprivate
 
-# Patches applied to all worker nodes
 worker:
   patches:
   - |-
@@ -134,8 +110,7 @@ worker:
       kubelet:
         extraArgs:
           rotate-server-certificates: "true"
-        # Kepler extraMounts: /sys omitted (back-propagation via rshared corrupts
-        # host cgroup2). Only /proc with rprivate is safe. See controlPlane.patches.
+        # /sys must not be mounted: rshared back-propagates and corrupts the host cgroup2 mount.
         extraMounts:
           - destination: /proc
             type: bind
@@ -144,5 +119,3 @@ worker:
               - bind
               - ro
               - rprivate
-  # Extensions are managed via Image Factory schematic (bc2522764e5655d92dbfa1bc08ed9ae8da5de7622019d3842cfe0dc024c4671e).
-  # Use `talosctl upgrade --image factory.talos.dev/installer/<schematic>:<version>` to apply.

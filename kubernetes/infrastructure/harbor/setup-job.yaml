@@ -1,14 +1,10 @@
 ---
-# Harbor has no declarative representation for proxy-cache registries/projects,
-# so this one-shot Job creates them through the API. It is idempotent.
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: harbor-proxy-cache-setup
   namespace: harbor
   annotations:
-    # A one-shot hook, not a tracked resource: Jobs are immutable and a normal
-    # resource would wedge the app whenever the script changes.
     argocd.argoproj.io/hook: PostSync
     argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 spec:

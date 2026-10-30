@@ -9,7 +9,6 @@ spec:
     matchLabels:
       app: ntfy
   ingress:
-    # public: ntfy-api.alialjaffer.com, the iOS app (ntfy's own auth applies)
     - fromEndpoints:
         - matchLabels:
             "k8s:io.kubernetes.pod.namespace": cloudflare-tunnel-system
@@ -17,7 +16,6 @@ spec:
         - ports:
             - port: "80"
               protocol: TCP
-    # public: ntfy.alialjaffer.com, browser traffic after Keycloak login
     - fromEndpoints:
         - matchLabels:
             "k8s:io.kubernetes.pod.namespace": ntfy
@@ -26,7 +24,6 @@ spec:
         - ports:
             - port: "80"
               protocol: TCP
-    # in-cluster: fai (and future apps) publishing
     - fromEndpoints:
         - matchLabels:
             "k8s:io.kubernetes.pod.namespace": fai
@@ -48,7 +45,6 @@ spec:
           rules:
             dns:
               - matchPattern: "*"
-    # upstream relay for iOS push delivery (see README)
     - toFQDNs:
         - matchName: "ntfy.sh"
       toPorts:
@@ -66,7 +62,6 @@ spec:
     matchLabels:
       app.kubernetes.io/name: oauth2-proxy
   ingress:
-    # Cilium Gateway (cloudflared reaches the gateway, the gateway reaches here)
     - fromEndpoints:
         - matchLabels:
             "k8s:io.kubernetes.pod.namespace": cloudflare-tunnel-system
@@ -74,7 +69,6 @@ spec:
         - ports:
             - port: "4180"
               protocol: TCP
-    # kubelet readiness/liveness probes come from the node
     - fromEntities:
         - host
       toPorts:
@@ -103,7 +97,6 @@ spec:
         - ports:
             - port: "80"
               protocol: TCP
-    # OIDC discovery + token exchange against the public issuer
     - toFQDNs:
         - matchName: "kc.alialjaffer.com"
       toPorts:

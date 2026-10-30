@@ -20,8 +20,6 @@ prometheus:
         existingSecret:
           name: thanos-objstore-secret
           key: objstore.yml
-      # ThanosSpec.resources - passed straight through to the Prometheus CR,
-      # not a chart-templated field, so it's absent from `helm show values`.
       resources:
         requests:
           cpu: 5m
@@ -29,10 +27,6 @@ prometheus:
         limits:
           memory: 352Mi
 
-    # Sized from the 30d Thanos history: avg 2.9GiB, p95 3.6GiB, peak 5.2GiB
-    # (post-restart WAL replay). Request tracks the 7d average; the limit sits
-    # above the observed peak. Post-cleanup head series are ~1/3 of that peak,
-    # so this leaves plenty of room.
     resources:
       requests:
         cpu: 180m
@@ -40,9 +34,6 @@ prometheus:
       limits:
         memory: 6144Mi
 
-    # Safety net for the Go heap. GOMEMLIMIT only covers the Go heap, so leave
-    # ~1Gi below the container limit for the TSDB mmap and non-heap allocations;
-    # the kubelet stays the hard backstop.
     containers:
       - name: prometheus
         env:
@@ -68,36 +59,24 @@ grafana:
   defaultDashboardsEnabled: true
   defaultDashboardsTimezone: Asia/Riyadh
 
-  # Without this, the chart auto-generates a random admin password on every
-  # render via Helm's `lookup`, which tries to reuse the existing one. ArgoCD's
-  # repo-server doesn't have reliable live-cluster access, so `lookup`
-  # intermittently comes back empty and re-randomizes the password, silently
-  # breaking login.
+  # Required; otherwise the chart re-randomizes the admin password on every render.
   admin:
     existingSecret: grafana-admin-credentials
     userKey: admin-user
     passwordKey: admin-password
 
-  # RWO Longhorn PVC: Recreate avoids Multi-Attach deadlock on rollouts
+  # RWO Longhorn PVC: Recreate avoids Multi-Attach deadlock.
   deploymentStrategy:
     type: Recreate
 
-  # "extraEnvFrom" is not a field this chart recognizes and is silently
-  # ignored. The correct key is envFromSecrets.
+  # The chart ignores "extraEnvFrom"; this is the supported key.
   envFromSecrets:
     - name: grafana-discord-webhook
     - name: grafana-github-token
 
-  # Mail goes through the cluster's rate-limited relay (mail/smtp-relay),
-  # which authenticates to Resend itself, so no SMTP credentials are set here.
-
   plugins:
     - grafana-github-datasource
 
-  # Dashboards pulled by the download-dashboards initContainer instead of
-  # vendored ConfigMaps. gnetId pins grafana.com revisions, url pins release
-  # branches for dashboards the projects only publish in their repos. Bump a
-  # revision/ref to update.
   dashboardProviders:
     dashboardproviders.yaml:
       apiVersion: 1
@@ -146,11 +125,6 @@ grafana:
     storageClassName: longhorn
     size: 5Gi
 
-  # Grafana idles around 350-500Mi but leaks ~30Mi/hour: the previous pod went
-  # 404Mi -> 1.6GiB in under two days and then sat at GOMEMLIMIT. 30d peak is
-  # 1735MiB, so the limit has to stay high enough to hold the plateau until the
-  # weekly restart (grafana-restart.yaml) fires; the chart derives
-  # GOMEMLIMIT=1584MiB from it. Only the request is lowered to the idle size.
   resources:
     requests:
       cpu: 50m
@@ -161,9 +135,9 @@ grafana:
   grafana.ini:
     server:
       root_url: https://grafana.alialjaffer.com
-      enable_pprof: true  # localhost:6060, reach via kubectl port-forward
+      enable_pprof: true
     database:
-      wal: true  # required for SQLite on networked (Longhorn) storage
+      wal: true
     smtp:
       enabled: true
       host: smtp-relay.mail.svc.cluster.local:587
@@ -171,9 +145,6 @@ grafana:
       from_name: Grafana
       startTLS_policy: NoStartTLS
 
-  # sidecar.resources is shared by grafana-sc-dashboard and
-  # grafana-sc-datasources, the chart has one resources key for both. Sized
-  # to the larger of the two.
   sidecar:
     datasources:
       isDefaultDatasource: false
@@ -212,8 +183,6 @@ grafana:
             matcherRegex: spanID=(\w+)
             url: $${__value.raw}
             datasourceUid: prometheus
-    # Alias so dashboards hardcoding a "prometheus" name/uid resolve. Points
-    # at Thanos Query, not raw Prometheus, for full retention.
     - name: Prometheus
       type: prometheus
       uid: prometheus
@@ -223,8 +192,6 @@ grafana:
       jsonData:
         httpMethod: POST
         timeInterval: 15s
-    # deleteDatasources below clears a same-name/different-uid row, which
-    # Grafana can't reconcile otherwise.
     - name: GitHub
       type: grafana-github-datasource
       uid: github
@@ -234,7 +201,7 @@ grafana:
       jsonData:
         selectedAuthType: personal-access-token
       secureJsonData:
-        accessToken: "${GITHUB_TOKEN}"  # Set via grafana.envFromSecrets
+        accessToken: "${GITHUB_TOKEN}"
 
   deleteDatasources:
     - name: GitHub
@@ -244,11 +211,6 @@ grafana:
     contactpoints.yaml:
       apiVersion: 1
       contactPoints:
-        # One contact point, two integrations: Grafana notifies every
-        # integration a contact point contains, so this fans out to Discord and
-        # email. Fan-out has to live here because Grafana routes each alert to
-        # exactly one contact point (two notification policies would not both
-        # fire).
         - orgId: 1
           name: Discord + Email
           receivers:
@@ -256,11 +218,9 @@ grafana:
               type: discord
               settings:
                 message: '{{ "{{" }} template "discord.default.message" . {{ "}}" }}'
-                url: "${DISCORD_WEBHOOK_URL}"  # Set via grafana.envFromSecret
+                url: "${DISCORD_WEBHOOK_URL}"
                 use_discord_username: false
               disableResolveMessage: false
-            # Email goes through the cluster's rate-limited relay
-            # (mail/smtp-relay), configured under grafana.grafana.ini.smtp above.
             - uid: homelab-email-01
               type: email
               settings:
@@ -382,9 +342,6 @@ grafana:
               notification_settings:
                 receiver: Discord + Email
 
-            # Covers all nodes, unlike "High Temperature > 80°C" above which only
-            # matches chip="platform_coretemp_0" and misses nodes without a coretemp
-            # sensor (e.g. cp0, which only exposes the acpitz thermal zone).
             - uid: vgfo0a3aomfu7l
               title: High Node Temperature (any sensor) > 90°C
               condition: C
@@ -418,9 +375,6 @@ grafana:
               notification_settings:
                 receiver: Discord + Email
 
-            # Loki logging pipeline. These cover the "silent" failure modes:
-            # logs collected but never reaching Loki, and Loki querying broken
-            # even though pods report Running.
             - uid: lg7a0af1byfaa
               title: Loki Logs Being Dropped (Alloy)
               condition: C
@@ -481,7 +435,6 @@ grafana:
                     expression: A
                     type: threshold
                     refId: C
-              # Absence of distributor metrics IS the stall condition; NoData must page.
               noDataState: Alerting
               execErrState: Error
               for: 10m
@@ -554,14 +507,6 @@ grafana:
               notification_settings:
                 receiver: Discord + Email
 
-            # Thanos is the only long-term store: Prometheus keeps 2d locally, so
-            # anything the sidecar fails to upload to the GCS bucket is gone for
-            # good. In 2026-08 the objectstore credential was rotated and the
-            # Prometheus/Thanos pods were not restarted, so uploads failed for
-            # ~2 months and every block that aged out of Prometheus was lost.
-            # Nothing paged, because nothing was watching the bucket write path.
-            # Blocks land every 2h, so zero block loads in 6h means the path is
-            # broken even though every pod still reports Running.
             - uid: th7a0af1byfaa
               title: Thanos Bucket Uploads Stalled
               condition: C
@@ -595,10 +540,6 @@ grafana:
               notification_settings:
                 receiver: Discord + Email
 
-            # Bucket read/write failing outright (the CiliumNetworkPolicy
-            # regression): storegateway block-metadata syncs and compactor
-            # objectstore operations error out. A handful of 15s retries is
-            # normal noise, so only a sustained burst pages.
             - uid: th7a0af1byfbb
               title: Thanos Bucket Access Failing
               condition: C
@@ -632,8 +573,6 @@ grafana:
               notification_settings:
                 receiver: Discord + Email
 
-# Chart defaults are replaced when these lists are set, so they are repeated
-# here with the extra drops appended.
 kubelet:
   serviceMonitor:
     cAdvisorMetricRelabelings:
@@ -676,9 +615,6 @@ kubelet:
         sourceLabels: [__name__]
         regex: 'kubernetes_feature_enabled|prober_probe_duration_seconds_bucket'
 
-# Drop high-cardinality apiserver histograms and static feature-gate gauges,
-# no homelab value. apiserver_request_sli_duration_seconds_bucket alone was
-# ~27k series (26% of the apiserver job, 12% of the whole TSDB).
 kubeApiServer:
   serviceMonitor:
     metricRelabelings:
@@ -686,8 +622,6 @@ kubeApiServer:
         regex: 'apiserver_request_body_size_bytes_bucket|apiserver_response_sizes_bucket|apiserver_watch_cache_read_wait_seconds_bucket|apiserver_watch_events_sizes_bucket|apiserver_request_duration_seconds_bucket|apiserver_watch_list_duration_seconds_bucket|etcd_request_duration_seconds_bucket|apiserver_request_sli_duration_seconds_bucket|apiserver_admission_controller_admission_duration_seconds_bucket|kubernetes_feature_enabled'
         action: drop
 
-# kubernetes_feature_enabled is a static per-gate gauge (~720 series each) that
-# never changes; drop it on the other two emitters too.
 kubeControllerManager:
   serviceMonitor:
     metricRelabelings:
@@ -711,25 +645,13 @@ alertmanager:
         memory: 56Mi
       limits:
         memory: 112Mi
-    # Mount the Discord webhook secret so discord_configs.webhook_url_file can
-    # reference it without the URL living in this repo in plaintext.
     secrets:
       - grafana-discord-webhook
-    # The Alertmanager CRD has no spec.config field: `alertmanager.config` above
-    # is rendered into the Secret `alertmanager-<crname>`, and the CR has to name
-    # that Secret or the operator silently falls back to its own generated
-    # "route everything to null" config. The chart does not default this, so
-    # without the line below every PrometheusRule alert is accepted and dropped.
+    # Without this the operator falls back to a null route and drops every alert.
     configSecret: alertmanager-kube-prometheus-alertmanager
-  # Replace the chart default (route everything to "null") so PrometheusRule
-  # alerts actually deliver to Discord. Without this, every default alert
-  # (Watchdog, KubernetesPodCrashLooping, TargetDown, ...) fires silently.
   config:
     global:
       resolve_timeout: 5m
-      # Outbound email via the cluster's rate-limited relay (mail/smtp-relay),
-      # which forwards to Resend with the API key it holds. No SMTP credentials
-      # are configured here.
       smtp_smarthost: 'smtp-relay.mail.svc.cluster.local:587'
       smtp_from: 'homelab@alialjaffer.com'
       smtp_require_tls: false
@@ -762,21 +684,6 @@ alertmanager:
       group_interval: 5m
       repeat_interval: 12h
       receiver: 'discord'
-      # Fan out to email as well as Discord. continue:true on the email route
-      # lets the Discord catch-all below also match.
-      #
-      # Watchdog (the always-firing deadman's-switch heartbeat) is routed to
-      # null alongside InfoInhibitor: no external dead-man receiver is wired
-      # up, so it only generated noise on Discord/email.
-      #
-      # InfoInhibitor is pure bookkeeping -- its only job is to suppress other
-      # severity=info alerts in the same namespace via inhibit_rules above, it
-      # carries no actionable signal of its own. It flaps on/off with whatever
-      # info-level condition triggered it (e.g. CPUThrottlingHigh in
-      # node-feature-discovery), and send_resolved:true on both receivers
-      # turned every flap into a firing+resolved pair of notifications. Routed
-      # to null before the fan-out so it reaches neither channel; the
-      # inhibition itself happens regardless of notification routing.
       routes:
         - receiver: 'null'
           matchers:
@@ -800,9 +707,7 @@ alertmanager:
             send_resolved: true
       - name: 'null'
 
-# Cilium runs with kube-proxy-replacement: true -- no kube-proxy pods exist on
-# this cluster, so the chart's KubeProxyDown rule (absent(up{job="kube-proxy"}))
-# is permanently true and can never resolve.
+# Cilium replaces kube-proxy, so the chart's KubeProxyDown rule would never resolve.
 kubeProxy:
   enabled: false
 
@@ -846,8 +751,6 @@ prometheusOperator:
       memory: 48Mi
     limits:
       memory: 96Mi
-  # Shared setting: also sizes the config-reloader sidecar injected into the
-  # Alertmanager StatefulSet, not just Prometheus's.
   prometheusConfigReloader:
     resources:
       requests:

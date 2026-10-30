@@ -1,22 +1,4 @@
 ---
-# Recording rules backing the "Cluster Health" dashboard (grafana-dashboard-
-# cluster-health.yaml). Two problems these fix, found 2026-10-17 while
-# diagnosing slow dashboard loads:
-#
-# 1. Several panels independently repeated the same `node_uname_info` join
-#    (instance -> nodename) -- CPU%, memory%, disk%, 3x load average, RX/TX,
-#    temperature, ACPI zone. Every viewer's every refresh recomputed the join
-#    from raw series instead of it being computed once. Precomputed here
-#    instead; panels just read the resulting series.
-# 2. The two cost/energy panels ran `avg_over_time((sum(...))[7d:1m])` --
-#    10,080 evaluation points, from raw (there is no downsampled data for
-#    this cluster yet) -- on every single dashboard load. kepler_cluster_cpu:
-#    avg7d precomputes it once on a 15m cycle at a coarser 10m subquery step;
-#    a monthly estimate does not need per-refresh precision.
-#
-# label release: monitoring is required for the Prometheus CR's ruleSelector
-# (matchLabels: {release: monitoring}) to pick this up; namespace is
-# unrestricted (ruleNamespaceSelector: {}).
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
