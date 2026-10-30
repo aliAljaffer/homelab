@@ -143,6 +143,7 @@ grafana:
   grafana.ini:
     server:
       root_url: https://grafana.alialjaffer.com
+      enable_pprof: true  # localhost:6060, reach via kubectl port-forward
     database:
       wal: true  # required for SQLite on networked (Longhorn) storage
     smtp:
@@ -613,6 +614,50 @@ grafana:
               notification_settings:
                 receiver: Discord + Email
 
+# Chart defaults are replaced when these lists are set, so they are repeated
+# here with the extra drops appended.
+kubelet:
+  serviceMonitor:
+    cAdvisorMetricRelabelings:
+      - sourceLabels: [__name__]
+        action: drop
+        regex: 'container_cpu_(cfs_throttled_seconds_total|load_average_10s|system_seconds_total|user_seconds_total)'
+      - sourceLabels: [__name__]
+        action: drop
+        regex: 'container_fs_(io_current|io_time_seconds_total|io_time_weighted_seconds_total|reads_merged_total|sector_reads_total|sector_writes_total|writes_merged_total)'
+      - sourceLabels: [__name__]
+        action: drop
+        regex: 'container_memory_(mapped_file|swap)'
+      - sourceLabels: [__name__]
+        action: drop
+        regex: 'container_(file_descriptors|tasks_state|threads_max)'
+      - sourceLabels: [__name__, scope]
+        action: drop
+        regex: 'container_memory_failures_total;hierarchy'
+      - sourceLabels: [__name__, interface]
+        action: drop
+        regex: 'container_network_.*;(cali|cilium|cni|lxc|nodelocaldns|tunl).*'
+      - sourceLabels: [__name__]
+        action: drop
+        regex: 'container_spec.*'
+      - sourceLabels: [id, pod]
+        action: drop
+        regex: '.+;'
+      - sourceLabels: [__name__]
+        action: drop
+        regex: 'container_blkio_device_usage_total|container_memory_failures_total'
+    probesMetricRelabelings:
+      - sourceLabels: [__name__]
+        action: drop
+        regex: 'prober_probe_duration_seconds_bucket'
+    metricRelabelings:
+      - action: drop
+        sourceLabels: [__name__, le]
+        regex: (csi_operations|storage_operation_duration)_seconds_bucket;(0.25|2.5|15|25|120|600)(\.0)?
+      - action: drop
+        sourceLabels: [__name__]
+        regex: 'kubernetes_feature_enabled|prober_probe_duration_seconds_bucket'
+
 # Drop high-cardinality apiserver histograms, no homelab value.
 kubeApiServer:
   serviceMonitor:
@@ -729,6 +774,12 @@ nodeExporter:
   enabled: true
 
 prometheus-node-exporter:
+  prometheus:
+    monitor:
+      metricRelabelings:
+        - sourceLabels: [__name__]
+          action: drop
+          regex: 'node_nfs_requests_total|node_scrape_collector_(duration_seconds|success)|node_network_(address_assign_type|carrier_changes_total|carrier_up_changes_total|carrier_down_changes_total|info|iface_link|iface_id|flags)'
   resources:
     requests:
       cpu: 10m
@@ -740,6 +791,10 @@ kubeStateMetrics:
   enabled: true
 
 kube-state-metrics:
+  metricDenylist:
+    - ^kube_pod_tolerations$
+    - ^kube_pod_status_qos_class$
+    - ^kube_pod_status_scheduled$
   resources:
     requests:
       cpu: 25m
