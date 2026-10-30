@@ -4,6 +4,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: harbor-registry-rwx
   namespace: harbor
+  labels:
+    app.kubernetes.io/part-of: harbor
 spec:
   accessModes:
     - ReadWriteMany
