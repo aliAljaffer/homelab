@@ -62,10 +62,13 @@ storegateway:
 
 compactor:
   enabled: true
+  # Steady-state use is ~50Mi; downsample/compaction spikes are covered by the
+  # limit, not the request, so the old 2296Mi request only reserved capacity it
+  # never used.
   resources:
     requests:
       cpu: 30m
-      memory: 2296Mi
+      memory: 512Mi
     limits:
       memory: 4592Mi
   retention:
