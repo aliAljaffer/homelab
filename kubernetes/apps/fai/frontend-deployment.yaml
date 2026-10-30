@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: fai-frontend
-          image: harbor.alialjaffer.com/mirror/fai-frontend@sha256:5419ab929fc928f3f48de00505814200e4ac75b5b9559c0eef4ab502a07426e0
+          image: harbor.alialjaffer.com/mirror/fai-frontend@sha256:6e937c878d5ecba61182319d0837592071361873bd90239c755512d736ff07ac
           ports:
             - containerPort: 80
           resources:
