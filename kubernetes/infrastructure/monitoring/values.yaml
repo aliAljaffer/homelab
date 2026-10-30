@@ -34,16 +34,17 @@ prometheus:
         cpu: 180m
         memory: 2560Mi
       limits:
-        memory: 4096Mi
+        memory: 5120Mi
 
     # Safety net for the Go heap now that head series are back under control
-    # (Kyverno CRDs gone, apiserver histograms dropped). Keep it below the
-    # container limit so GC kicks in before the kubelet OOMKills the process.
+    # (Kyverno CRDs gone, apiserver histograms dropped). GOMEMLIMIT only covers
+    # the Go heap, so leave ~1Gi below the container limit for the TSDB mmap
+    # and non-heap allocations; the kubelet stays the hard backstop.
     containers:
       - name: prometheus
         env:
           - name: GOMEMLIMIT
-            value: 3584MiB
+            value: 4096MiB
 
     additionalScrapeConfigs:
       - job_name: "catus-locatus-backend"
