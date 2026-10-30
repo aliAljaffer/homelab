@@ -18,7 +18,6 @@ these bullets capture the _why_ behind that ordering.
 - `keycloak-operator.yaml`: must exist before the `keycloak` Application (wave 1).
 - `keycloak.yaml`: needs `cloudnative-pg` (wave -2) and `keycloak-operator`
   (wave -1) healthy first.
-- `kyverno.yaml`: runs early (wave -2) so policies are in force before workloads sync.
 - `longhorn.yaml`: first install uses `helm install --no-hooks` during bootstrap
   to avoid a circular dependency on the pre-upgrade hook's service account. See
   `bootstrap/README.md` steps 1 and 7.
