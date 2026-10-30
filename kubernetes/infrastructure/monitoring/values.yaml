@@ -32,9 +32,18 @@ prometheus:
     resources:
       requests:
         cpu: 180m
-        memory: 3816Mi
+        memory: 2560Mi
       limits:
-        memory: 7632Mi
+        memory: 4096Mi
+
+    # Safety net for the Go heap now that head series are back under control
+    # (Kyverno CRDs gone, apiserver histograms dropped). Keep it below the
+    # container limit so GC kicks in before the kubelet OOMKills the process.
+    containers:
+      - name: prometheus
+        env:
+          - name: GOMEMLIMIT
+            value: 3584MiB
 
     additionalScrapeConfigs:
       - job_name: "catus-locatus-backend"
@@ -133,12 +142,16 @@ grafana:
     storageClassName: longhorn
     size: 5Gi
 
+  # Grafana idles around 500Mi. The chart sets GOMEMLIMIT to 90% of the limit,
+  # so 1152Mi caps the GC target at ~1036MiB (was 1584MiB off a 1760Mi limit)
+  # while still leaving room for the known goroutine leak until the weekly
+  # restart fires. See grafana-restart.yaml.
   resources:
     requests:
       cpu: 50m
-      memory: 880Mi
+      memory: 512Mi
     limits:
-      memory: 1760Mi
+      memory: 1152Mi
 
   grafana.ini:
     server:
@@ -332,7 +345,7 @@ grafana:
                 receiver: Discord + Email
 
             - uid: ff3ib9gnzeubkc
-              title: High Memory Usage > 70%
+              title: High Memory Usage > 85%
               condition: C
               data:
                 - refId: A
@@ -349,7 +362,7 @@ grafana:
                   model:
                     conditions:
                       - evaluator:
-                          params: [70]
+                          params: [85]
                           type: gt
                         query:
                           params: [C]
@@ -658,12 +671,30 @@ kubelet:
         sourceLabels: [__name__]
         regex: 'kubernetes_feature_enabled|prober_probe_duration_seconds_bucket'
 
-# Drop high-cardinality apiserver histograms, no homelab value.
+# Drop high-cardinality apiserver histograms and static feature-gate gauges,
+# no homelab value. apiserver_request_sli_duration_seconds_bucket alone was
+# ~27k series (26% of the apiserver job, 12% of the whole TSDB).
 kubeApiServer:
   serviceMonitor:
     metricRelabelings:
       - sourceLabels: [__name__]
-        regex: 'apiserver_request_body_size_bytes_bucket|apiserver_response_sizes_bucket|apiserver_watch_cache_read_wait_seconds_bucket|apiserver_watch_events_sizes_bucket|apiserver_request_duration_seconds_bucket|apiserver_watch_list_duration_seconds_bucket|etcd_request_duration_seconds_bucket'
+        regex: 'apiserver_request_body_size_bytes_bucket|apiserver_response_sizes_bucket|apiserver_watch_cache_read_wait_seconds_bucket|apiserver_watch_events_sizes_bucket|apiserver_request_duration_seconds_bucket|apiserver_watch_list_duration_seconds_bucket|etcd_request_duration_seconds_bucket|apiserver_request_sli_duration_seconds_bucket|apiserver_admission_controller_admission_duration_seconds_bucket|kubernetes_feature_enabled'
+        action: drop
+
+# kubernetes_feature_enabled is a static per-gate gauge (~720 series each) that
+# never changes; drop it on the other two emitters too.
+kubeControllerManager:
+  serviceMonitor:
+    metricRelabelings:
+      - sourceLabels: [__name__]
+        regex: 'kubernetes_feature_enabled'
+        action: drop
+
+kubeScheduler:
+  serviceMonitor:
+    metricRelabelings:
+      - sourceLabels: [__name__]
+        regex: 'kubernetes_feature_enabled'
         action: drop
 
 alertmanager:

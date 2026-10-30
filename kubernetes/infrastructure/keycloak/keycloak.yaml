@@ -6,6 +6,14 @@ metadata:
   namespace: keycloak
 spec:
   instances: 3
+  # The operator default is a 1700Mi request / 2Gi limit per instance; real use
+  # is ~650Mi. Keep the limit, drop the request so three Keycloaks stop
+  # reserving 5Gi across the workers.
+  resources:
+    requests:
+      memory: 1Gi
+    limits:
+      memory: 2Gi
   db:
     vendor: postgres
     host: keycloak-db-rw.keycloak.svc.cluster.local
