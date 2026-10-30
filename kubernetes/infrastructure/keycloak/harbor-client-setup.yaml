@@ -1,7 +1,4 @@
 ---
-# The KeycloakOIDCClient CRD is broken on operator 26.7.1 with
-# client-admin-api:v2 (NPE in the client proxy), so create Harbor's client,
-# groups mapper and admin group through the admin API instead.
 apiVersion: batch/v1
 kind: Job
 metadata:

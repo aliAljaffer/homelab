@@ -16,9 +16,6 @@ speaker:
     limits:
       memory: 112Mi
 
-# frr-k8s is a real Helm dependency, not a values passthrough. Its keys use
-# the subchart's own schema, nested one level deeper under the "frr-k8s"
-# alias (metallb's own values.yaml only has `frrk8s.enabled`).
 frr-k8s:
   frrk8s:
     resources:

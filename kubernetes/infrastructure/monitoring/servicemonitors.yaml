@@ -1,6 +1,4 @@
-# ServiceMonitors for the log stack (Alloy, Loki, canary, memcached caches).
-# Prometheus only selects ServiceMonitors labeled release=monitoring
-# (see the prometheus spec serviceMonitorSelector), so that label is required.
+# Prometheus only selects ServiceMonitors labeled release=monitoring.
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -33,14 +31,8 @@ spec:
       app.kubernetes.io/name: loki
       app.kubernetes.io/instance: loki
     matchExpressions:
-    # The loki service (single binary) has no component label, while the
-    # canary and memcached services do. Exclude them so this monitor only
-    # scrapes Loki itself.
     - key: app.kubernetes.io/component
       operator: DoesNotExist
-    # The chart also publishes a headless service (variant=headless) carrying
-    # the same base labels; its http-metrics port spans every loki pod type,
-    # which yields 404s. Only scrape the main ClusterIP service.
     - key: variant
       operator: DoesNotExist
 ---
@@ -104,8 +96,6 @@ metadata:
   labels:
     release: monitoring
 spec:
-  # The sealed-secrets controller runs in kube-system (installed by the
-  # bootstrap kustomization) and already exposes a dedicated metrics service.
   endpoints:
   - targetPort: 8081
     interval: 30s
@@ -140,7 +130,6 @@ metadata:
   labels:
     release: monitoring
 spec:
-  # postfix_exporter sidecar inside the mail/smtp-relay Deployment.
   endpoints:
     - port: metrics
       interval: 30s

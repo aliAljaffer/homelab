@@ -1,19 +1,4 @@
 ---
-# Reusable oauth2-proxy for any app that has no auth gate of its own.
-#
-# This is a kustomize Component, not a standalone app. An application includes
-# it and supplies two resources in its own namespace:
-#
-#   ConfigMap "oauth2-proxy-config"  OAUTH2_PROXY_UPSTREAMS / _REDIRECT_URL /
-#                                    _COOKIE_DOMAINS / _WHITELIST_DOMAINS /
-#                                    _EMAIL_DOMAINS
-#   Secret    "oauth2-proxy-secret"  OAUTH2_PROXY_CLIENT_ID / _CLIENT_SECRET /
-#                                    _COOKIE_SECRET
-#
-# The app's HTTPRoute then points at Service "oauth2-proxy" (port 80) instead of
-# the app Service, and oauth2-proxy proxies on to OAUTH2_PROXY_UPSTREAMS once the
-# user has authenticated. The OIDC client and secret live in Keycloak; see
-# kubernetes/components/oauth2-proxy/README.md.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -36,12 +21,7 @@ spec:
           args:
             - --http-address=0.0.0.0:4180
             - --provider=oidc
-            # Public issuer: the browser, not the pod, completes the login, and
-            # Keycloak's discovered issuer must match this exactly.
             - --oidc-issuer-url=https://kc.alialjaffer.com/realms/homelab
-            # TLS terminates at the Cilium Gateway. Cilium's Envoy DaemonSet is
-            # host-networked, so X-Forwarded-* arrive from a node IP; trust only
-            # the LAN range and not every source.
             - --reverse-proxy=true
             - --trusted-proxy-ip=192.168.8.0/24
             - --cookie-secure=true

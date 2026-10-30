@@ -2,9 +2,8 @@
 global:
   objstore:
     createSecret: false
-    secretName: thanos-objstore-secret # sealed in bootstrap/README.md
-    secretKey: objstore.yml # must match the key in the sealed secret
-  # Applies to query, storegateway, and compactor.
+    secretName: thanos-objstore-secret
+    secretKey: objstore.yml
   serviceMonitor:
     enabled: true
     labels:
@@ -22,37 +21,19 @@ query:
   - prometheus_replica
   endpoints:
     autogen:
-      enabled: true # wires up the in-chart storegateway automatically
+      enabled: true
     static:
     - prometheus-operated.monitoring.svc.cluster.local:10901
     - dnssrv+_grpc._tcp.kube-prometheus-kube-prome-thanos-discovery.monitoring.svc.cluster.local
 
 storegateway:
   enabled: true
-  # Bumped 2026-10-17: clearing /var/thanos/store (the index-header cache, see
-  # monitoring/README.md "Manual bucket mutations") forces a cold rebuild of
-  # every block's index-header on next startup instead of the usual
-  # incremental build for new blocks only. With ~480 blocks that rebuild spike
-  # alone exceeded the old 1280Mi limit and OOMKilled both replicas in a crash
-  # loop. 1280Mi -> 2560Mi -> 4096Mi, still OOMKilling repeatedly (both
-  # replicas, tens of minutes apart, not just on startup) -- nodes have
-  # plenty of headroom (28-68% memory used cluster-wide) so this isn't a node
-  # capacity problem. Bumped again pending a proper investigation into
-  # whether this is a real steady-state requirement at this block count or an
-  # actual leak; don't be surprised if this needs to go even higher or if the
-  # root cause turns out to be something other than "needs more memory."
   resources:
     requests:
       cpu: 5m
       memory: 640Mi
     limits:
       memory: 6144Mi
-  # No request-size limit exists by default (store.grpc.downloaded-bytes-limit
-  # is 0 = unbounded), so a single wide/expensive query could pull unlimited
-  # chunk data into memory on top of the already-reserved 2GB chunk pool +
-  # 250MB index cache. Caps one request's blast radius without throttling
-  # normal concurrent dashboard load (series-max-concurrency default of 20 is
-  # untouched).
   extraArgs:
     - --store.grpc.downloaded-bytes-limit=2GB
   persistence:
@@ -62,9 +43,6 @@ storegateway:
 
 compactor:
   enabled: true
-  # 30d history: avg 90Mi, p95 154Mi, max 2.2GiB (one compaction burst during
-  # the Oct 16 reset). Requests don't cap usage, so 512Mi covers normal work and
-  # the existing 4592Mi limit still covers the burst.
   resources:
     requests:
       cpu: 30m
@@ -72,16 +50,10 @@ compactor:
     limits:
       memory: 4592Mi
   retention:
-    resolutionRaw: "" # empty means keep forever
+    resolutionRaw: ""
     resolution5m: ""
     resolution1h: ""
-  # The compactor downloads every block it intends to compact into this volume,
-  # so it must be comfortably larger than the raw metrics footprint. It filled up
-  # the original 10Gi on 2026-10-16 and halted (`preallocate: no space left on
-  # device`), which stops all downsampling and retention. 50Gi gives headroom.
-  # NOTE: spec.volumeClaimTemplates is immutable on StatefulSets, so changing
-  # this value does NOT resize an existing PVC. See README.md for the manual
-  # expansion procedure.
+  # volumeClaimTemplates are immutable; resize existing PVCs manually (see README).
   persistence:
     enabled: true
     storageClass: longhorn

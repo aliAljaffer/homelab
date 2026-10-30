@@ -5,10 +5,6 @@ metadata:
   name: monthly-backup
   namespace: longhorn-system
 spec:
-  # First of every month, 03:00 (the daily job runs at 02:00). Twelve monthly
-  # backups give a ~1 year coarse recovery window at a fraction of the storage
-  # of daily backups, covering multi-week gaps like the 2026 metrics-loss
-  # incident where the daily window was too short.
   cron: "0 3 1 * *"
   task: backup
   groups:

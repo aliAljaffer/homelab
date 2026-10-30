@@ -1,11 +1,4 @@
 ---
-# Grafana dashboard for OpenZiti (controller + edge router), scraped via the
-# Ziti Prometheus metrics binding exposed by the ziti-controller chart's
-# ServiceMonitor.
-#
-# Loaded by the kube-prometheus-stack Grafana sidecar, which watches all
-# namespaces for ConfigMaps labeled grafana_dashboard: "1". The
-# grafana_dashboard_folder annotation places it in a folder.
 apiVersion: v1
 kind: ConfigMap
 metadata:

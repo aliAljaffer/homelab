@@ -9,8 +9,6 @@ proxy:
   tunnelTokenSecretRef:
     name: cloudflare-tunnel-token
   networkPolicy:
-    # Without this, Prometheus (monitoring namespace) can't reach the metrics
-    # port and scrapes time out.
     ingress:
       from:
         - namespaceSelector:

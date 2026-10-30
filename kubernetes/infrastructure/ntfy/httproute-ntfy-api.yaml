@@ -1,7 +1,4 @@
 ---
-# Direct-to-ntfy hostname for the iOS app (and any other non-browser client).
-# It has no oauth2-proxy in front because those clients cannot complete an
-# interactive OIDC login; ntfy's own basic auth / access tokens still apply.
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:

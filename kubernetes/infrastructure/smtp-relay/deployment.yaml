@@ -1,16 +1,4 @@
 ---
-# Single choke point for all cluster-generated email. Every email-emitting
-# application talks to this relay instead of smtp.resend.com directly, so a
-# runaway sender (Falco, Alertmanager, Grafana, ArgoCD, Keycloak, Vaultwarden)
-# cannot burn Resend's daily quota on its own.
-#
-# The relay is a Postfix "null client": it accepts mail from inside the cluster
-# and relays everything to Resend over authenticated TLS. Rate limits are
-# enforced here, in one place, rather than per application.
-#
-# The exporter sidecar (postfix_exporter) turns the mail log + queue into
-# Prometheus metrics; see metrics.yaml and the ServiceMonitor in the monitoring
-# app.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -38,13 +26,8 @@ spec:
               value: json
             - name: POSTFIX_myhostname
               value: smtp-relay.mail.svc.cluster.local
-            # Every sender uses *@alialjaffer.com as the envelope sender.
-            # Cluster pods are inside the default mynetworks private ranges, so
-            # they may relay without authenticating.
             - name: ALLOWED_SENDER_DOMAINS
               value: alialjaffer.com
-            # Relay everything to Resend with SASL; the API key is the SMTP
-            # password (same key the applications used to hold individually).
             - name: RELAYHOST
               value: "[smtp.resend.com]:587"
             - name: RELAYHOST_USERNAME
@@ -56,17 +39,8 @@ spec:
                   key: password
             - name: POSTFIX_smtp_tls_security_level
               value: encrypt
-            # The in-cluster listener is plaintext: pod traffic is already
-            # restricted by CiliumNetworkPolicy and the relay terminates TLS
-            # upstream. Not advertising STARTTLS stops clients from upgrading
-            # onto the relay's self-signed certificate and failing verification.
             - name: POSTFIX_smtpd_tls_security_level
               value: none
-            # --- Rate limits -------------------------------------------------
-            # anvil(8) enforces the smtpd_client_* limits per client IP (i.e.
-            # per sender pod), per anvil_rate_time_unit. The event-limit
-            # exceptions are deliberately set to a non-matching range so the
-            # cluster CIDR (trusted via mynetworks) is NOT exempted.
             - name: POSTFIX_anvil_rate_time_unit
               value: 60s
             - name: POSTFIX_smtpd_client_connection_rate_limit
@@ -77,8 +51,6 @@ spec:
               value: "40"
             - name: POSTFIX_smtpd_client_event_limit_exceptions
               value: "192.0.2.1/32"
-            # Global ceiling on how fast we hand mail to Resend: a single
-            # relayhost destination, one message at a time, 1s apart.
             - name: POSTFIX_initial_destination_concurrency
               value: "1"
             - name: POSTFIX_default_destination_rate_delay
@@ -95,20 +67,15 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 10
           volumeMounts:
-            # Queue/spool, shared with the exporter's showq reader.
             - name: spool
               mountPath: /var/spool/postfix
               subPath: spool
-            # Plain-text mail log, shared with the exporter.
             - name: spool
               mountPath: /var/log
               subPath: logs
             - name: metrics-config
               mountPath: /etc/rsyslog.d-metrics/maillog.conf
               subPath: maillog.conf
-            # Distinct filename: the image's own /etc/logrotate.d/logrotate.conf
-            # is rewritten by its init script, which cannot rename over a
-            # bind-mounted file.
             - name: metrics-config
               mountPath: /etc/logrotate.d/smtp-relay.conf
               subPath: logrotate.conf
@@ -127,7 +94,6 @@ spec:
             - "--web.listen-address=0.0.0.0:9154"
             - "--web.telemetry-path=/metrics"
             - "--postfix.logfile_path=/var/log/mail.log"
-            # Start even before rsyslog has created mail.log (fresh emptyDir).
             - "--no-postfix.logfile_must_exist"
             - "--postfix.showq_path=/var/spool/postfix/public/showq"
           ports:

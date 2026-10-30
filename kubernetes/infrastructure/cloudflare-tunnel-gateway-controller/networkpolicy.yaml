@@ -9,11 +9,6 @@ spec:
       app.kubernetes.io/component: proxy
       app.kubernetes.io/instance: cloudflare-tunnel-gateway-controller
       app.kubernetes.io/name: cloudflare-tunnel-gateway-controller-proxy
-  # Ingress on :8081 is otherwise governed by the chart's own plain
-  # NetworkPolicy (cloudflare-tunnel-system + monitoring namespaces). Cilium
-  # unions CiliumNetworkPolicy and plain NetworkPolicy ingress rules for the
-  # same endpoint, so this only adds the host entity on top of that, it
-  # doesn't replace it.
   ingress:
   - fromEntities:
     - host

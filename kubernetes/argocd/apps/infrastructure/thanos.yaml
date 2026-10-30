@@ -11,9 +11,8 @@ metadata:
 spec:
   project: infrastructure
   sources:
+  # No oci:// prefix: ArgoCD's token helper gets a 403 from ghcr otherwise.
   - repoURL: ghcr.io/thanos-community/helm-charts
-    # No oci:// scheme. With it, ArgoCD's token helper requests the wrong
-    # OAuth scope and ghcr returns 403 (Application stuck at sync=Unknown).
     chart: thanos
     targetRevision: 0.21.0
     helm:
@@ -28,16 +27,10 @@ spec:
   ignoreDifferences:
   - group: apps
     kind: StatefulSet
+    # volumeClaimTemplates are immutable; ignoring them prevents permanent OutOfSync.
     jsonPointers:
     - /spec/persistentVolumeClaimRetentionPolicy
     - /spec/template/spec/containers/0/startupProbe/initialDelaySeconds
-    # volumeClaimTemplates is immutable on live StatefulSets, so the size in
-    # values.yaml can only be applied on a fresh install. Existing PVCs are
-    # resized manually (see kubernetes/infrastructure/thanos/README.md). The
-    # whole list is ignored: ArgoCD's diff engine reports defaulted VCT fields
-    # (apiVersion/kind, and resources.requests.storage once it differs) as drift
-    # that cannot be patched anyway, which would leave the app permanently
-    # OutOfSync.
     - /spec/volumeClaimTemplates
   syncPolicy:
     automated:

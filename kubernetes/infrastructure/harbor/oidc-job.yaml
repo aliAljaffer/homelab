@@ -1,7 +1,4 @@
 ---
-# Harbor has no declarative setting for the OIDC client secret, so configure it
-# through the API from a sealed secret. PostSync + idempotent; runs after Harbor
-# is healthy. The local `admin` account keeps API/basic-auth access in OIDC mode.
 apiVersion: batch/v1
 kind: Job
 metadata:

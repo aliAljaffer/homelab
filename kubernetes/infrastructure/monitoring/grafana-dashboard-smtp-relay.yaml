@@ -1,10 +1,4 @@
 ---
-# Grafana dashboard for the cluster SMTP relay (mail/smtp-relay): email volume,
-# deferrals and bounces, and the exporter's own health. Backed by the
-# postfix_exporter sidecar scraped by the "smtp-relay" ServiceMonitor.
-#
-# Loaded by the kube-prometheus-stack Grafana sidecar, which watches all
-# namespaces for ConfigMaps labeled grafana_dashboard: "1".
 apiVersion: v1
 kind: ConfigMap
 metadata:

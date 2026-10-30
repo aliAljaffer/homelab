@@ -11,9 +11,8 @@ metadata:
 spec:
   project: infrastructure
   sources:
+  # No oci:// prefix: ArgoCD appends "chart" to the repoURL, which must match sourceRepos.
   - repoURL: quay.io/sustainable_computing_io/charts
-    # No oci:// scheme. ArgoCD auto-detects OCI and appends `chart` to the
-    # repoURL, so the AppProject sourceRepos entry must match this prefix.
     chart: kepler
     targetRevision: 0.11.4
     helm:

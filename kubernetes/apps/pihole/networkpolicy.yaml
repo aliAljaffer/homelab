@@ -50,7 +50,6 @@ spec:
           rules:
             dns:
               - matchPattern: "*"
-    # Matches PIHOLE_DNS_ in pihole-deployment.yaml.
     - toCIDR:
         - "8.8.8.8/32"
         - "8.8.4.4/32"

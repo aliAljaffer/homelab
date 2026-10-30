@@ -42,8 +42,6 @@ spec:
             secretKeyRef:
               name: vaultwarden-secret
               key: ADMIN_TOKEN
-        # Mail goes through the cluster's rate-limited relay (mail/smtp-relay);
-        # it authenticates to Resend itself, so no credentials are set here.
         - name: SMTP_HOST
           value: "smtp-relay.mail.svc.cluster.local"
         - name: SMTP_PORT

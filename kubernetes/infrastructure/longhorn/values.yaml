@@ -3,9 +3,6 @@ defaultSettings:
   defaultReplicaCount: "2"
   defaultDataLocality: best-effort
   storageReservedPercentageForDefaultDisk: "15"
-  # backupTarget and backupTargetCredentialSecret are set via the BackupTarget
-  # CR (backup-target.yaml), not here. Longhorn ignores defaultSettings for
-  # an already-created BackupTarget.
 
 persistence:
   defaultClass: true
@@ -22,10 +19,6 @@ ingress:
 longhornUI:
   replicas: "1"
 
-# Only longhornManager exposes a resources key in this chart (v1.12.0). The
-# csi.* sidecars, longhornDriver, longhornUI, and per-version engine-image
-# DaemonSets are created dynamically at runtime and unreachable here, even a
-# manual patch wouldn't stick.
 longhornManager:
   resources:
     requests:

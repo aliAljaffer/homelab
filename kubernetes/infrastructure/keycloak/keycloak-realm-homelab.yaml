@@ -30,11 +30,6 @@ spec:
       auth: "false"
       starttls: "false"
       ssl: "false"
-    # Shared OIDC client for the per-app oauth2-proxy reverse proxies. See
-    # kubernetes/components/oauth2-proxy/README.md. Keycloak matches redirect
-    # URIs exactly — a wildcard in the host is NOT supported — so every app that
-    # includes the component needs its own callback entry here and in the live
-    # realm (realm import skips an existing realm, see the caveat below).
     clients:
       - clientId: oauth2-proxy
         name: oauth2-proxy
@@ -52,11 +47,6 @@ spec:
           - "https://ntfy.alialjaffer.com"
         attributes:
           pkce.code.challenge.method: S256
-      # fai does its own JWT validation (no oauth2-proxy in front of it — see
-      # kubernetes/apps/fai/README.md), so this is a public PKCE client, not a
-      # confidential one. Already created by hand in the admin console per the
-      # realm-already-exists caveat below; this entry documents it for a future
-      # from-scratch realm recreation.
       - clientId: fai
         name: fai
         enabled: true

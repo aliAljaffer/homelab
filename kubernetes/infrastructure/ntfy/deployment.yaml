@@ -18,13 +18,6 @@ spec:
       labels:
         app: ntfy
     spec:
-      # Bootstraps users/ACLs idempotently against the persisted auth.db on every
-      # restart. `user add --ignore-exists` no-ops (exit 0) once a user already
-      # exists, verified directly against the real ntfy image before writing this -
-      # `--auth-file`/`--base-url` etc. are flags on the `user`/`access` subcommand
-      # itself, not the top-level `ntfy` command (a real gotcha: `ntfy --auth-file
-      # ... user add` fails with "flag provided but not defined", it must be `ntfy
-      # user --auth-file ... add`).
       initContainers:
         - name: bootstrap-auth
           image: binwiederhier/ntfy
