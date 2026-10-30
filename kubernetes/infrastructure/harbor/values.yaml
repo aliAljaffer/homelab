@@ -54,14 +54,18 @@ persistence:
     database:
       storageClass: longhorn
       size: 5Gi
-    redis:
-      storageClass: longhorn
-      size: 1Gi
 
 database:
   type: internal
 redis:
-  type: internal
+  type: external
+  external:
+    addr: valkey.redis-operator.svc.cluster.local:6379
+    coreDatabaseIndex: "0"
+    jobserviceDatabaseIndex: "1"
+    registryDatabaseIndex: "2"
+    trivyAdapterIndex: "5"
+    password: ""
 
 # Not a security scanner box; disable Trivy for now.
 trivy:
