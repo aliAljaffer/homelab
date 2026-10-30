@@ -6,3 +6,4 @@ resources:
   - grafana-dashboard.yaml
   - grafana-dashboard-cluster-health.yaml
   - prometheusrule-cluster-health.yaml
+  - servicemonitor.yaml
