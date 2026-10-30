@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: harbor.alialjaffer.com/mirror/grooszy-web@sha256:6103d816d6fa6a2a3f2106c1ea87b6df1b7c88d8aa20a0b999c468c8f67c3bc1
+          image: harbor.alialjaffer.com/mirror/grooszy-web@sha256:6321f374ba3cdc45adb64f3d4e7afd209886246882f02499ee2755998b0b9e0e
           ports:
             - containerPort: 3000
               name: http
