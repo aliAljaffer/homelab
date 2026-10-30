@@ -68,6 +68,11 @@ redis:
     trivyAdapterIndex: "5"
     password: ""
 
+# jobservice's jobLog volume is RWO, so a surging pod strands the old one on the
+# other node's Multi-Attach error and the rollout never finishes.
+updateStrategy:
+  type: Recreate
+
 # Not a security scanner box; disable Trivy for now.
 trivy:
   enabled: false
