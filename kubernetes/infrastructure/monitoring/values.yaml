@@ -119,8 +119,6 @@ grafana:
         gnetId: 16888
         revision: 14
         datasource: Prometheus
-      kyverno:
-        url: https://raw.githubusercontent.com/kyverno/grafana-dashboard/master/grafana/dashboard.json
       argocd:
         url: https://raw.githubusercontent.com/argoproj/argo-cd/master/examples/dashboard.json
       thanos-compact:
@@ -620,7 +618,7 @@ kubeApiServer:
   serviceMonitor:
     metricRelabelings:
       - sourceLabels: [__name__]
-        regex: 'apiserver_request_body_size_bytes_bucket|apiserver_response_sizes_bucket|apiserver_watch_cache_read_wait_seconds_bucket|apiserver_watch_events_sizes_bucket'
+        regex: 'apiserver_request_body_size_bytes_bucket|apiserver_response_sizes_bucket|apiserver_watch_cache_read_wait_seconds_bucket|apiserver_watch_events_sizes_bucket|apiserver_request_duration_seconds_bucket|apiserver_watch_list_duration_seconds_bucket|etcd_request_duration_seconds_bucket'
         action: drop
 
 alertmanager:

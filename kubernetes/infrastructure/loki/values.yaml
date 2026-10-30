@@ -119,7 +119,7 @@ lokiCanary:
 # default became a 9830Mi request). Chunks live in GCS here, so a huge cache
 # is pointless and it no longer fits on any node. Right-size to 1Gi (-> ~1229Mi).
 chunksCache:
-  allocatedMemory: 1024
+  allocatedMemory: 256
 
 # selfMonitoring off: Alloy handles this instead of the chart's bundled agent
 monitoring:

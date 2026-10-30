@@ -71,7 +71,7 @@ config:
         - go
 
 serviceMonitor:
-  enabled: true
+  enabled: false
   interval: 5s
   path: /metrics
   labels:
