@@ -6,9 +6,9 @@ metadata:
   namespace: keycloak
 spec:
   instances: 3
-  # The operator default is a 1700Mi request / 2Gi limit per instance; real use
-  # is ~650Mi. Keep the limit, drop the request so three Keycloaks stop
-  # reserving 5Gi across the workers.
+  # Operator default is a 1700Mi request / 2Gi limit per instance. 30d history:
+  # avg 749Mi, p95 834Mi, max 958Mi. 1Gi request clears the observed max and
+  # still drops 2Gi of reservations across the three instances.
   resources:
     requests:
       memory: 1Gi
