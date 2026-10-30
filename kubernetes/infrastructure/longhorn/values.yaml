@@ -39,6 +39,10 @@ metrics:
     enabled: true
     additionalLabels:
       release: monitoring
+    metricRelabelings:
+      - sourceLabels: [__name__]
+        action: drop
+        regex: 'longhorn_rest_client_.*|longhorn_workqueue_.*'
 
 httproute:
   enabled: true

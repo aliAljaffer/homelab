@@ -1,0 +1,80 @@
+# Grafana leaks goroutine stacks (about 1 GiB after 2 weeks). Restart weekly
+# until the cause is found. The Role can only get/patch this one Deployment.
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: grafana-restart
+  namespace: monitoring
+automountServiceAccountToken: false
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: grafana-restart
+  namespace: monitoring
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    resourceNames: ["monitoring-grafana"]
+    verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: grafana-restart
+  namespace: monitoring
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: grafana-restart
+subjects:
+  - kind: ServiceAccount
+    name: grafana-restart
+    namespace: monitoring
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: grafana-restart
+  namespace: monitoring
+spec:
+  schedule: "0 4 * * 0"
+  timeZone: Asia/Riyadh
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      ttlSecondsAfterFinished: 86400
+      template:
+        spec:
+          serviceAccountName: grafana-restart
+          automountServiceAccountToken: true
+          restartPolicy: OnFailure
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: kubectl
+              image: registry.k8s.io/kubectl:v1.36.2
+              args:
+                - rollout
+                - restart
+                - deployment/monitoring-grafana
+                - -n
+                - monitoring
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+              resources:
+                requests:
+                  cpu: 5m
+                  memory: 32Mi
+                limits:
+                  memory: 64Mi
