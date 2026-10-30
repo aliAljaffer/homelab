@@ -87,7 +87,9 @@ talosctl --talosconfig ~/talosconfig apply-config -n 192.168.8.103 -f /tmp/wrk2.
 ## Notes
 
 - Registry storage is a 20Gi Longhorn PVC (`persistence` in `values.yaml`).
-  Losing it only means re-pulling; database/Redis are also PVC-backed.
+  Losing it only means re-pulling; the database is PVC-backed too.
+- Redis is the `valkey` instance in `redis-operator` (databases 0/1/2 for
+  core, jobservice, registry), not a chart-managed pod.
 - First pull of a new upstream image still crosses the WAN (Harbor fetches it
   once). Every other node then pulls over the LAN. Very large upstream layers
   can race Harbor's proxy-cache manifest commit on a slow upstream; the client
