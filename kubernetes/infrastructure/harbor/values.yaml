@@ -45,6 +45,7 @@ persistence:
   enabled: true
   persistentVolumeClaim:
     registry:
+      existingClaim: harbor-registry-rwx
       storageClass: longhorn
       size: 50Gi
     jobservice:

@@ -9,6 +9,7 @@ resources:
   - harbor-core-tls.sealed.yaml
   - harbor-jobservice-app.sealed.yaml
   - harbor-registry-app.sealed.yaml
+  - registry-pvc.yaml
   - httproute.yaml
   - oidc-job.yaml
   - setup-job.yaml

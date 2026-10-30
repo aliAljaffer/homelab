@@ -63,7 +63,12 @@ spec:
               ensure_project quay "$(ensure_registry quay docker-registry https://quay.io)"
               ensure_project k8s "$(ensure_registry k8s docker-registry https://registry.k8s.io)"
 
-              echo "proxy cache projects are ready"
+              # The GC schedule lives in Harbor's database, so keep it declarative here.
+              curl -fsS -u "$USER:$PASS" -X PUT -H 'Content-Type: application/json' \
+                -d '{"schedule":{"type":"Daily","cron":"0 0 2 * * *"},"parameters":{"delete_untagged":false,"workers":1}}' \
+                "$HARBOR/api/v2.0/system/gc/schedule" >/dev/null
+
+              echo "proxy cache projects and GC schedule are ready"
           env:
             - name: HARBOR
               value: http://harbor-core
