@@ -20,7 +20,6 @@ All Helm chart values are committed to Git alongside their ArgoCD Applications. 
 | Thanos                | `kubernetes/infrastructure/thanos/values.yaml`         |
 | Grafana Alloy         | `kubernetes/infrastructure/alloy/values.yaml`          |
 | CloudNativePG         | `kubernetes/infrastructure/cloudnative-pg/values.yaml` |
-| Kyverno               | `kubernetes/infrastructure/kyverno/values.yaml`        |
 
 Cilium and ArgoCD are bootstrap-installed imperatively (their Helm releases are not managed by ArgoCD). Values are tracked in `kubernetes/bootstrap/`. Everything else is fully ArgoCD-managed.
 

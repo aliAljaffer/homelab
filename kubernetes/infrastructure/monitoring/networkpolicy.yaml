@@ -86,13 +86,6 @@ spec:
         protocol: TCP
   - toEndpoints:
     - matchLabels:
-        "k8s:io.kubernetes.pod.namespace": kyverno
-    toPorts:
-    - ports:
-      - port: "8000"
-        protocol: TCP
-  - toEndpoints:
-    - matchLabels:
         "k8s:io.kubernetes.pod.namespace": external-dns
     toPorts:
     - ports:
