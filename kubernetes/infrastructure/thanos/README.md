@@ -19,13 +19,18 @@ provisions. It does **not** resize an existing volume:
 
   ```bash
   kubectl -n monitoring patch pvc data-thanos-compactor-0 \
-    -p '{"spec":{"resources":{"requests":{"storage":"50Gi"}}}}'
+    -p '{"spec":{"resources":{"requests":{"storage":"120Gi"}}}}'
   kubectl -n monitoring delete pod thanos-compactor-0
   kubectl -n monitoring get pvc data-thanos-compactor-0   # CAPACITY should now match REQ
   ```
 
 On 2026-10-16 the compactor filled its original 10Gi and halted with
 `compaction: ...: preallocate: no space left on device`, which stops all
-downsampling and retention. It was expanded to 50Gi (6.2G in use). If a fresh
-install is ever needed, the StatefulSet must be deleted (PVCs are orphaned and
-safe) so the new `volumeClaimTemplates` size takes effect.
+downsampling and retention. It was expanded to 50Gi (6.2G in use).
+
+On 2026-11-01 it filled that 50Gi while compacting a 14-day backlog (7 source
+blocks of ~6G each plus the output block) and halted again at 42Gi used. It was
+expanded to 120Gi, which leaves ~76G free for the next compaction plan.
+
+If a fresh install is ever needed, the StatefulSet must be deleted (PVCs are
+orphaned and safe) so the new `volumeClaimTemplates` size takes effect.
