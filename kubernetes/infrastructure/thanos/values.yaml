@@ -57,7 +57,7 @@ compactor:
   persistence:
     enabled: true
     storageClass: longhorn
-    size: 50Gi
+    size: 120Gi
 
 ruler:
   enabled: false
