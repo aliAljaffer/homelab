@@ -50,9 +50,9 @@ compactor:
     limits:
       memory: 4592Mi
   retention:
-    resolutionRaw: ""
-    resolution5m: ""
-    resolution1h: ""
+    resolutionRaw: 30d
+    resolution5m: 90d
+    resolution1h: 365d
   # volumeClaimTemplates are immutable; resize existing PVCs manually (see README).
   persistence:
     enabled: true
