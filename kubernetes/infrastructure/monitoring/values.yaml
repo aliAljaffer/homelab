@@ -211,12 +211,6 @@ grafana:
                 authorization_scheme: Bearer
                 authorization_credentials: "${REMEDIATOR_TOKEN}"
               disableResolveMessage: true
-            - uid: homelab-email-01
-              type: email
-              settings:
-                addresses: ahjfr@icloud.com
-                singleEmail: true
-              disableResolveMessage: false
     policies.yaml:
       apiVersion: 1
       policies:
@@ -576,9 +570,6 @@ alertmanager:
   config:
     global:
       resolve_timeout: 5m
-      smtp_smarthost: 'smtp-relay.mail.svc.cluster.local:587'
-      smtp_from: 'homelab@alialjaffer.com'
-      smtp_require_tls: false
     inhibit_rules:
       - source_matchers:
           - 'severity = critical'
@@ -612,10 +603,6 @@ alertmanager:
         - receiver: 'null'
           matchers:
             - alertname =~ "InfoInhibitor|Watchdog"
-        - receiver: 'email'
-          matchers:
-            - alertname != "Watchdog"
-          continue: true
         - receiver: 'discord'
           matchers:
             - alertname =~ ".+"
@@ -625,10 +612,6 @@ alertmanager:
           - webhook_url_file: /etc/alertmanager/secrets/grafana-discord-webhook/DISCORD_WEBHOOK_URL
             title: '{{ .GroupLabels.alertname }} {{ if eq .Status "firing" }}[FIRING]{{ else }}[RESOLVED]{{ end }}'
             message: '{{ range .Alerts }}{{ .Annotations.summary }} (severity={{ .Labels.severity }}){{ end }}'
-      - name: 'email'
-        email_configs:
-          - to: 'ahjfr@icloud.com'
-            send_resolved: true
       - name: 'null'
 
 # Cilium replaces kube-proxy, so the chart's KubeProxyDown rule would never resolve.
