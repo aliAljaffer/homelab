@@ -28,7 +28,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: opencode
-          image: harbor.alialjaffer.com/mirror/remediator@sha256:98e61b16504dd6a1fbdb329478d6dba31e819ab48509429e094acdb60bc16d2c
+          image: harbor.alialjaffer.com/mirror/remediator@sha256:c7c683889826a9e8583118607fda6294d75469580bde18728ce84fe0df722bf5
           imagePullPolicy: IfNotPresent
           command: ["sh", "-ec"]
           args:
@@ -97,7 +97,7 @@ spec:
               mountPath: /workspace
 
         - name: receiver
-          image: harbor.alialjaffer.com/mirror/remediator@sha256:98e61b16504dd6a1fbdb329478d6dba31e819ab48509429e094acdb60bc16d2c
+          image: harbor.alialjaffer.com/mirror/remediator@sha256:c7c683889826a9e8583118607fda6294d75469580bde18728ce84fe0df722bf5
           imagePullPolicy: IfNotPresent
           command: ["/usr/local/bin/remediator"]
           env:
