@@ -108,7 +108,7 @@ spec:
             - name: OPENCODE_AGENT
               value: remediator
             - name: MODELS
-              value: opencode/deepseek-v4.1-flash-free,opencode-go/deepseek-v4.1-flash
+              value: opencode-go/deepseek-v4.1-flash,opencode/deepseek-v4.1-flash-free
             - name: RECEIVER_TOKEN
               valueFrom:
                 secretKeyRef:
