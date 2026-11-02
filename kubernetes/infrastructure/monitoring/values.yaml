@@ -221,6 +221,11 @@ grafana:
             - alertname
     alert-rules.yaml:
       apiVersion: 1
+      deleteRules:
+        - orgId: 1
+          uid: th7a0af1byfaa
+        - orgId: 1
+          uid: th7a0af1byfbb
       groups:
         - orgId: 1
           name: Homelab
