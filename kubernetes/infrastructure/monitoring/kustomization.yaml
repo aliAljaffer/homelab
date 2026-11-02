@@ -4,7 +4,6 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - httproute-grafana.yaml
-  - thanos-objstore.sealed.yaml
   - grafana-github-token.sealed.yaml
   - grafana-admin-credentials.sealed.yaml
   - networkpolicy.yaml

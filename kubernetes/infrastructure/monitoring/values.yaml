@@ -3,8 +3,8 @@ fullnameOverride: kube-prometheus
 
 prometheus:
   prometheusSpec:
-    retention: 2d
-    retentionSize: 15GB
+    retention: 30d
+    retentionSize: 70GB
     storageSpec:
       volumeClaimTemplate:
         spec:
@@ -12,20 +12,7 @@ prometheus:
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
-              storage: 20Gi
-
-    thanos:
-      image: quay.io/thanos/thanos:v0.37.2@sha256:0f72bcecb5c8d7f53634385696179a3da95df97584d583c5385205cf47340487
-      objectStorageConfig:
-        existingSecret:
-          name: thanos-objstore-secret
-          key: objstore.yml
-      resources:
-        requests:
-          cpu: 5m
-          memory: 176Mi
-        limits:
-          memory: 352Mi
+              storage: 80Gi
 
     resources:
       requests:
@@ -113,12 +100,6 @@ grafana:
         datasource: Prometheus
       argocd:
         url: https://raw.githubusercontent.com/argoproj/argo-cd/master/examples/dashboard.json
-      thanos-compact:
-        url: https://raw.githubusercontent.com/thanos-io/thanos/v0.37.2/examples/dashboards/compact.json
-      thanos-query:
-        url: https://raw.githubusercontent.com/thanos-io/thanos/v0.37.2/examples/dashboards/query.json
-      thanos-store:
-        url: https://raw.githubusercontent.com/thanos-io/thanos/v0.37.2/examples/dashboards/store.json
 
   persistence:
     enabled: true
@@ -160,7 +141,7 @@ grafana:
     - name: Thanos
       type: prometheus
       uid: thanos
-      url: http://thanos-query.monitoring.svc.cluster.local:9090
+      url: http://kube-prometheus-prometheus.monitoring.svc.cluster.local:9090
       access: proxy
       isDefault: true
       jsonData:
@@ -186,7 +167,7 @@ grafana:
     - name: Prometheus
       type: prometheus
       uid: prometheus
-      url: http://thanos-query.monitoring.svc.cluster.local:9090
+      url: http://kube-prometheus-prometheus.monitoring.svc.cluster.local:9090
       access: proxy
       isDefault: false
       jsonData:
@@ -504,72 +485,6 @@ grafana:
               noDataState: NoData
               execErrState: Error
               for: 5m
-              notification_settings:
-                receiver: Discord + Email
-
-            - uid: th7a0af1byfaa
-              title: Thanos Bucket Uploads Stalled
-              condition: C
-              data:
-                - refId: A
-                  relativeTimeRange:
-                    from: 600
-                    to: 0
-                  datasourceUid: thanos
-                  model:
-                    expr: 'sum(increase(thanos_bucket_store_block_loads_total[6h]))'
-                    instant: true
-                    refId: A
-                - refId: C
-                  datasourceUid: __expr__
-                  model:
-                    conditions:
-                      - evaluator:
-                          params: [1]
-                          type: lt
-                        query:
-                          params: [C]
-                        reducer:
-                          type: last
-                    expression: A
-                    type: threshold
-                    refId: C
-              noDataState: NoData
-              execErrState: Error
-              for: 30m
-              notification_settings:
-                receiver: Discord + Email
-
-            - uid: th7a0af1byfbb
-              title: Thanos Bucket Access Failing
-              condition: C
-              data:
-                - refId: A
-                  relativeTimeRange:
-                    from: 900
-                    to: 0
-                  datasourceUid: thanos
-                  model:
-                    expr: 'sum(increase(thanos_blocks_meta_sync_failures_total[15m])) + sum(increase(thanos_objstore_bucket_operation_failures_total[15m]))'
-                    instant: true
-                    refId: A
-                - refId: C
-                  datasourceUid: __expr__
-                  model:
-                    conditions:
-                      - evaluator:
-                          params: [1]
-                          type: gt
-                        query:
-                          params: [C]
-                        reducer:
-                          type: last
-                    expression: A
-                    type: threshold
-                    refId: C
-              noDataState: NoData
-              execErrState: Error
-              for: 15m
               notification_settings:
                 receiver: Discord + Email
 

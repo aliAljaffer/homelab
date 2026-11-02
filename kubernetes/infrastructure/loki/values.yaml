@@ -10,26 +10,21 @@ loki:
   commonConfig:
     replication_factor: 1
 
-  # The chart has no storage.secretName; credentials come from extraEnv/extraVolumes below.
   storage:
-    type: gcs
-    bucketNames:
-      chunks: alialjaffer-homelab
-      ruler: alialjaffer-homelab
-      admin: alialjaffer-homelab
+    type: filesystem
 
   schemaConfig:
     configs:
     - from: "2024-01-01"
       store: tsdb
-      object_store: gcs
+      object_store: filesystem
       schema: v13
       index:
         prefix: loki_index_
         period: 24h
 
   limits_config:
-    retention_period: 168h
+    retention_period: 720h
     reject_old_samples: false
     ingestion_rate_mb: 16
     ingestion_burst_size_mb: 32
@@ -40,7 +35,7 @@ loki:
 
   compactor:
     retention_enabled: true
-    delete_request_store: gcs
+    delete_request_store: filesystem
     working_directory: /var/loki/retention
 
   query_range:
@@ -54,24 +49,13 @@ singleBinary:
   replicas: 1
   persistence:
     storageClass: longhorn
-    size: 5Gi
+    size: 10Gi
   resources:
     requests:
       cpu: 70m
       memory: 560Mi
     limits:
       memory: 1120Mi
-  extraEnv:
-    - name: GOOGLE_APPLICATION_CREDENTIALS
-      value: /etc/loki/gcs-credentials/service_account.json
-  extraVolumes:
-    - name: gcs-credentials
-      secret:
-        secretName: loki-gcs-credentials
-  extraVolumeMounts:
-    - name: gcs-credentials
-      mountPath: /etc/loki/gcs-credentials
-      readOnly: true
 
 backend:
   replicas: 0
