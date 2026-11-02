@@ -119,6 +119,12 @@ spec:
                 secretKeyRef:
                   name: remediator-receiver
                   key: discord-webhook-url
+            - name: GITHUB_APP_ID
+              value: "5511128"
+            - name: GITHUB_APP_KEY_FILE
+              value: /github-app/private-key.pem
+            - name: GITHUB_REPO
+              value: aliAljaffer/homelab
           ports:
             - name: http
               containerPort: 8080
@@ -145,7 +151,14 @@ spec:
             readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
+          volumeMounts:
+            - name: github-app
+              mountPath: /github-app
+              readOnly: true
       volumes:
+        - name: github-app
+          secret:
+            secretName: remediator-github-app
         - name: config
           configMap:
             name: remediator-config

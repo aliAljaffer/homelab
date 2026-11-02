@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Usage: DISCORD_WEBHOOK_URL=... [RECEIVER_TOKEN=...] [OPENCODE_API_KEY=...] seal-secrets.sh
+# Usage: DISCORD_WEBHOOK_URL=... GITHUB_APP_KEY_FILE=... [RECEIVER_TOKEN=...] [OPENCODE_API_KEY=...] seal-secrets.sh
 set -euo pipefail
 dir="$(cd "$(dirname "$0")" && pwd)"
 token="${RECEIVER_TOKEN:-$(openssl rand -hex 32)}"
@@ -16,4 +16,7 @@ kubectl create secret generic grafana-remediator-token -n monitoring \
   --from-literal=REMEDIATOR_TOKEN="$token" \
   --dry-run=client -o yaml | seal > "$dir/../../infrastructure/monitoring/grafana-remediator-token.sealed.yaml"
 echo "Add grafana-remediator-token.sealed.yaml to the monitoring kustomization.yaml"
+kubectl create secret generic remediator-github-app -n remediator \
+  --from-file=private-key.pem="${GITHUB_APP_KEY_FILE:?set GITHUB_APP_KEY_FILE}" \
+  --dry-run=client -o yaml | seal > "$dir/remediator-github-app.sealed.yaml"
 echo "Receiver token for Grafana: $token"
