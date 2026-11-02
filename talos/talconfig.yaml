@@ -79,6 +79,11 @@ controlPlane:
           name: none
       proxy:
         disabled: true
+      # Talos defaults this to 1536MiB, too low for the ~1GB live heap here;
+      # the API server then GC-thrashes and burns CPU. 4GiB leaves headroom.
+      apiServer:
+        env:
+          GOMEMLIMIT: 4GiB
       # Exposed so kube-prometheus-stack can scrape :10257/:10259.
       controllerManager:
         extraArgs:
