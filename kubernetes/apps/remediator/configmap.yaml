@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: remediator-config
+  namespace: remediator
+data:
+  opencode.json: |
+    {
+      "$schema": "https://opencode.ai/config.json",
+      "model": "opencode/deepseek-v4.1-flash-free",
+      "default_agent": "remediator",
+      "share": "disabled",
+      "update": "disable",
+      "autoupdate": false,
+      "snapshots": false,
+      "permission": "deny",
+      "tools": {
+        "bash": false,
+        "edit": false,
+        "write": false,
+        "read": false,
+        "grep": false,
+        "glob": false,
+        "list": false,
+        "webfetch": false,
+        "websearch": false,
+        "task": false,
+        "patch": false,
+        "todowrite": false,
+        "skill": false,
+        "question": false,
+        "lsp": false,
+        "batch": false
+      },
+      "agent": {
+        "remediator": {
+          "mode": "primary",
+          "description": "Kubernetes alert remediation",
+          "prompt": "You investigate and fix Kubernetes alerts with kubectl only.",
+          "tools": {
+            "bash": true
+          },
+          "permission": {
+            "edit": "deny",
+            "webfetch": "deny",
+            "bash": {
+              "*": "deny",
+              "kubectl get *": "allow",
+              "kubectl describe *": "allow",
+              "kubectl logs *": "allow",
+              "kubectl top *": "allow",
+              "kubectl events *": "allow",
+              "kubectl rollout *": "allow",
+              "kubectl scale *": "allow",
+              "kubectl patch *": "allow",
+              "kubectl delete pod *": "allow",
+              "kubectl delete pods *": "allow",
+              "kubectl delete job *": "allow",
+              "kubectl delete jobs *": "allow",
+              "kubectl scale *statefulset*": "deny",
+              "kubectl scale *sts*": "deny",
+              "kubectl * secret*": "deny",
+              "kubectl * pvc*": "deny",
+              "kubectl * persistentvolume*": "deny",
+              "kubectl * namespace*": "deny",
+              "kubectl * --raw*": "deny"
+            }
+          }
+        }
+      }
+    }

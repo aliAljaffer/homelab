@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: remediator
+  namespace: remediator
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: remediator
+rules:
+  - apiGroups: [""]
+    resources:
+      - pods
+      - pods/log
+      - services
+      - endpoints
+      - events
+      - configmaps
+      - namespaces
+      - nodes
+      - persistentvolumeclaims
+      - persistentvolumes
+      - resourcequotas
+      - limitranges
+      - replicationcontrollers
+    verbs: [get, list, watch]
+  - apiGroups:
+      - apps
+      - batch
+      - networking.k8s.io
+      - gateway.networking.k8s.io
+      - autoscaling
+      - policy
+      - storage.k8s.io
+      - metrics.k8s.io
+      - argoproj.io
+      - longhorn.io
+      - monitoring.coreos.com
+      - cilium.io
+    resources: ["*"]
+    verbs: [get, list, watch]
+  - apiGroups: [""]
+    resources: [pods]
+    verbs: [delete]
+  - apiGroups: [apps]
+    resources: [deployments, statefulsets, daemonsets]
+    verbs: [patch, update]
+  - apiGroups: [apps]
+    resources: [replicasets]
+    verbs: [delete]
+  - apiGroups: [apps]
+    resources: [deployments/scale, replicasets/scale]
+    verbs: [get, patch, update]
+  - apiGroups: [batch]
+    resources: [jobs]
+    verbs: [create, delete]
+  - apiGroups: [batch]
+    resources: [cronjobs]
+    verbs: [patch, update]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: remediator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: remediator
+subjects:
+  - kind: ServiceAccount
+    name: remediator
+    namespace: remediator

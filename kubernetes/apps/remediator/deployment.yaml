@@ -1,0 +1,160 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: remediator
+  namespace: remediator
+  labels:
+    app: remediator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: remediator
+  template:
+    metadata:
+      labels:
+        app: remediator
+    spec:
+      serviceAccountName: remediator
+      automountServiceAccountToken: true
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: opencode
+          image: harbor.alialjaffer.com/mirror/remediator@sha256:0000000000000000000000000000000000000000000000000000000000000000
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-ec"]
+          args:
+            - |
+              mkdir -p "$HOME" "$XDG_DATA_HOME/opencode" "$XDG_CONFIG_HOME" "$XDG_STATE_HOME" "$XDG_CACHE_HOME"
+              if [ -n "${PROVIDER_API_KEY:-}" ]; then
+                node -e 'require("fs").writeFileSync(process.env.XDG_DATA_HOME + "/opencode/auth.json", JSON.stringify({ "opencode-go": { type: "api", key: process.env.PROVIDER_API_KEY } }), { mode: 0o600 })'
+              fi
+              exec opencode serve --hostname 127.0.0.1 --port 4096
+          env:
+            - name: HOME
+              value: /opencode/home
+            - name: XDG_CONFIG_HOME
+              value: /opencode/config
+            - name: XDG_DATA_HOME
+              value: /opencode/data
+            - name: XDG_STATE_HOME
+              value: /opencode/state
+            - name: XDG_CACHE_HOME
+              value: /opencode/cache
+            - name: OPENCODE_CONFIG
+              value: /config/opencode.json
+            - name: PROVIDER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: remediator-provider
+                  key: api-key
+          readinessProbe:
+            exec:
+              command:
+                - node
+                - -e
+                - fetch('http://127.0.0.1:4096/global/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            timeoutSeconds: 5
+          livenessProbe:
+            exec:
+              command:
+                - node
+                - -e
+                - fetch('http://127.0.0.1:4096/global/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+            - name: opencode-data
+              mountPath: /opencode
+            - name: tmp
+              mountPath: /tmp
+            - name: workspace
+              mountPath: /workspace
+
+        - name: receiver
+          image: harbor.alialjaffer.com/mirror/remediator@sha256:0000000000000000000000000000000000000000000000000000000000000000
+          imagePullPolicy: IfNotPresent
+          command: ["/usr/local/bin/remediator"]
+          env:
+            - name: ADDR
+              value: ":8080"
+            - name: OPENCODE_URL
+              value: http://127.0.0.1:4096
+            - name: OPENCODE_AGENT
+              value: remediator
+            - name: MODELS
+              value: opencode/deepseek-v4.1-flash-free,opencode-go/deepseek-v4.1-flash
+            - name: RECEIVER_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: remediator-receiver
+                  key: token
+            - name: DISCORD_WEBHOOK_URL
+              valueFrom:
+                secretKeyRef:
+                  name: remediator-receiver
+                  key: discord-webhook-url
+          ports:
+            - name: http
+              containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+      volumes:
+        - name: config
+          configMap:
+            name: remediator-config
+            items:
+              - key: opencode.json
+                path: opencode.json
+        - name: opencode-data
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+        - name: workspace
+          emptyDir: {}
