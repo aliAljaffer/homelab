@@ -531,6 +531,14 @@ spec:
         protocol: TCP
   - toEndpoints:
     - matchLabels:
+        "k8s:io.kubernetes.pod.namespace": remediator
+        app: remediator
+    toPorts:
+    - ports:
+      - port: "8080"
+        protocol: TCP
+  - toEndpoints:
+    - matchLabels:
         "k8s:io.kubernetes.pod.namespace": mail
         app.kubernetes.io/name: smtp-relay
     toPorts:

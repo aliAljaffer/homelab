@@ -5,6 +5,7 @@ resources:
   - namespace.yaml
   - httproute-grafana.yaml
   - grafana-github-token.sealed.yaml
+  - grafana-remediator-token.sealed.yaml
   - grafana-admin-credentials.sealed.yaml
   - networkpolicy.yaml
   - servicemonitors.yaml
