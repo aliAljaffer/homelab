@@ -6,4 +6,7 @@ resources:
   - configmap.yaml
   - deployment.yaml
   - service.yaml
+  - remediator-receiver.sealed.yaml
+  - remediator-provider.sealed.yaml
+  - remediator-github-app.sealed.yaml
   - networkpolicy.yaml

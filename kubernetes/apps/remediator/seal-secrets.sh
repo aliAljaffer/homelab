@@ -19,4 +19,3 @@ echo "Add grafana-remediator-token.sealed.yaml to the monitoring kustomization.y
 kubectl create secret generic remediator-github-app -n remediator \
   --from-file=private-key.pem="${GITHUB_APP_KEY_FILE:?set GITHUB_APP_KEY_FILE}" \
   --dry-run=client -o yaml | seal > "$dir/remediator-github-app.sealed.yaml"
-echo "Receiver token for Grafana: $token"
