@@ -5,6 +5,5 @@ metadata:
   name: default
   namespace: longhorn-system
 spec:
-  backupTargetURL: "s3://alialjaffer-homelab@europe-west4/longhorn/"
-  credentialSecret: longhorn-backup-secret
+  backupTargetURL: ""
   pollInterval: 5m0s
