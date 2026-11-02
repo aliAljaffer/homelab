@@ -60,6 +60,7 @@ grafana:
   envFromSecrets:
     - name: grafana-discord-webhook
     - name: grafana-github-token
+    - name: grafana-remediator-token
 
   plugins:
     - grafana-github-datasource
@@ -202,6 +203,14 @@ grafana:
                 url: "${DISCORD_WEBHOOK_URL}"
                 use_discord_username: false
               disableResolveMessage: false
+            - uid: homelab-remediator-01
+              type: webhook
+              settings:
+                url: http://remediator.remediator.svc.cluster.local/grafana
+                httpMethod: POST
+                authorization_scheme: Bearer
+                authorization_credentials: "${REMEDIATOR_TOKEN}"
+              disableResolveMessage: true
             - uid: homelab-email-01
               type: email
               settings:

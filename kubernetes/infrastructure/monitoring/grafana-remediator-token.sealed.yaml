@@ -1,0 +1,13 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: grafana-remediator-token
+  namespace: monitoring
+spec:
+  encryptedData:
+    REMEDIATOR_TOKEN: AgBqhm6DcvYt/mew+UV+V+XHdByi4o7nO6TmQZbNRRzC9Ye0Lhqw8pvecRGgOY9ZcIZOzlNG5hr068OTOWtM6nNcdCYJiwFXk2ExlX2lDFWmxuXotItogXkhZJ4FhL7zyFkvNaJBeoLNxw3b89ONBSq+VvuMNZPCiMCAnuD+JIrCsWlI8J0CqcDEzA+ahXIfzBfnyUANMDz5pavi97tF21lBUC4/wvg5yh+ebVSKhQWmYp+QwvuN8UFOFxUiIt55CJXvqRWgjTlI9BB52/lKezq5OG/RK93sAFouVArbMrRrixGyMHrWg5mvDHNWdf5II4rxl1DZxLKcIxwe9IFx5x2Png7cJgtrkI5Xv2H5IrqAreZ5Z40tGyVP+fhvLnH97d6Vz0hD0WBA93dokTgWbfCokCDkfzRaJZetiqludiifH3klg6v3GzOJQG6sf2u7Dz8FyIc/RP6rMDUg9iUnWLZ/eXDjZGQ4hCXYVveCXk/4I/7FHiHHfgUGGGjoFx7BA7MpHHY1KvBc98tg2BwxmAapsc7gl9iXc6XJMYTHXVr7EGb7ORUWeE3aXyTsbO9v14+VLuiDdxqEzNeYvps+dEGFQhPHopN+MRyBLbG97AJyuaNdzOBXVAZHfkMm7PS0A1vqBNcXKJNgSI2JhebXieePqBUYxEJ+8st5XWpI92t1e7O2tqMpIweozSLAaqGAwOTlrIwuHBpL0tgSapeN5jyCoMPNhoaAXBw8vRV1aTltokXZglel9wnUPR/EVLh/oExb42NL3052JNwheL3JcOHt
+  template:
+    metadata:
+      name: grafana-remediator-token
+      namespace: monitoring
