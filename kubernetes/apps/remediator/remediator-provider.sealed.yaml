@@ -1,0 +1,13 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: remediator-provider
+  namespace: remediator
+spec:
+  encryptedData:
+    api-key: AgAvHxkDUHcg/6T/U4uUaqGXwKV/JNw8CSHI3rk8PC3vVNEYsEWCPQKntGYv6/f7B73ZQB8JErTQ5lC2YMUkKG12msI19BTnoQvw2bHLst7xHIi6mL5GBCZ3/nwY0HldmpchHAY6Kh92Zojljbj8UOlgJUy8WpbGdhYMsdpnC4czbsOttvx5yzCciHbZ389VbPd3xzc/zp/zIQc1oDb8+R8csr8kvC+sZKStmN5In8gmLCf5HE+W/lGqCPlK1FdTlSq7aWXhLa2SSzcs2jWKNFfoFB2hwaZ+pSEz9Y/dGyehUr8upewmdYMhon12Z5otKNodXSmsHg3An8zWgMFISKycLEJ7EfjAqTEtb/mmSruuQKukpaKlrDFThWUrfE/sxwjYxkGiHhOoHoJvNQjLsvPPw9tlyO4b0mv2DU+6Od7ucyKqvQucZQJCmRRgyHfzkWVRb8FZZQAyQRu6PPoyL+sZmyVBJelOnVlJpBwYy/o53M0uvA5bw0mNmX0qv4Owjap3St1FkLRt74in1ad2/Op9EPdh3LTnt77kcFkzg3de2bT5pJLh/DSWXIS1Cei9afyH8ONOK6yBMNTtkcNOdOimULfIm2q5XR2n0bB2Q9y/pyKkqVtT9sqKUU/oBhVq9P6QdpNicd1PEvt2JhtN0WFF4fFn0J6NdmgP+JM0IPQ4PkeKboKNw89Tp4yRPZPpAFqGrKDFGALlBX0B4goh+GOGN5/VR+TLkkrE3uMWVUdJIg/shuSalxiu4I1f8rxUFySFCBw=
+  template:
+    metadata:
+      name: remediator-provider
+      namespace: remediator
