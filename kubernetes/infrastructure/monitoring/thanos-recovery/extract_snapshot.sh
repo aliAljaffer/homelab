@@ -72,14 +72,19 @@ OUT="$WORK/blocks"; rm -rf "$OUT"; mkdir -p "$OUT"
 debugfs -R "ls -l $TSDB" "$WORK/img.raw" 2>/dev/null \
   | grep -oE '01[0-9A-Z]{24}' | sort -u > "$WORK/dirs.txt"
 log "TSDB block dirs found: $(wc -l < "$WORK/dirs.txt")"
-while read -r d; do
-  [ -z "$d" ] && continue
+extract_block_dir() {
+  local d=$1
   mkdir -p "$OUT/$d"
   debugfs -R "rdump $TSDB/$d $OUT/$d" "$WORK/img.raw" >/dev/null 2>&1
   if [ -d "$OUT/$d/$d" ]; then
     mv "$OUT/$d/$d" "$OUT/.tmp_$d" && rmdir "$OUT/$d" && mv "$OUT/.tmp_$d" "$OUT/$d"
   fi
-done < "$WORK/dirs.txt"
+}
+export OUT TSDB WORK
+export -f extract_block_dir
+# debugfs only reads the image, so the block dirs are independent.
+xargs -r -P "${EXTRACT_JOBS:-$(nproc)}" -I{} bash -c 'extract_block_dir "$1"' _ {} \
+  < "$WORK/dirs.txt"
 log "extracted: $(ls "$OUT" | wc -l) dirs, $(du -sh "$OUT" | cut -f1)"
 touch "$WORK/EXTRACT_OK"
 echo "EXTRACT_DONE $NAME $OUT"

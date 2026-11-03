@@ -70,31 +70,40 @@ if os.path.getsize(chunk_path) < 1024:
 PY
 }
 
-ok=0; bad=0; skip=0
-for d in "$SRC"/*/; do
-  [ -d "$d" ] || continue
+upload_block() {
+  local d=$1 u reason
   u=$(basename "$d")
   if [ ! -f "$d/meta.json" ] || [ ! -d "$d/chunks" ] || [ ! -f "$d/index" ]; then
-    echo "  SKIP $u (incomplete locally)"; bad=$((bad+1)); continue
+    echo "  SKIP $u (incomplete locally)" >&2; echo bad; return
   fi
   if gcloud storage ls "$BUCKET/$u/chunks/" >/dev/null 2>&1; then
-    echo "  skip $u (already in bucket)"; skip=$((skip+1)); continue
+    echo "  skip $u (already in bucket)" >&2; echo skip; return
   fi
   if ! reason=$(validate_block "$d/index" "$d/chunks/000001" 2>&1); then
-    echo "  SKIP $u (failed local validation: $reason)"; bad=$((bad+1)); continue
+    echo "  SKIP $u (failed local validation: $reason)" >&2; echo bad; return
   fi
   inject_labels "$d/meta.json"
-  python3 - "$d/meta.json" <<'PY'
+  python3 - "$d/meta.json" >&2 <<'PY'
 import json,sys,datetime
 m=json.load(open(sys.argv[1]))
 f=lambda ms: datetime.datetime.fromtimestamp(ms/1000, datetime.UTC).strftime("%Y-%m-%d %H:%M")
 print("  up   %s level=%s %s -> %s" % (m["ulid"], m.get("compaction",{}).get("level"), f(m["minTime"]), f(m["maxTime"])))
 PY
-  gsutil -m -q -o GSUtil:parallel_thread_count=16 cp -r "$d/chunks" "$BUCKET/$u/" || { echo "       chunks FAILED"; bad=$((bad+1)); continue; }
+  gsutil -m -q -o GSUtil:parallel_thread_count=16 cp -r "$d/chunks" "$BUCKET/$u/" \
+    || { echo "       chunks FAILED" >&2; echo bad; return; }
   gsutil -m -q cp "$d/index" "$BUCKET/$u/" 2>/dev/null || true
   gsutil -m -q cp "$d/tombstones" "$BUCKET/$u/" 2>/dev/null || true
-  gsutil -q cp "$d/meta.json" "$BUCKET/$u/meta.json" || { echo "       meta FAILED"; bad=$((bad+1)); continue; }
-  ok=$((ok+1))
-done
+  gsutil -q cp "$d/meta.json" "$BUCKET/$u/meta.json" \
+    || { echo "       meta FAILED" >&2; echo bad; return; }
+  echo ok
+}
+export BUCKET
+export -f inject_labels validate_block upload_block
+
+# Each block is independent; meta.json still goes up last within its own block.
+statuses=$(find "$SRC" -mindepth 1 -maxdepth 1 -type d -print0 \
+  | xargs -0 -r -P "${UPLOAD_JOBS:-4}" -I{} bash -c 'upload_block "$1"' _ {})
+read -r ok skip bad <<<"$(printf '%s\n' "$statuses" \
+  | awk '{c[$1]++} END {print c["ok"]+0, c["skip"]+0, c["bad"]+0}')"
 echo "uploaded=$ok already_present=$skip invalid=$bad"
 echo "UPLOAD_DONE"
