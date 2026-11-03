@@ -5,9 +5,8 @@ here=$(cd "$(dirname "$0")" && pwd)
 source "$here/versions.env"
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
-for repo in grooszy chat-gateway fai; do
-  git clone --depth 1 "git@github.com:aliAljaffer/$repo.git" "$tmp/apps/$repo"
-done
+printf '%s\n' grooszy chat-gateway fai \
+  | xargs -P 3 -I{} git clone --depth 1 "git@github.com:aliAljaffer/{}.git" "$tmp/apps/{}"
 mkdir -p "$tmp/context"/{go/grooszy,go/chat,go/fai,root,web,fai/frontend}
 cp "$tmp/apps/grooszy/go.mod" "$tmp/apps/grooszy/go.sum" "$tmp/context/go/grooszy/"
 cp "$tmp/apps/chat-gateway/go.mod" "$tmp/apps/chat-gateway/go.sum" "$tmp/context/go/chat/"
