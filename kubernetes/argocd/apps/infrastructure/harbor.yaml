@@ -26,6 +26,11 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: harbor
+  ignoreDifferences:
+  - kind: ConfigMap
+    name: harbor-nginx
+    jsonPointers:
+    - /data/nginx.conf
   syncPolicy:
     automated:
       prune: true
