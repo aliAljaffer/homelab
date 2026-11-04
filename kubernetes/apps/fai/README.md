@@ -43,9 +43,11 @@ the deployment wiring differs.
   assistant credentials: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_ALLOWED_USER_ID`, and
   `TELEGRAM_ALLOWED_CHAT_ID`. `TELEGRAM_STATE_FILE` points at
   `/data/attachments/telegram-offset` so the update offset survives restarts on
-  the attachments PVC. `ELEVENLABS_API_KEY` (with the `speech_to_text`
-  permission) and `ELEVENLABS_STT_MODEL=scribe_v2` enable voice-note
-  transcription.
+  the attachments PVC. Voice-note transcription points at the self-hosted
+  `speaches` service in the `stt` namespace through `STT_BASE_URL`,
+  `STT_MODEL`, and `STT_LANGUAGE`. The legacy `ELEVENLABS_API_KEY` and
+  `ELEVENLABS_STT_MODEL` remain in the Secret only as an external fallback when
+  `STT_BASE_URL` is unset.
 
 ## Calendar feed
 

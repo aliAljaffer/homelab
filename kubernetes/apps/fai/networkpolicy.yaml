@@ -53,6 +53,14 @@ spec:
         - ports:
             - port: "587"
               protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": stt
+            app: speaches
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
     - toFQDNs:
         - matchName: "kc.alialjaffer.com"
       toPorts:

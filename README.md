@@ -79,7 +79,8 @@ AMD Ryzen 7 7800X3D, 32GB RAM, RTX 4070 Ti Super, 3x 2TB NVMe, dual-boots Fedora
 - **stremio** - self-hosted Stremio, GPU-transcoded. I'm running the `nightly` image because I needed a WASM build my LG TV's old webOS browser could actually run, and even then I ended up sideloading it onto the TV as a native app instead, the browser route just never worked out (see [docs/lg-tv-sideload.md](docs/lg-tv-sideload.md))
 - **nexotv** - Stremio addon I use for an IPTV catalog over Xtream Codes. ArgoCD-managed through a hand-written Application (it is excluded from the `workloads` ApplicationSet) and deployed into the `stremio` namespace
 - **umami** - self-hosted analytics (CNPG-backed Postgres)
-- **fai** - personal task tracker / Kanban / notes (Next.js frontend, Go backend, CNPG Postgres, ReadWriteMany Longhorn PVC for attachments); the backend validates Keycloak JWTs itself, so it does not sit behind oauth2-proxy
+- **fai** - personal task tracker / Kanban / notes (Next.js frontend, Go backend, CNPG Postgres, ReadWriteMany Longhorn PVC for attachments); the backend validates Keycloak JWTs itself, so it does not sit behind oauth2-proxy. Telegram voice notes are transcribed by `stt`
+- **stt** - self-hosted Speaches/faster-whisper speech-to-text on CPU, English-only model, used by `fai`
 - **grooszy** - private expense analysis app (web + API, CNPG Postgres)
 - **ntfy** - cluster-wide push notification server, oauth2-proxy in front; `fai` is the first consumer
 - **chat** - one private chat API for every app: each app wraps its own UI and calls the API with a per-app key. Runs OpenCode as a text-only agent. See [kubernetes/apps/chat](kubernetes/apps/chat/README.md) and [aliAljaffer/chat-gateway](https://github.com/aliAljaffer/chat-gateway).
