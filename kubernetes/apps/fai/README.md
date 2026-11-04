@@ -34,8 +34,9 @@ the deployment wiring differs.
 - `fai-secret.sealed.yaml` — `DATABASE_URL` (same password as above, a manually
   constructed connection string — CNPG's own bootstrap secret isn't referenced
   directly, matching the `umami` convention), OIDC config, the live Jira
-  credentials + default project/status map, the optional AI settings (blank —
-  degrades gracefully when unset), the ntfy publisher credentials (shared with
+  credentials + default project/status map, the AI settings (free
+  `deepseek-v4.1-flash-free` first, `deepseek-v4.1-flash` through
+  `opencode-go` as the fallback), the ntfy publisher credentials (shared with
   `kubernetes/infrastructure/ntfy`'s own sealed secret), and the
   `smtp-relay.mail.svc.cluster.local:587` settings used for reminder emails
   (no SMTP credentials — the relay holds the upstream ones), plus `ICS_TOKEN` and
@@ -45,9 +46,9 @@ the deployment wiring differs.
   `/data/attachments/telegram-offset` so the update offset survives restarts on
   the attachments PVC. Voice-note transcription points at the self-hosted
   `speaches` service in the `stt` namespace through `STT_BASE_URL`,
-  `STT_MODEL`, and `STT_LANGUAGE`. The legacy `ELEVENLABS_API_KEY` and
-  `ELEVENLABS_STT_MODEL` remain in the Secret only as an external fallback when
-  `STT_BASE_URL` is unset.
+  `STT_MODEL`, and `STT_LANGUAGE`. The optional `ELEVENLABS_API_KEY` and
+  `ELEVENLABS_STT_MODEL` settings are not set here; `STT_BASE_URL` is the only
+  configured transcription path.
 
 ## Calendar feed
 
