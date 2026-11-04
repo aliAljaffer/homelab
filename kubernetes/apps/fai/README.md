@@ -34,9 +34,9 @@ the deployment wiring differs.
 - `fai-secret.sealed.yaml` — `DATABASE_URL` (same password as above, a manually
   constructed connection string — CNPG's own bootstrap secret isn't referenced
   directly, matching the `umami` convention), OIDC config, the live Jira
-  credentials + default project/status map, the AI settings (free
-  `deepseek-v4.1-flash-free` first, `deepseek-v4.1-flash` through
-  `opencode-go` as the fallback), the ntfy publisher credentials (shared with
+  credentials + default project/status map, the AI settings (`opencode-go` with
+  `deepseek-v4.1-flash` first, free `deepseek-v4.1-flash-free` through
+  `opencode-zen` as the fallback), the ntfy publisher credentials (shared with
   `kubernetes/infrastructure/ntfy`'s own sealed secret), and the
   `smtp-relay.mail.svc.cluster.local:587` settings used for reminder emails
   (no SMTP credentials — the relay holds the upstream ones), plus `ICS_TOKEN` and
