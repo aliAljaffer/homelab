@@ -32,6 +32,8 @@ spec:
               value: Systran/faster-distil-whisper-small.en
             - name: STT_LANGUAGE
               value: en
+            - name: TELEGRAM_TZ_OFFSET
+              value: "180"
           envFrom:
             - secretRef:
                 name: fai-secret

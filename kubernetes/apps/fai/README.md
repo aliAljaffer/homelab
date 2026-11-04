@@ -48,7 +48,8 @@ the deployment wiring differs.
   `speaches` service in the `stt` namespace through `STT_BASE_URL`,
   `STT_MODEL`, and `STT_LANGUAGE`. The optional `ELEVENLABS_API_KEY` and
   `ELEVENLABS_STT_MODEL` settings are not set here; `STT_BASE_URL` is the only
-  configured transcription path.
+  configured transcription path. `TELEGRAM_TZ_OFFSET=180` makes relative dates
+  in Telegram voice notes resolve in Riyadh time.
 
 ## Calendar feed
 
