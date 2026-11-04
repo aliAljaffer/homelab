@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: fai-backend
-          image: harbor.alialjaffer.com/mirror/fai-backend@sha256:8bfdbecf54f2c249f4454d5b8f12283d78cf3c21a8ea5addc5a16b3f77c16d53
+          image: harbor.alialjaffer.com/mirror/fai-backend@sha256:9a8f91252639e311e3cbaba667ce4c789242d8a7795a6c139a1be8e82ab40df2
           ports:
             - containerPort: 8080
           env:
