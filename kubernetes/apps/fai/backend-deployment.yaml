@@ -26,6 +26,12 @@ spec:
               value: "8080"
             - name: ATTACHMENTS_DIR
               value: /data/attachments
+            - name: STT_BASE_URL
+              value: http://speaches.stt.svc.cluster.local:8000/v1
+            - name: STT_MODEL
+              value: Systran/faster-distil-whisper-small.en
+            - name: STT_LANGUAGE
+              value: en
           envFrom:
             - secretRef:
                 name: fai-secret
