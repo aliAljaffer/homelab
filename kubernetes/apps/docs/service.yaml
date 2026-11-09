@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: docs
+  namespace: docs
+  labels:
+    app: docs
+spec:
+  selector:
+    app: docs
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
