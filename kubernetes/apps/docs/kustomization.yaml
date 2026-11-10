@@ -7,3 +7,6 @@ resources:
   - service.yaml
   - httproute.yaml
   - networkpolicy.yaml
+images:
+  - name: ghcr.io/alialjaffer/docs-system
+    newTag: sha-053da7f
