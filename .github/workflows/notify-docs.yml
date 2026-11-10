@@ -1,0 +1,11 @@
+name: Notify docs
+
+on:
+  push:
+    branches: [main]
+    paths: ["docs/**"]
+
+jobs:
+  notify:
+    uses: aliAljaffer/docs-system/.github/workflows/notify.yml@main
+    secrets: inherit
