@@ -22,7 +22,7 @@ spec:
         app: portfolio
     spec:
       containers:
-        - image: harbor.alialjaffer.com/mirror/portfolio-website@sha256:e1a57caceb44927eafadd8f7c71a730e39d0c69d5c6238e89e6b954509549d3a
+        - image: ghcr.io/alialjaffer/portfolio-website@sha256:b41895c7ebea640f52e4acdbcc50e8c32df3e124c7b1b75a684b9326af4d98f0
           livenessProbe:
             httpGet:
               path: /
