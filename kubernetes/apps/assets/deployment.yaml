@@ -1,0 +1,47 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: assets
+  name: assets
+  namespace: assets
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: assets
+  template:
+    metadata:
+      labels:
+        app: assets
+    spec:
+      containers:
+        - image: harbor.alialjaffer.com/mirror/assets@sha256:b977cfb242c5b11775c1363b1cd436115f8f88749d17df94abf8ffe290a23198
+          livenessProbe:
+            httpGet:
+              path: /documents/ali_aljaffer_cv.pdf
+              port: 80
+          name: nginx
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /documents/ali_aljaffer_cv.pdf
+              port: 80
+          resources:
+            limits:
+              memory: 64Mi
+            requests:
+              cpu: 20m
+              memory: 32Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              add:
+                - CHOWN
+                - SETGID
+                - SETUID
+                - NET_BIND_SERVICE
+              drop:
+                - ALL
