@@ -9,4 +9,4 @@ resources:
   - networkpolicy.yaml
 images:
   - name: ghcr.io/alialjaffer/docs-system
-    newTag: run-43003961510
+    newTag: run-43061841324
