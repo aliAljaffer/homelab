@@ -1,0 +1,72 @@
+name: Refresh updated application
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "kubernetes/apps/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: refresh-updated-application
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    if: >-
+      github.event.head_commit != null &&
+      (github.event.head_commit.author.username == 'update-manifests-homelab[bot]' ||
+       github.actor == 'update-manifests-homelab[bot]')
+    runs-on: arc-runner-homelab
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install kubectl
+        run: |
+          set -euo pipefail
+          version=$(curl -fsSL https://dl.k8s.io/release/stable.txt)
+          mkdir -p "$RUNNER_TEMP/bin"
+          curl -fsSLo "$RUNNER_TEMP/bin/kubectl" \
+            "https://dl.k8s.io/release/${version}/bin/linux/amd64/kubectl"
+          chmod +x "$RUNNER_TEMP/bin/kubectl"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+
+      - name: Hard refresh changed applications
+        env:
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.event.after }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ] \
+            || ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            range="$AFTER^..$AFTER"
+          else
+            range="$BEFORE..$AFTER"
+          fi
+
+          mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$range" -- kubernetes/apps)
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "No application manifests changed."
+            exit 0
+          fi
+
+          mapfile -t apps < <(printf '%s\n' "${files[@]}" | cut -d/ -f3 | sort -u)
+          for app in "${apps[@]}"; do
+            case "$app" in
+              ""|.*) continue ;;
+            esac
+
+            if ! kubectl get application "$app" -n argocd >/dev/null 2>&1; then
+              echo "::warning::Application $app not found; skipping."
+              continue
+            fi
+
+            echo "Hard-refreshing $app"
+            kubectl annotate application "$app" -n argocd \
+              argocd.argoproj.io/refresh=hard --overwrite
+          done
