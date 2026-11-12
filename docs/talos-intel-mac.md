@@ -6,14 +6,15 @@
 
 Talos 1.13.0 and later do not boot on Intel Macs. The boot process stops at the Talos logo with no kernel output. The regression was introduced in 1.13.0-alpha2 when the kernel build switched from GNU ld to Clang+LLD (LLVM ThinLTO). Apple's EFI firmware rejects the PE binary produced by LLD.
 
-**Affected hardware:** Any Intel Mac with Apple EFI firmware  -  Mac Mini 2012/2014, MacBook Pro 2012, MacBook Air, and others.
-
-**Not affected:** Standard x86 machines (Dell, Lenovo, etc.) which accept the LLD-compiled kernel without issue.
-
-**Confirmed unresolved in:** v1.13.0 through v1.13.8 (standard factory images do not boot on affected hardware).
+| Status | Hardware or version |
+|---|---|
+| Affected hardware | Any Intel Mac with Apple EFI firmware: Mac Mini 2012/2014, MacBook Pro 2012, MacBook Air, and others |
+| Not affected | Standard x86 machines (Dell, Lenovo, etc.) which accept the LLD-compiled kernel without issue |
+| Confirmed unresolved in | v1.13.0 through v1.13.8 (standard factory images do not boot on affected hardware) |
 
 **Source:** siderolabs/talos issue [#13231](https://github.com/siderolabs/talos/issues/13231). Full credit to GitHub user [`virtualm2000`](https://github.com/virtualm2000) who identified the LLD regression, narrowed it to the alpha1/alpha2 boundary, and worked out the complete rebuild procedure. This document is a cleaned-up version of their findings.
 
+> [!WARNING]
 > **Important caveat:** the kernel rebuild in Step 2 is confirmed working (by the upstream issue reporters) only on Mac Mini and iMac hardware. On at least one 13" Mid-2012 MacBook Pro, the kernel fix alone was **not** sufficient  -  the machine still hung at the boot logo afterward. The actual mechanism there turned out to be unrelated to the kernel: `systemd-boot`/the UKI EFI path itself hangs on that machine's firmware, regardless of how the kernel was compiled. See [Step 7](#step-7--if-it-still-hangs-after-the-kernel-fix-macbook-pro) if you hit this.
 
 ---
@@ -36,6 +37,7 @@ Rebuild the Talos kernel with `LLVM: 1` removed from the build config and ThinLT
 
 You need Docker with BuildKit support, at least 20 GB of free disk space, and a stable internet connection. Budget 1-2 hours (mostly waiting on compilation).
 
+> [!NOTE]
 > **WSL2 note:** If you are building on WSL2 with Docker Desktop, you may see the error `error getting credentials: docker-credential-desktop.exe: executable file not found in $PATH`. This happens because Docker's config inside WSL2 points to a Windows credential helper. Fix it before starting:
 >
 > ```bash
@@ -161,21 +163,11 @@ Use the standard images directly in the profile in Step 5. You do not need to cl
 
 2. Build the kernel artifacts, initramfs, imager, and installer base.
 
-   ```bash
    First, look up the exact tag that was pushed for your kernel build  -  the Makefile appends a commit hash, so it is never just `-dirty`:
 
    ```bash
    curl -s http://127.0.0.1:5005/v2/talos/pkgs/kernel/tags/list
    # example output: {"name":"talos/pkgs/kernel","tags":["v1.13.0-55-gf677246-dirty"]}
-   ```
-
-   Use that tag in `PKG_KERNEL` and `PKGS`:
-
-   First, look up the exact tag that was pushed for your kernel build:
-
-   ```bash
-   curl -s http://127.0.0.1:5005/v2/talos/pkgs/kernel/tags/list
-   # example: {"name":"talos/pkgs/kernel","tags":["v1.13.0-55-gf677246-dirty"]}
    ```
 
    Then run the build. Only `PKG_KERNEL` points to the local registry. All other packages come from the official `ghcr.io/siderolabs/pkgs` images. Do not set `PKGS` or `PKGS_PREFIX`  -  doing so would redirect every package lookup to the local registry, and only the kernel is there.
@@ -306,7 +298,8 @@ If the screen is **identical with or without** these  -  no extra text, nothing 
 
 Talos supports GRUB as an alternate bootloader (confirmed in `pkg/machinery/imager/imageropts`: bootloader kinds are `none`, `dual-boot`, `sd-boot`, `grub`), and Talos's GRUB does install in real UEFI mode (`x86_64-efi` platform, not just legacy BIOS)  -  this is a different code path from `systemd-boot` entirely and worked immediately.
 
-**Important limitation:** this can *only* be set via the **imager's disk-image mode**, not via machine config or any `talosctl apply-config` flag. Talos's real installer (triggered by `apply-config` doing a fresh install) hardcodes the bootloader choice in `bootloader.NewAuto()`:
+> [!WARNING]
+> **Important limitation:** this can *only* be set via the **imager's disk-image mode**, not via machine config or any `talosctl apply-config` flag. Talos's real installer (triggered by `apply-config` doing a fresh install) hardcodes the bootloader choice in `bootloader.NewAuto()`:
 
 ```go
 func NewAuto() Bootloader {
