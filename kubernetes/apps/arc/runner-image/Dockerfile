@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=harbor.alialjaffer.com/mirror/actions-runner@sha256:0ce3288e48b012a83685998f683a2ae0cbd284fa722c090dda0af5443215cf30
+ARG BASE_IMAGE=ghcr.io/actions/actions-runner@sha256:0ce3288e48b012a83685998f683a2ae0cbd284fa722c090dda0af5443215cf30
 FROM ${BASE_IMAGE}
 
 USER root
@@ -28,7 +28,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" -o /tmp/go.tgz \
     && tar -C /usr/local -xzf /tmp/go.tgz \
-    && rm /tmp/go.tgz
+    && rm -rf /tmp/go.tgz /usr/local/go/test /usr/local/go/doc
 
 RUN curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz" -o /tmp/node.tar.xz \
     && tar -C /usr/local --strip-components=1 -xJf /tmp/node.tar.xz \
@@ -41,25 +41,30 @@ RUN curl -fsSL "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_$
     && install -m 0755 "/tmp/gh_${GH_VERSION}_linux_amd64/bin/gh" /usr/local/bin/gh \
     && rm -rf /tmp/gh.tgz "/tmp/gh_${GH_VERSION}_linux_amd64"
 
-COPY go/grooszy/go.mod go/grooszy/go.sum /tmp/go-cache/grooszy/
-COPY go/chat/go.mod go/chat/go.sum /tmp/go-cache/chat/
-COPY go/fai/go.mod go/fai/go.sum /tmp/go-cache/fai/
+# Created and owned up front so no later layer needs a recursive chown.
+RUN mkdir -p /home/runner/go /home/runner/.npm /home/runner/.cache /opt/hostedtoolcache \
+    && chown -R runner:docker /home/runner/go /home/runner/.npm /home/runner/.cache /opt/hostedtoolcache
+
+COPY --chown=runner:docker root/package.json root/package-lock.json /tmp/npm-root/
+RUN cd /tmp/npm-root && npm ci --cache /tmp/npm-install-cache --no-audit --no-fund \
+    && npx playwright install-deps chromium \
+    && rm -rf /tmp/npm-root /tmp/npm-install-cache /var/lib/apt/lists/*
+
+USER runner
+
+COPY --chown=runner:docker go/grooszy/go.mod go/grooszy/go.sum /tmp/go-cache/grooszy/
+COPY --chown=runner:docker go/chat/go.mod go/chat/go.sum /tmp/go-cache/chat/
+COPY --chown=runner:docker go/fai/go.mod go/fai/go.sum /tmp/go-cache/fai/
 RUN cd /tmp/go-cache/grooszy && go mod download \
     && cd /tmp/go-cache/chat && go mod download \
     && cd /tmp/go-cache/fai && go mod download \
     && rm -rf /tmp/go-cache
 
-COPY root/package.json root/package-lock.json /tmp/npm-root/
-COPY web/package.json web/package-lock.json /tmp/npm-web/
-COPY fai/frontend/package.json fai/frontend/package-lock.json /tmp/npm-fai/
+COPY --chown=runner:docker root/package.json root/package-lock.json /tmp/npm-root/
+COPY --chown=runner:docker web/package.json web/package-lock.json /tmp/npm-web/
+COPY --chown=runner:docker fai/frontend/package.json fai/frontend/package-lock.json /tmp/npm-fai/
 RUN cd /tmp/npm-root && npm ci --cache /home/runner/.npm --no-audit --no-fund \
-    && npx playwright install --with-deps chromium \
+    && npx playwright install chromium \
     && cd /tmp/npm-web && npm ci --cache /home/runner/.npm --no-audit --no-fund \
     && cd /tmp/npm-fai && npm ci --cache /home/runner/.npm --no-audit --no-fund \
     && rm -rf /tmp/npm-root /tmp/npm-web /tmp/npm-fai
-
-RUN chown -R runner:docker /home/runner/go /home/runner/.npm /home/runner/.cache \
-    && mkdir -p /opt/hostedtoolcache \
-    && chown runner:docker /opt/hostedtoolcache
-
-USER runner
