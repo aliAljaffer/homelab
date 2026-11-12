@@ -22,7 +22,7 @@ spec:
         app: portfolio
     spec:
       containers:
-        - image: ghcr.io/alialjaffer/portfolio-website@sha256:d92eb692886f90ae95279fe3cd4a9d79039c8f54a21bd0cd45934641b3d25a98
+        - image: ghcr.io/alialjaffer/portfolio-website@sha256:f92e1ffa383aa8dd02d3d851a1521154650de3bf7c89f4e5aa9fca55434cbd14
           livenessProbe:
             httpGet:
               path: /
