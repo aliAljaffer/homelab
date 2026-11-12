@@ -9,10 +9,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: refresh-updated-application
-  cancel-in-progress: false
-
 jobs:
   refresh:
     if: >-
@@ -24,16 +20,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Install kubectl
-        run: |
-          set -euo pipefail
-          version=$(curl -fsSL https://dl.k8s.io/release/stable.txt)
-          mkdir -p "$RUNNER_TEMP/bin"
-          curl -fsSLo "$RUNNER_TEMP/bin/kubectl" \
-            "https://dl.k8s.io/release/${version}/bin/linux/amd64/kubectl"
-          chmod +x "$RUNNER_TEMP/bin/kubectl"
-          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
 
       - name: Hard refresh changed applications
         env:
@@ -55,18 +41,36 @@ jobs:
             exit 0
           fi
 
+          api="https://kubernetes.default.svc"
+          token=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+          ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+
           mapfile -t apps < <(printf '%s\n' "${files[@]}" | cut -d/ -f3 | sort -u)
           for app in "${apps[@]}"; do
             case "$app" in
               ""|.*) continue ;;
             esac
 
-            if ! kubectl get application "$app" -n argocd >/dev/null 2>&1; then
-              echo "::warning::Application $app not found; skipping."
-              continue
-            fi
+            url="$api/apis/argoproj.io/v1alpha1/namespaces/argocd/applications/$app"
+            code=$(curl -sS -o /dev/null -w '%{http_code}' --cacert "$ca" \
+              -H "Authorization: Bearer $token" "$url")
+            case "$code" in
+              200) ;;
+              404)
+                echo "::warning::Application $app not found; skipping."
+                continue
+                ;;
+              *)
+                echo "::error::Failed to read Application $app (HTTP $code)"
+                exit 1
+                ;;
+            esac
 
             echo "Hard-refreshing $app"
-            kubectl annotate application "$app" -n argocd \
-              argocd.argoproj.io/refresh=hard --overwrite
+            curl -sS --fail-with-body --cacert "$ca" \
+              -H "Authorization: Bearer $token" \
+              -H 'Content-Type: application/merge-patch+json' \
+              -X PATCH \
+              --data '{"metadata":{"annotations":{"argocd.argoproj.io/refresh":"hard"}}}' \
+              "$url" >/dev/null
           done
