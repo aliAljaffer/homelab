@@ -385,7 +385,7 @@ const grubPrefix = "(hd0,gpt3)/grub" // EFI, BIOS, BOOT
 
 This assumes the boot disk is always BIOS/EFI disk number 0. On hardware where firmware enumerates the internal disk as `hd1` (as on this MacBook Pro, once the USB sticks were removed), GRUB cannot find its own `grub.cfg` and drops to an interactive `grub>` rescue prompt on every cold boot  -  it only proceeds if someone is physically present to type:
 
-```
+```text
 ls (hd1,gpt3)/
 set root=(hd1,gpt3)
 configfile /grub/grub.cfg
