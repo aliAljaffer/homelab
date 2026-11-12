@@ -107,7 +107,8 @@ talosctl config endpoint localhost:50000
 talosctl config node localhost
 ```
 
-> **Note:** Switch the endpoint back to `192.168.8.99` when you are on the home network.
+> [!NOTE]
+> Switch the endpoint back to `192.168.8.99` when you are on the home network.
 
 ---
 

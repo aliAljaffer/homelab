@@ -2,9 +2,11 @@
 
 Honestly, if there's one thing you do for this cluster, make it these backups. Lose the Sealed Secrets key and every `.sealed.yaml` file in this repo is gone forever. Same with the SOPS age key - no key, no Talos machine configs.
 
-**WARNING:** Loss of the Sealed Secrets key makes all `.sealed.yaml` files in this repository unreadable.
+> [!WARNING]
+> Loss of the Sealed Secrets key makes all `.sealed.yaml` files in this repository unreadable.
 
-**WARNING:** Loss of the SOPS age key makes all encrypted Talos machine configs unreadable. You cannot rebuild the cluster without it.
+> [!WARNING]
+> Loss of the SOPS age key makes all encrypted Talos machine configs unreadable. You cannot rebuild the cluster without it.
 
 ---
 
@@ -84,7 +86,11 @@ Backups land in `s3://alialjaffer-homelab@europe-west4/longhorn/`.
 
 ### Longhorn snapshots
 
-Do this before Longhorn or node upgrades. Open the Longhorn UI at `https://lh.alialjaffer.com`, go to **Volume**, and for each volume click **Create Snapshot**. Takes 2 minutes.
+Do this before Longhorn or node upgrades. It takes 2 minutes.
+
+1. Open the Longhorn UI at `https://lh.alialjaffer.com`.
+2. Go to **Volume**.
+3. For each volume, click **Create Snapshot**.
 
 ---
 
@@ -92,7 +98,8 @@ Do this before Longhorn or node upgrades. Open the Longhorn UI at `https://lh.al
 
 ### Sealed Secrets key on a new cluster
 
-**Do this before ArgoCD syncs anything.** If ArgoCD syncs first, all SealedSecrets will fail to unseal and you will have to re-sync them manually after. Not fun.
+> [!WARNING]
+> Do this before ArgoCD syncs anything. If ArgoCD syncs first, all SealedSecrets will fail to unseal and you will have to re-sync them manually after. Not fun.
 
 Make sure the Sealed Secrets controller is running and you have `sealed-secrets-master-key.yaml` from your secure storage.
 
@@ -150,6 +157,7 @@ You need `homelab.age` on your local machine, and both `sops` and `talosctl` ins
 | `talos/clusterconfig/k8s-homelab-wrk2.sops.yaml`     | wrk2 - 192.168.8.103 |
 | `talos/clusterconfig/k8s-homelab-wrk3.sops.yaml`     | wrk3 - 192.168.8.100 |
 
+> [!WARNING]
 > **cp0 topology change (2026-08-08):** control plane moved from the M920q (was `cp0`, 192.168.8.99, now repurposed as `wrk3`, 192.168.8.100) to the MacBook Pro (`cp0`, 192.168.8.99, config in `k8s-homelab-macbook.sops.yaml`). The Mac requires a non-standard install (custom kernel + GRUB bootloader instead of systemd-boot) - see `docs/talos-intel-mac.md` before reinstalling it via any standard flow, or it will silently regress to the boot hang that doc describes.
 
 1. Set the age key path.
@@ -194,7 +202,8 @@ Machine configs applied. No plaintext written to disk.
 
 Use this when a PV loses data and you need to restore from a backup.
 
-**CAUTION:** Restoring overwrites current data. Scale down the application first.
+> [!WARNING]
+> Restoring overwrites current data. Scale down the application first.
 
 Make sure the target namespace exists and the Longhorn storage class is available.
 
