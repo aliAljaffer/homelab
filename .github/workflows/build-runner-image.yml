@@ -28,28 +28,28 @@ jobs:
     outputs:
       changed: ${{ steps.diff.outputs.changed }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Mint app token
         id: app
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ secrets.HOMELAB_APP_ID }}
           private-key: ${{ secrets.HOMELAB_APP_PRIVATE_KEY }}
           owner: aliAljaffer
           repositories: grooszy,chat-gateway,fai
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           repository: aliAljaffer/grooszy
           token: ${{ steps.app.outputs.token }}
           path: apps/grooszy
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           repository: aliAljaffer/chat-gateway
           token: ${{ steps.app.outputs.token }}
           path: apps/chat-gateway
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           repository: aliAljaffer/fai
           token: ${{ steps.app.outputs.token }}
@@ -105,7 +105,7 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: desired-env
           path: desired.env
@@ -118,34 +118,34 @@ jobs:
     outputs:
       digest: ${{ steps.build.outputs.digest }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Mint app token
         id: app
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ secrets.HOMELAB_APP_ID }}
           private-key: ${{ secrets.HOMELAB_APP_PRIVATE_KEY }}
           owner: aliAljaffer
           repositories: grooszy,chat-gateway,fai
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           repository: aliAljaffer/grooszy
           token: ${{ steps.app.outputs.token }}
           path: apps/grooszy
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           repository: aliAljaffer/chat-gateway
           token: ${{ steps.app.outputs.token }}
           path: apps/chat-gateway
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           repository: aliAljaffer/fai
           token: ${{ steps.app.outputs.token }}
           path: apps/fai
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           name: desired-env
           path: .
@@ -176,9 +176,9 @@ jobs:
             echo "BASE_IMAGE=$BASE_IMAGE"
           } >> "$GITHUB_ENV"
 
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
 
-      - uses: docker/login-action@v3
+      - uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -186,7 +186,7 @@ jobs:
 
       - name: Build and push
         id: build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ${{ env.CONTEXT }}
           file: kubernetes/apps/arc/runner-image/Dockerfile
@@ -208,23 +208,23 @@ jobs:
     needs: build
     runs-on: arc-runner-homelab
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
 
-      - uses: docker/login-action@v3
+      - uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: docker/login-action@v3
+      - uses: docker/login-action@v4
         with:
           registry: harbor.alialjaffer.com
           username: ${{ secrets.HARBOR_USERNAME }}
           password: ${{ secrets.HARBOR_PASSWORD }}
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           name: desired-env
           path: .
