@@ -43,10 +43,10 @@ spec:
                     value: "120"
                 resources:
                   requests:
-                    cpu: 100m
-                    memory: 256Mi
+                    cpu: "1"
+                    memory: 1Gi
                   limits:
-                    memory: 3Gi
+                    memory: 4Gi
                 volumeMounts:
                   - name: work
                     mountPath: /home/runner/_work
@@ -65,10 +65,10 @@ spec:
                   privileged: true
                 resources:
                   requests:
-                    cpu: 100m
-                    memory: 512Mi
+                    cpu: 500m
+                    memory: 1Gi
                   limits:
-                    memory: 3Gi
+                    memory: 6Gi
                 startupProbe:
                   exec:
                     command: ["docker", "info"]
