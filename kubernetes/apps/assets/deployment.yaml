@@ -17,7 +17,7 @@ spec:
         app: assets
     spec:
       containers:
-        - image: harbor.alialjaffer.com/mirror/assets@sha256:e6af2612f2af2adc7638356c484a5315680d659f7fd116e19907627eebfc6e7f
+        - image: harbor.alialjaffer.com/mirror/assets@sha256:61d08d2b2f2e64bf6c5b6ae96c348c1e0aff427aa653d57a7dca6c64ca192dbe
           livenessProbe:
             httpGet:
               path: /documents/ali_aljaffer_cv.pdf
