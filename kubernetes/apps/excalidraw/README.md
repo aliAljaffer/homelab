@@ -10,14 +10,18 @@ One public hostname, four backends:
 | `/socket.io` | `excalidraw-room` | live collaboration (WebSocket) |
 | `/api/v2` | `excalidraw-scenes` | share links and their images |
 | `/` (exact) | `oauth2-proxy` | the editor, behind a login |
+| `/b/` | `oauth2-proxy` | one board open in the editor |
+| `/api/boards` | `oauth2-proxy` then `excalidraw` then `excalidraw-scenes` | the board gallery and its scenes |
 | everything else | `excalidraw` | the static app |
 
 ## Access model
 
 The app is public because every link I send points at `/s/`: a share link is
 `https://excalidraw.alialjaffer.com/s/#json=<id>,<key>`, a collaboration link is
-`/s/#room=<id>,<key>`. Only the bare root and the proxy's own `/oauth2/*` paths
-demand a login, so boards (session 2) land behind the proxy too.
+`/s/#room=<id>,<key>`. The private paths are the bare root, a board at `/b/`,
+and the boards API. A board is a private document: it opens from `/b/<id>`,
+autosaves through `/api/boards`, and never joins a room. Sharing is a separate,
+explicit action in the Share dialog.
 
 Gateway API picks the longest matching path prefix, so the public rules win over
 the catch-all whatever order they appear in. Verify a new path with `curl` from
@@ -25,7 +29,8 @@ a private window before trusting it.
 
 `excalidraw-scenes` is the Go service in the fork's `backend/`. It stores opaque
 blobs: the browser encrypts with a key that stays in the URL fragment, so the
-service cannot read a scene. Rows are deleted after 90 days.
+service cannot read a share-link scene. Rows are deleted after 90 days. Board
+rooms are exempt while a board points at them.
 
 ## Images
 
