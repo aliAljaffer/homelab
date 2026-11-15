@@ -28,6 +28,8 @@ spec:
     - name: http
       port: 80
       targetPort: 8080
+      # The tunnel gateway only proxies the upgrade when the port says so.
+      appProtocol: kubernetes.io/ws
 ---
 apiVersion: v1
 kind: Service
