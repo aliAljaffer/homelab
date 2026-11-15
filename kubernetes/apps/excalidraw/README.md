@@ -46,9 +46,12 @@ The room Service port declares `appProtocol: kubernetes.io/ws`. Without it the
 tunnel gateway forwards the upgrade as plain HTTP and every socket gets a 502.
 That one field is the difference between a working room and a silent failure.
 
-The app image carries `nginx.conf` from the fork root: CSP, `no-referrer`,
-`nosniff`, HSTS, the `/s/` SPA fallback, and long-lived `/assets` and `/fonts`
-caching.
+The app image carries `nginx.conf.template` from the fork root, rendered by the
+image entrypoint so the gallery resolver comes from the pod's own
+`resolv.conf`. It holds the CSP, `no-referrer`, `nosniff`, HSTS, the `/s/` SPA
+fallback, long-lived `/assets` and `/fonts` caching, and the `/boards` proxy to
+`excalidraw-scenes`. That proxy resolves per request: a missing gallery upstream
+must never stop nginx, or share links would go down with it.
 
 ## Storage
 

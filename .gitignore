@@ -30,3 +30,4 @@ talos/clusterconfig/*.yaml
 
 # Session working notes - local only, never tracked
 /CONTEXT-*.md
+homelab.wt/
