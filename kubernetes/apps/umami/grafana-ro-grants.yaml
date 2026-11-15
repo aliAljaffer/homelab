@@ -21,8 +21,8 @@ metadata:
     argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 spec:
   ttlSecondsAfterFinished: 600
-  backoffLimit: 3
-  activeDeadlineSeconds: 300
+  backoffLimit: 2
+  activeDeadlineSeconds: 360
   template:
     metadata:
       # Matches the existing NetworkPolicy that allows umami to reach the database.
@@ -36,11 +36,9 @@ spec:
           command: ["/bin/sh", "-c"]
           args:
             - |
-              i=0
+              # The operator creates the role asynchronously, after the sync.
               until psql "$DATABASE_URL" -tAc "SELECT 1 FROM pg_roles WHERE rolname = 'grafana_ro'" | grep -q 1; do
-                i=$((i + 1))
-                [ "$i" -gt 30 ] && exit 1
-                sleep 3
+                sleep 5
               done
               psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /sql/grants.sql
           envFrom:
