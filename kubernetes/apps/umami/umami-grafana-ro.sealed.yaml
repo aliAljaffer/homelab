@@ -1,0 +1,13 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: umami-grafana-ro
+  namespace: umami
+spec:
+  encryptedData:
+    password: AgBIdfnSUxxXnhD0KH/SWG0cXDJBqNQrsDIE11Ni0artuiMzm3jsO2pYGzbCDQ5uNmCJ3DKJGxkyHy/Nax3kXJCElrB88zgJwZaeCp9Pdw9AcPFpQFR3QH7mKGH+4Wx1DA8iIurjvYbu5IbznKnGNNOpXXMnp7m/RqUIzZPh7D6nBNjNrr8tmKLSb2SM9kxB8aZClO1W4BTwSt2ua0tR8BjvABnEyEmeAiluzugeWIIyb+s2Y7LYqfGq+3KS9dI/76UPzL5EmuarcKas6zZHv32Iho6VseXJLIaAPyBlKcIBbD/tA2SPd1t/oBXcXTt1/RDBcPYGibKqBMNQPitakyy/CjtXFiDtxv1d6BV81GwC1HAVcTqsQJnGYBKeUUXGbh5WAWhXJqnEXskCeZU2gW6LOZoUm+fHExgZq9bkOUTmK9K4p6wP5AD0GS9XfM2SLmynDYMNnCwf/92pSezvFGysUWS6MxDqFOYrafK+PpvLB3gDK8LbTaTLjY+dPtZ8bgs54CdHG/D4V0a3KBrE6aNtHwVbu1NGKTe2retXH5XgJriY6cybgVoIdNzWd6fs77kH83govp+ldkbBNDhqNbD/sAbXTFR1dJlGBvdivECCOBT5zhXP/7f9ptiRhLKGzwr9KwFHKuyrVgVVxt9swiT9u+MaC2SwXLXUtZGZ5m6tvtfEtJp+MpMWjlAFhLrAEoOTEFdRUq3eGRaAMRTnrZ75Dm7hQ7bd/XeIRqAySjdax2Iluaw6USD0q0a7JchCueg=
+  template:
+    metadata:
+      name: umami-grafana-ro
+      namespace: umami

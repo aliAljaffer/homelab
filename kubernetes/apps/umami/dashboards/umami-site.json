@@ -1,0 +1,539 @@
+{
+  "uid": "umami-site",
+  "title": "Umami - Site detail",
+  "description": "Content, engagement, performance, and audience for one tracked site. Pick the site at the top.",
+  "tags": ["umami", "analytics"],
+  "timezone": "browser",
+  "editable": true,
+  "graphTooltip": 1,
+  "time": { "from": "now-30d", "to": "now" },
+  "refresh": "",
+  "schemaVersion": 39,
+  "version": 1,
+  "templating": {
+    "list": [
+      {
+        "name": "site",
+        "label": "Site",
+        "type": "query",
+        "datasource": { "type": "postgres", "uid": "umami" },
+        "definition": "SELECT domain AS __text, website_id::text AS __value FROM website WHERE deleted_at IS NULL ORDER BY domain",
+        "query": "SELECT domain AS __text, website_id::text AS __value FROM website WHERE deleted_at IS NULL ORDER BY domain",
+        "refresh": 1,
+        "includeAll": false,
+        "multi": false,
+        "sort": 1,
+        "hide": 0,
+        "current": {},
+        "options": []
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "Traffic",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "panels": []
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Visitors",
+      "datasource": { "type": "postgres", "uid": "umami" },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 1 },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT count(DISTINCT session_id) AS \"visitors\" FROM website_event WHERE website_id = ${site:sqlstring} AND $__timeFilter(created_at)"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "none",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Pageviews",
+      "datasource": { "type": "postgres", "uid": "umami" },
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 1 },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT count(*) AS \"pageviews\" FROM website_event WHERE website_id = ${site:sqlstring} AND event_type = 1 AND $__timeFilter(created_at)"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "none",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Bounce rate",
+      "datasource": { "type": "postgres", "uid": "umami" },
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 1 },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT round(100.0 * count(*) FILTER (WHERE pv = 1) / nullif(count(*), 0), 1) AS \"bounce\" FROM (SELECT visit_id, count(*) AS pv FROM website_event WHERE website_id = ${site:sqlstring} AND event_type = 1 AND $__timeFilter(created_at) GROUP BY 1) v"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 60 },
+              { "color": "red", "value": 80 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Avg visit",
+      "datasource": { "type": "postgres", "uid": "umami" },
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 1 },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT round(avg(EXTRACT(EPOCH FROM span))) AS \"avg_seconds\" FROM (SELECT visit_id, max(created_at) - min(created_at) AS span FROM website_event WHERE website_id = ${site:sqlstring} AND $__timeFilter(created_at) GROUP BY 1) v"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Custom events",
+      "datasource": { "type": "postgres", "uid": "umami" },
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 1 },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT count(*) AS \"events\" FROM website_event WHERE website_id = ${site:sqlstring} AND event_type = 2 AND $__timeFilter(created_at)"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "none",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 7,
+      "type": "stat",
+      "title": "404s",
+      "description": "page-404 events, sent only when the site renders its not-found page.",
+      "datasource": { "type": "postgres", "uid": "umami" },
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 1 },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT count(*) AS \"not_found\" FROM website_event WHERE website_id = ${site:sqlstring} AND event_name = 'page-404' AND $__timeFilter(created_at)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1 },
+              { "color": "red", "value": 10 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Pageviews and visitors",
+      "datasource": { "type": "postgres", "uid": "umami" },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 5 },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT $__timeGroup(created_at, $__interval) AS time, count(*) FILTER (WHERE event_type = 1) AS \"pageviews\", count(DISTINCT session_id) AS \"visitors\" FROM website_event WHERE website_id = ${site:sqlstring} AND $__timeFilter(created_at) GROUP BY 1 ORDER BY 1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": false,
+            "lineInterpolation": "smooth"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      }
+    },
+    {
+      "id": 9,
+      "type": "row",
+      "title": "Content",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 13 },
+      "panels": []
+    },
+    {
+      "id": 10,
+      "type": "table",
+      "title": "Top pages",
+      "description": "Ranked by pageviews. Entry and exit counts show which pages start and end a visit.",
+      "datasource": { "type": "postgres", "uid": "umami" },
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 14 },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT e.url_path AS \"Path\", count(*) AS \"Views\", count(DISTINCT e.session_id) AS \"Visitors\" FROM website_event e WHERE e.website_id = ${site:sqlstring} AND e.event_type = 1 AND $__timeFilter(e.created_at) GROUP BY 1 ORDER BY 2 DESC LIMIT 25"
+        }
+      ],
+      "fieldConfig": { "defaults": { "custom": { "align": "auto", "filterable": true } }, "overrides": [] },
+      "options": { "showHeader": true, "cellHeight": "sm" }
+    },
+    {
+      "id": 11,
+      "type": "table",
+      "title": "Entry and exit pages",
+      "datasource": { "type": "postgres", "uid": "umami" },
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 14 },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT url_path AS \"Path\", count(*) AS \"Entries\" FROM (SELECT DISTINCT ON (visit_id) visit_id, url_path FROM website_event WHERE website_id = ${site:sqlstring} AND event_type = 1 AND $__timeFilter(created_at) ORDER BY visit_id, created_at) t GROUP BY 1 ORDER BY 2 DESC LIMIT 15"
+        },
+        {
+          "refId": "B",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT url_path AS \"Path\", count(*) AS \"Exits\" FROM (SELECT DISTINCT ON (visit_id) visit_id, url_path FROM website_event WHERE website_id = ${site:sqlstring} AND event_type = 1 AND $__timeFilter(created_at) ORDER BY visit_id, created_at DESC) t GROUP BY 1 ORDER BY 2 DESC LIMIT 15"
+        }
+      ],
+      "transformations": [{ "id": "merge", "options": {} }],
+      "fieldConfig": { "defaults": { "custom": { "align": "auto", "filterable": true } }, "overrides": [] },
+      "options": { "showHeader": true, "cellHeight": "sm" }
+    },
+    {
+      "id": 12,
+      "type": "table",
+      "title": "Scroll depth",
+      "description": "Page loads that reached each milestone, as a share of pageviews. Explains bounce rate better than bounce rate alone.",
+      "datasource": { "type": "postgres", "uid": "umami" },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 24 },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT ed.number_value::int || '%' AS \"Depth\", count(DISTINCT ed.website_event_id) AS \"Page loads\", round(100.0 * count(DISTINCT ed.website_event_id) / nullif((SELECT count(*) FROM website_event WHERE website_id = ${site:sqlstring} AND event_type = 1 AND $__timeFilter(created_at)), 0), 1) AS \"Share of pageviews\" FROM event_data ed WHERE ed.website_id = ${site:sqlstring} AND ed.data_key = 'depth' AND $__timeFilter(ed.created_at) GROUP BY 1 ORDER BY 1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "custom": { "align": "auto", "filterable": true } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Share of pageviews" }, "properties": [{ "id": "unit", "value": "percent" }, { "id": "max", "value": 100 }] }
+        ]
+      },
+      "options": { "showHeader": true, "cellHeight": "sm" }
+    },
+    {
+      "id": 13,
+      "type": "table",
+      "title": "Page types",
+      "description": "From the page-type event. Tells you what kind of content earns attention, not just which URL.",
+      "datasource": { "type": "postgres", "uid": "umami" },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 24 },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT ed.string_value AS \"Type\", count(*) AS \"Events\", count(DISTINCT e.session_id) AS \"Visitors\" FROM event_data ed JOIN website_event e ON e.event_id = ed.website_event_id WHERE ed.website_id = ${site:sqlstring} AND ed.data_key = 'type' AND $__timeFilter(ed.created_at) GROUP BY 1 ORDER BY 2 DESC"
+        }
+      ],
+      "fieldConfig": { "defaults": { "custom": { "align": "auto", "filterable": true } }, "overrides": [] },
+      "options": { "showHeader": true, "cellHeight": "sm" }
+    },
+    {
+      "id": 14,
+      "type": "table",
+      "title": "Search terms",
+      "description": "Terms visitors typed into the site search. High-volume terms are missing content.",
+      "datasource": { "type": "postgres", "uid": "umami" },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 24 },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT ed.string_value AS \"Term\", count(*) AS \"Searches\" FROM event_data ed WHERE ed.website_id = ${site:sqlstring} AND ed.data_key = 'term' AND $__timeFilter(ed.created_at) GROUP BY 1 ORDER BY 2 DESC LIMIT 25"
+        }
+      ],
+      "fieldConfig": { "defaults": { "custom": { "align": "auto", "filterable": true } }, "overrides": [] },
+      "options": { "showHeader": true, "cellHeight": "sm" }
+    },
+    {
+      "id": 15,
+      "type": "row",
+      "title": "Engagement",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 32 },
+      "panels": []
+    },
+    {
+      "id": 16,
+      "type": "table",
+      "title": "Outbound links",
+      "datasource": { "type": "postgres", "uid": "umami" },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 33 },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT coalesce(ed.string_value, 'unknown') AS \"Domain\", count(*) AS \"Clicks\" FROM event_data ed WHERE ed.website_id = ${site:sqlstring} AND ed.data_key = 'domain' AND $__timeFilter(ed.created_at) GROUP BY 1 ORDER BY 2 DESC LIMIT 15"
+        }
+      ],
+      "fieldConfig": { "defaults": { "custom": { "align": "auto", "filterable": true } }, "overrides": [] },
+      "options": { "showHeader": true, "cellHeight": "sm" }
+    },
+    {
+      "id": 17,
+      "type": "table",
+      "title": "Downloads",
+      "datasource": { "type": "postgres", "uid": "umami" },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 33 },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT coalesce(ed.string_value, e.url_path) AS \"File\", count(*) AS \"Downloads\" FROM website_event e LEFT JOIN event_data ed ON ed.website_event_id = e.event_id AND ed.data_key = 'file' WHERE e.website_id = ${site:sqlstring} AND e.event_name = 'file-download' AND $__timeFilter(e.created_at) GROUP BY 1 ORDER BY 2 DESC LIMIT 15"
+        }
+      ],
+      "fieldConfig": { "defaults": { "custom": { "align": "auto", "filterable": true } }, "overrides": [] },
+      "options": { "showHeader": true, "cellHeight": "sm" }
+    },
+    {
+      "id": 18,
+      "type": "table",
+      "title": "Referrers",
+      "datasource": { "type": "postgres", "uid": "umami" },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 33 },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT coalesce(e.referrer_domain, 'direct') AS \"Referrer\", count(DISTINCT e.session_id) AS \"Visitors\", count(*) AS \"Pageviews\" FROM website_event e WHERE e.website_id = ${site:sqlstring} AND e.event_type = 1 AND $__timeFilter(e.created_at) GROUP BY 1 ORDER BY 2 DESC LIMIT 15"
+        }
+      ],
+      "fieldConfig": { "defaults": { "custom": { "align": "auto", "filterable": true } }, "overrides": [] },
+      "options": { "showHeader": true, "cellHeight": "sm" }
+    },
+    {
+      "id": 19,
+      "type": "row",
+      "title": "Performance",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 41 },
+      "panels": []
+    },
+    {
+      "id": 20,
+      "type": "table",
+      "title": "Core Web Vitals per page (p75)",
+      "description": "Pages with more than 2 samples. Sort order is LCP, slowest first.",
+      "datasource": { "type": "postgres", "uid": "umami" },
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 42 },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT url_path AS \"Path\", count(*) AS \"Samples\", round(percentile_cont(0.75) WITHIN GROUP (ORDER BY lcp) FILTER (WHERE lcp IS NOT NULL)) AS \"LCP p75\", round(percentile_cont(0.75) WITHIN GROUP (ORDER BY inp) FILTER (WHERE inp IS NOT NULL)) AS \"INP p75\", round((percentile_cont(0.75) WITHIN GROUP (ORDER BY cls) FILTER (WHERE cls IS NOT NULL))::numeric, 3) AS \"CLS p75\", round(percentile_cont(0.75) WITHIN GROUP (ORDER BY ttfb) FILTER (WHERE ttfb IS NOT NULL)) AS \"TTFB p75\" FROM website_event WHERE website_id = ${site:sqlstring} AND event_type = 5 AND $__timeFilter(created_at) GROUP BY 1 HAVING count(*) > 2 ORDER BY 3 DESC LIMIT 30"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "custom": { "align": "auto", "filterable": true } },
+        "overrides": [
+          {
+            "matcher": { "id": "byRegexp", "options": "LCP p75|TTFB p75" },
+            "properties": [
+              { "id": "unit", "value": "ms" },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "green", "value": null },
+                    { "color": "yellow", "value": 2500 },
+                    { "color": "red", "value": 4000 }
+                  ]
+                }
+              },
+              { "id": "custom.cellOptions", "value": { "type": "color-text" } }
+            ]
+          },
+          { "matcher": { "id": "byName", "options": "INP p75" }, "properties": [{ "id": "unit", "value": "ms" }] }
+        ]
+      },
+      "options": { "showHeader": true, "cellHeight": "sm" }
+    },
+    {
+      "id": 21,
+      "type": "row",
+      "title": "Events and audience",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 51 },
+      "panels": []
+    },
+    {
+      "id": 22,
+      "type": "table",
+      "title": "Events by name",
+      "datasource": { "type": "postgres", "uid": "umami" },
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 52 },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT event_name AS \"Event\", count(*) AS \"Count\", count(DISTINCT session_id) AS \"Sessions\", to_char(max(created_at), 'YYYY-MM-DD HH24:MI') AS \"Last seen\" FROM website_event WHERE website_id = ${site:sqlstring} AND event_type = 2 AND $__timeFilter(created_at) GROUP BY 1 ORDER BY 2 DESC"
+        }
+      ],
+      "fieldConfig": { "defaults": { "custom": { "align": "auto", "filterable": true } }, "overrides": [] },
+      "options": { "showHeader": true, "cellHeight": "sm" }
+    },
+    {
+      "id": 23,
+      "type": "table",
+      "title": "Devices and browsers",
+      "datasource": { "type": "postgres", "uid": "umami" },
+      "gridPos": { "h": 9, "w": 6, "x": 12, "y": 52 },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT coalesce(device, 'unknown') AS \"Device\", coalesce(browser, 'unknown') AS \"Browser\", count(*) AS \"Visitors\" FROM session WHERE website_id = ${site:sqlstring} AND $__timeFilter(created_at) GROUP BY 1, 2 ORDER BY 3 DESC LIMIT 20"
+        }
+      ],
+      "fieldConfig": { "defaults": { "custom": { "align": "auto", "filterable": true } }, "overrides": [] },
+      "options": { "showHeader": true, "cellHeight": "sm" }
+    },
+    {
+      "id": 24,
+      "type": "table",
+      "title": "Countries",
+      "datasource": { "type": "postgres", "uid": "umami" },
+      "gridPos": { "h": 9, "w": 6, "x": 18, "y": 52 },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT coalesce(nullif(trim(country), ''), 'unknown') AS \"Country\", count(*) AS \"Visitors\" FROM session WHERE website_id = ${site:sqlstring} AND $__timeFilter(created_at) GROUP BY 1 ORDER BY 2 DESC LIMIT 20"
+        }
+      ],
+      "fieldConfig": { "defaults": { "custom": { "align": "auto", "filterable": true } }, "overrides": [] },
+      "options": { "showHeader": true, "cellHeight": "sm" }
+    }
+  ],
+  "annotations": { "list": [] },
+  "links": []
+}

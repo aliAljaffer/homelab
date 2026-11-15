@@ -11,4 +11,5 @@ resources:
   - servicemonitors.yaml
   - grafana-dashboard-openziti.yaml
   - grafana-dashboard-smtp-relay.yaml
+  - grafana-umami-db.sealed.yaml
   - grafana-restart.yaml

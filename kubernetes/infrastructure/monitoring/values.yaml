@@ -61,6 +61,7 @@ grafana:
     - name: grafana-discord-webhook
     - name: grafana-github-token
     - name: grafana-remediator-token
+    - name: grafana-umami-db
 
   plugins:
     - grafana-github-datasource
@@ -184,6 +185,24 @@ grafana:
         selectedAuthType: personal-access-token
       secureJsonData:
         accessToken: "${GITHUB_TOKEN}"
+    - name: Umami
+      type: postgres
+      uid: umami
+      access: proxy
+      isDefault: false
+      editable: false
+      url: umami-db-rw.umami.svc.cluster.local:5432
+      user: grafana_ro
+      jsonData:
+        database: umami
+        sslmode: disable
+        postgresVersion: 1700
+        timescaledb: false
+        maxOpenConns: 4
+        maxIdleConns: 2
+        connMaxLifetime: 14400
+      secureJsonData:
+        password: "${UMAMI_DB_PASSWORD}"
 
   deleteDatasources:
     - name: GitHub

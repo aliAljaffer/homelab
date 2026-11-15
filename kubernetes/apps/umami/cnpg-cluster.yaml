@@ -11,6 +11,13 @@ spec:
     size: 5Gi
     storageClass: longhorn
   enableSuperuserAccess: false
+  managed:
+    roles:
+      - name: grafana_ro
+        ensure: present
+        login: true
+        passwordSecret:
+          name: umami-grafana-ro
   backup:
     target: prefer-standby
     volumeSnapshot:

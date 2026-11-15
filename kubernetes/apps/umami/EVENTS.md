@@ -215,3 +215,7 @@ segment on docs.
 - Public route: `httproute-umami.yaml`, behind the Gateway tunnel.
 - Tracker name: `assets/web.js`, set by `TRACKER_SCRIPT_NAME`.
 - Website IDs live in each site's tracker tag, not here.
+- Dashboards: `kubernetes/apps/umami/dashboards/`, rendered by Grafana. See
+  `kubernetes/apps/umami/README.md`.
+- Dashboards: `kubernetes/apps/umami/dashboards/`, rendered in Grafana. See
+  `README.md` next to this file.

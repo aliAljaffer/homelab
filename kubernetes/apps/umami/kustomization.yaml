@@ -10,4 +10,16 @@ resources:
   - httproute-umami.yaml
   - umami-postgres.sealed.yaml
   - umami-secret.sealed.yaml
+  - umami-grafana-ro.sealed.yaml
+  - grafana-ro-grants.yaml
   - networkpolicy.yaml
+generatorOptions:
+  labels:
+    grafana_dashboard: "1"
+configMapGenerator:
+  - name: grafana-dashboard-umami-sites
+    files:
+      - dashboards/umami-sites.json
+  - name: grafana-dashboard-umami-site
+    files:
+      - dashboards/umami-site.json

@@ -1,0 +1,61 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-ro-grants
+  namespace: umami
+data:
+  grants.sql: |-
+    GRANT CONNECT ON DATABASE umami TO grafana_ro;
+    GRANT USAGE ON SCHEMA public TO grafana_ro;
+    GRANT SELECT ON ALL TABLES IN SCHEMA public TO grafana_ro;
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO grafana_ro;
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: grafana-ro-grants
+  namespace: umami
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  ttlSecondsAfterFinished: 600
+  backoffLimit: 3
+  activeDeadlineSeconds: 300
+  template:
+    metadata:
+      # Matches the existing NetworkPolicy that allows umami to reach the database.
+      labels:
+        app: umami
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: grants
+          image: ghcr.io/cloudnative-pg/postgresql:17.5@sha256:e6dd48683234f2b957ca2a18da4fd99e2a39a0534ac33fd2ee77e1ff7732270b
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              i=0
+              until psql "$DATABASE_URL" -tAc "SELECT 1 FROM pg_roles WHERE rolname = 'grafana_ro'" | grep -q 1; do
+                i=$((i + 1))
+                [ "$i" -gt 30 ] && exit 1
+                sleep 3
+              done
+              psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /sql/grants.sql
+          envFrom:
+            - secretRef:
+                name: umami-secret
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+          volumeMounts:
+            - name: sql
+              mountPath: /sql
+      volumes:
+        - name: sql
+          configMap:
+            name: grafana-ro-grants
