@@ -27,6 +27,17 @@ tailscale status                                   # homelab-lan shows 192.168.8
 curl -sI https://argocd.alialjaffer.com | head -1  # off-LAN, direct over Tailscale
 ```
 
+## Accept the subnet route on each client
+
+`192.168.8.0/24` is an advertised route, so each device must accept it:
+
+```bash
+tailscale set --accept-routes
+```
+
+On the macOS and Windows apps, the equivalent setting is **Use Tailscale
+subnets**. Without it, only `100.x` addresses work off-LAN.
+
 ## kubectl
 
 Auth mode requires HTTPS certificates enabled for the tailnet: admin console,
