@@ -22,7 +22,7 @@ spec:
         runAsGroup: 65532
       containers:
         - name: scenes
-          image: harbor.alialjaffer.com/mirror/excalidraw-scenes@sha256:4977741a7cfb38d27eb90a7da90d1f1fbf100983a0543dca331618f86a7e028c
+          image: harbor.alialjaffer.com/mirror/excalidraw-scenes@sha256:1e58e370d575b9bee8980c946d2fadd6b657f46b26b1870c3ee99cdd29249730
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
