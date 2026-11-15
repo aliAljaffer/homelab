@@ -1,13 +1,14 @@
 # arc
 
-GitHub Actions self-hosted runners for `chat-gateway`, `grooszy`, and `fai`
-(fai's `build-images` CI; fai's `release` workflow stays on GitHub-hosted
-runners because it needs macOS/Windows).
+GitHub Actions self-hosted runners for `chat-gateway`, `grooszy`,
+`excalidraw`, and `fai` (fai's `build-images` CI; fai's `release` workflow stays
+on GitHub-hosted runners because it needs macOS/Windows).
 
 - `arc` Application: the `gha-runner-scale-set-controller` 0.14.2 chart from
   `ghcr.io`, the namespaces, the GitHub App credential, the PodMonitors and the
   toolchain warmer.
-- `arc-runner-chat-gateway`, `arc-runner-grooszy`, `arc-runner-fai`: one
+- `arc-runner-chat-gateway`, `arc-runner-grooszy`,
+  `arc-runner-excalidraw`, `arc-runner-fai`: one
   `gha-runner-scale-set` each. The release name is also the `runs-on:` label.
 - Auth is the `update-manifests-homelab` GitHub App
   (`github-app.sealed.yaml`); it needs **Administration: Read and write** and

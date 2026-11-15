@@ -1,0 +1,45 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: excalidraw
+  namespace: excalidraw
+  labels:
+    app: excalidraw
+spec:
+  selector:
+    app: excalidraw
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: excalidraw-room
+  namespace: excalidraw
+  labels:
+    app: excalidraw-room
+spec:
+  selector:
+    app: excalidraw-room
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: excalidraw-scenes
+  namespace: excalidraw
+  labels:
+    app: excalidraw-scenes
+spec:
+  selector:
+    app: excalidraw-scenes
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080

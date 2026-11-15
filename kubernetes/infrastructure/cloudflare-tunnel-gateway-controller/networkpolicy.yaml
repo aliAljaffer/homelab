@@ -71,6 +71,22 @@ spec:
     - ports:
       - port: "80"
         protocol: TCP
+  - toEndpoints:
+    - matchLabels:
+        "k8s:io.kubernetes.pod.namespace": excalidraw
+    toPorts:
+    - ports:
+      - port: "80"
+        protocol: TCP
+      - port: "8080"
+        protocol: TCP
+  - toEndpoints:
+    - matchLabels:
+        "k8s:io.kubernetes.pod.namespace": livesync
+    toPorts:
+    - ports:
+      - port: "5984"
+        protocol: TCP
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy

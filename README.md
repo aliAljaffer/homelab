@@ -66,7 +66,7 @@ AMD Ryzen 7 7800X3D, 32GB RAM, RTX 4070 Ti Super, 3x 2TB NVMe, dual-boots Fedora
 | DNS              | Cloudflare (ExternalDNS + cert-manager DNS01)                                                                                                                                                                                                            |
 | Backups          | Longhorn native backup (S3-compatible to GCS, daily at 02:00 UTC keeping 30, monthly on the 1st keeping 12)                                                                                                                                              |
 | Power monitoring | Kepler (RAPL energy counters, node-level)                                                                                                                                                                                                                |
-| Remote access    | Legacy `cloudflared` tunnel (workload-specific routes: kubectl/talosctl endpoints plus catus-locatus) + the public Gateway tunnel, which exposes vaultwarden, keycloak, umami, chat-api, ntfy, fai and grooszy externally (Cloudflare-proxied); everything else (argocd, grafana, pihole, harbor, Hubble, Longhorn, MinIO console, stremio) stays LAN-only on the internal Gateway |
+| Remote access    | Legacy `cloudflared` tunnel (workload-specific routes: kubectl/talosctl endpoints plus catus-locatus) + the public Gateway tunnel, which exposes vaultwarden, keycloak, umami, chat-api, ntfy, fai, grooszy, excalidraw and livesync externally (Cloudflare-proxied); everything else (argocd, grafana, pihole, harbor, Hubble, Longhorn, MinIO console, stremio) stays LAN-only on the internal Gateway |
 
 ---
 
@@ -82,10 +82,12 @@ AMD Ryzen 7 7800X3D, 32GB RAM, RTX 4070 Ti Super, 3x 2TB NVMe, dual-boots Fedora
 - **fai** - personal task tracker / Kanban / notes (Next.js frontend, Go backend, CNPG Postgres, ReadWriteMany Longhorn PVC for attachments); the backend validates Keycloak JWTs itself, so it does not sit behind oauth2-proxy. Telegram voice notes are transcribed by `stt`
 - **stt** - self-hosted Speaches/faster-whisper speech-to-text on CPU, English-only model, used by `fai`
 - **grooszy** - private expense analysis app (web + API, CNPG Postgres)
+- **excalidraw** - self-hosted whiteboard fork with public collaboration and share links (CNPG-backed store for shared scenes)
+- **livesync** - CouchDB for Obsidian LiveSync, with plugin-side end-to-end encryption
 - **ntfy** - cluster-wide push notification server, oauth2-proxy in front; `fai` is the first consumer
 - **chat** - one private chat API for every app: each app wraps its own UI and calls the API with a per-app key. Runs OpenCode as a text-only agent. See [kubernetes/apps/chat](kubernetes/apps/chat/README.md) and [aliAljaffer/chat-gateway](https://github.com/aliAljaffer/chat-gateway).
 - **cloudflared** - Cloudflare Tunnel for public traffic
-- **arc** - GitHub Actions self-hosted runners for `chat-gateway`, `grooszy`, and `fai`'s build CI (fai release stays hosted; toolchain image built in CI and served through Harbor)
+- **arc** - GitHub Actions self-hosted runners for `chat-gateway`, `grooszy`, `excalidraw` and `fai`'s build CI (fai release stays hosted; toolchain image built in CI and served through Harbor)
 - **longhorn-backup** - scheduled PV backups to GCS (Longhorn RecurringJob)
 - **monitoring** - Grafana, Prometheus, Thanos, Loki, Alloy
 

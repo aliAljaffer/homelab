@@ -1,0 +1,82 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: couchdb
+  namespace: livesync
+  labels:
+    app: couchdb
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: couchdb
+  template:
+    metadata:
+      labels:
+        app: couchdb
+    spec:
+      securityContext:
+        # the entrypoint only chowns /opt/couchdb when it starts as root, and
+        # the ConfigMap-mounted config cannot be chowned
+        runAsNonRoot: true
+        runAsUser: 5984
+        runAsGroup: 5984
+        fsGroup: 5984
+      containers:
+        - name: couchdb
+          image: couchdb:3.5.3@sha256:907eab5b7e55ab7cfd241d39b90b2a335ea40bef82acee5a37388c08bf201dda
+          ports:
+            - containerPort: 5984
+              name: http
+          env:
+            - name: COUCHDB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: couchdb
+                  key: COUCHDB_USER
+            - name: COUCHDB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: couchdb
+                  key: COUCHDB_PASSWORD
+            - name: TZ
+              value: Asia/Riyadh
+          volumeMounts:
+            - name: data
+              mountPath: /opt/couchdb/data
+            - name: config
+              mountPath: /opt/couchdb/etc/local.d/10-livesync.ini
+              subPath: 10-livesync.ini
+          resources:
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              memory: 1Gi
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - curl -fsS -u "$COUCHDB_USER:$COUCHDB_PASSWORD" http://127.0.0.1:5984/_up
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - curl -fsS -u "$COUCHDB_USER:$COUCHDB_PASSWORD" http://127.0.0.1:5984/_up
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            failureThreshold: 6
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: couchdb
+        - name: config
+          configMap:
+            name: couchdb-config

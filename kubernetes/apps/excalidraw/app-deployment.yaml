@@ -1,0 +1,43 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: excalidraw
+  namespace: excalidraw
+  labels:
+    app: excalidraw
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: excalidraw
+  template:
+    metadata:
+      labels:
+        app: excalidraw
+    spec:
+      containers:
+        - name: app
+          image: harbor.alialjaffer.com/mirror/excalidraw:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 2
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 20

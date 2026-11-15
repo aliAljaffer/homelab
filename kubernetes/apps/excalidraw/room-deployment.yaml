@@ -1,0 +1,47 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: excalidraw-room
+  namespace: excalidraw
+  labels:
+    app: excalidraw-room
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: excalidraw-room
+  template:
+    metadata:
+      labels:
+        app: excalidraw-room
+    spec:
+      containers:
+        - name: room
+          image: excalidraw/excalidraw-room:latest@sha256:2fe999f9be4379e3ee282fc45d75d84a691a6383dde33544514cc395287c7a70
+          env:
+            - name: CORS_ORIGIN
+              value: https://excalidraw.alialjaffer.com
+            - name: NODE_ENV
+              value: production
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 256Mi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 2
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 20

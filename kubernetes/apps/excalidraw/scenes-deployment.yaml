@@ -1,0 +1,70 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: excalidraw-scenes
+  namespace: excalidraw
+  labels:
+    app: excalidraw-scenes
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: excalidraw-scenes
+  template:
+    metadata:
+      labels:
+        app: excalidraw-scenes
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+      containers:
+        - name: scenes
+          image: harbor.alialjaffer.com/mirror/excalidraw-scenes:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: LISTEN_ADDR
+              value: ":8080"
+            - name: MAX_BYTES
+              value: "10485760"
+            - name: UPLOADS_PER_HOUR
+              value: "120"
+            - name: RETENTION_DAYS
+              value: "90"
+            # $(VAR) expands from the variables defined above, so DATABASE_URL
+            # has to stay below PGUSER and PGPASSWORD.
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  name: excalidraw-db
+                  key: username
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: excalidraw-db
+                  key: password
+            - name: DATABASE_URL
+              value: "postgres://$(PGUSER):$(PGPASSWORD)@excalidraw-db-rw.excalidraw.svc.cluster.local:5432/excalidraw?sslmode=require"
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 2
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 20
