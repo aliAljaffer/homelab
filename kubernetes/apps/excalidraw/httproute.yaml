@@ -30,12 +30,16 @@ spec:
       backendRefs:
         - name: excalidraw-scenes
           port: 8080
-    # The only private entry point: the editor at the root. Everything a guest
-    # needs is under /s/ and must stay reachable without a login.
+    # The private entry points: the editor at the root and the board gallery.
+    # Everything a guest needs is under /s/ and must stay reachable without a
+    # login.
     - matches:
         - path:
             type: Exact
             value: /
+        - path:
+            type: PathPrefix
+            value: /boards
         - path:
             type: PathPrefix
             value: /oauth2/

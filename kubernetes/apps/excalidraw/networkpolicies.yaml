@@ -72,6 +72,15 @@ spec:
         - ports:
             - port: "8080"
               protocol: TCP
+    # /boards is rendered by this service and proxied by the app's nginx
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": excalidraw
+            app: excalidraw
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
     - fromEntities:
         - host
       toPorts:
