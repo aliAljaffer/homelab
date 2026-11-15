@@ -22,7 +22,7 @@ spec:
         runAsGroup: 1000
       containers:
         - name: room
-          image: harbor.alialjaffer.com/mirror/excalidraw-room@sha256:ba567e9b454eb4b8dbc95bbd13fce94e3ca75fcd87f2bb9de2c3bce6cdccd7cf
+          image: harbor.alialjaffer.com/mirror/excalidraw-room@sha256:b2c40a56edd3543ee93fbc4c82899dc9336e5e3e1eaec95ebeee4daaeae05c2b
           imagePullPolicy: IfNotPresent
           env:
             - name: CORS_ORIGIN
