@@ -1,0 +1,15 @@
+# Secret operator-oauth is precreated by operator-oauth.sealed.yaml. Leaving the
+# oauth block empty stops the chart rendering plaintext credentials.
+oauth: {}
+
+operatorConfig:
+  hostname: tailscale-operator
+
+proxyConfig:
+  defaultTags: tag:k8s
+
+# Auth mode: the proxy impersonates the Tailscale identity and Kubernetes RBAC
+# decides what it can do. The tailnet grant in policy.hujson maps members to
+# system:masters. Needs HTTPS certificates enabled for the tailnet.
+apiServerProxyConfig:
+  mode: "true"

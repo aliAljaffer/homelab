@@ -1,34 +1,130 @@
 # Remote Cluster Access
 
-Access `kubectl` and `talosctl` from outside the home network using the existing Cloudflare Tunnel, protected by Cloudflare Access Zero Trust.
-
-This replaces the old `ssh.alialjaffer.com` MacBook bastion. Instead of SSH-ing into a machine and running commands from there, you run a local TCP proxy via `cloudflared` and point your tools at `localhost`.
+Two paths exist. Tailscale is the primary one. The Cloudflare tunnel stays as a
+fallback that does not depend on the Tailscale operator or tailnet policy.
 
 ---
 
-## What you need
+# Tailscale (primary)
 
-On your remote machine:
+The operator runs in the `tailscale` namespace. Two things make the cluster and
+the LAN reachable:
+
+- `Connector lan` advertises `192.168.8.0/24`, so any tailnet device can reach
+  every LAN address, including the cluster's MetalLB VIPs.
+- The API server proxy (auth mode) impersonates your Tailscale identity and maps
+  it to Kubernetes RBAC.
+
+## Reach services by their normal names
+
+DNS needs no tailnet configuration. Public Cloudflare DNS already returns
+`192.168.8.129` for LAN-only hostnames (ExternalDNS), and those hostnames carry
+the wildcard `*.alialjaffer.com` certificate. Over the tailnet, the subnet route
+makes that address work. Public hostnames keep going through Cloudflare.
+
+```bash
+tailscale status                                   # homelab-lan shows 192.168.8.0/24
+curl -sI https://argocd.alialjaffer.com | head -1  # off-LAN, direct over Tailscale
+```
+
+## kubectl
+
+Auth mode requires HTTPS certificates enabled for the tailnet: admin console,
+**DNS** page, **HTTPS Certificates**, Enable. Without it the proxy has no
+certificate and `kubectl` cannot connect.
+
+```bash
+tailscale configure kubeconfig tailscale-operator
+kubectl get nodes
+```
+
+The grant in `kubernetes/infrastructure/tailscale-operator/policy.hujson` maps
+`autogroup:member` to `system:masters`. That is deliberate for a single-user
+tailnet; narrow it before adding users.
+
+## talosctl
+
+Plain subnet routing, no proxy involved:
+
+```bash
+talosctl --endpoints 192.168.8.99 --nodes 192.168.8.99 get nodes
+```
+
+## Verify
+
+```bash
+tailscale status                     # 3 nodes: 2 laptops, homelab-lan
+tailscale ping homelab-lan
+```
+
+---
+
+# SSO with Keycloak (prepared, not enabled)
+
+Tailscale only lets a tailnet switch to a custom OIDC provider when the tailnet
+uses a custom domain. This tailnet signs in with GitHub, so the switch needs
+Tailscale support and now trades a working login for no access gain. Everything
+except the switch itself is in place:
+
+- Keycloak client `tailscale` in the `homelab` realm, redirect
+  `https://login.tailscale.com/a/oauth_response`.
+- Sealed client secret `tailscale-oidc-secret` in the `keycloak` namespace.
+- WebFinger Worker in `cloudflare/webfinger`, not deployed.
+
+To finish it later:
+
+1. Give a Keycloak user an `@alialjaffer.com` address. Tailscale derives the
+   WebFinger lookup from the email domain, so a gmail address cannot work.
+2. Deploy the Worker and check it:
+
+   ```bash
+   cd cloudflare/webfinger && npx wrangler deploy
+   curl "https://alialjaffer.com/.well-known/webfinger?resource=acct:ali@alialjaffer.com"
+   ```
+
+3. Read the client secret:
+
+   ```bash
+   kubectl get secret tailscale-oidc-secret -n keycloak \
+     -o go-template='{{.data.CLIENT_SECRET | base64decode}}{{"\n"}}'
+   ```
+
+4. In the admin console, **Settings > Authentication**, switch the identity
+   provider with issuer `https://kc.alialjaffer.com/realms/homelab`, client ID
+   `tailscale`, and that secret. Every user re-authenticates afterwards.
+
+Until then Keycloak remains the SSO layer for the applications reached over the
+tailnet (oauth2-proxy and app-native OIDC).
+
+---
+
+# Cloudflare tunnel (fallback)
+
+Access `kubectl` and `talosctl` from outside the home network through the
+existing Cloudflare Tunnel, protected by Cloudflare Access Zero Trust.
+
+Instead of SSH-ing into a machine, you run a local TCP proxy via `cloudflared`
+and point your tools at `localhost`.
+
+## What you need
 
 - `cloudflared` CLI  -  [install](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/)
 - `kubectl` with a working kubeconfig for the cluster
 - `talosctl` with `~/.talos/config` or `~/.kube/talosconfig`
 - Access to your Cloudflare Zero Trust account (to authenticate the first time)
 
----
-
 ## How it works
 
-The `cloudflared` daemon running in the cluster (`cloudflared` namespace) exposes two TCP hostnames:
+The `cloudflared` daemon in the `cloudflared` namespace exposes two TCP hostnames:
 
 | Hostname | Routes to | Port |
 |---|---|---|
-| `kubectl.alialjaffer.com` | Talos API server (cp0) | 6443 |
-| `talos.alialjaffer.com` | Talos node API (cp0) | 50000 |
+| `k.alialjaffer.com` | Talos API server (cp0) | 6443 |
+| `t.alialjaffer.com` | Talos node API (cp0) | 50000 |
 
-Both are protected by a Cloudflare Access policy. You authenticate once via your browser, then `cloudflared access tcp` creates a local proxy that passes traffic through the tunnel.
-
----
+Both are protected by a Cloudflare Access policy. You authenticate once via your
+browser, then `cloudflared access tcp` creates a local proxy that passes traffic
+through the tunnel.
 
 ## Step 1  -  Set up Cloudflare Access policies
 
@@ -36,14 +132,12 @@ Do this once in the Cloudflare dashboard.
 
 1. Go to **Zero Trust > Access > Applications**.
 
-2. Create an application for `kubectl.alialjaffer.com`:
+2. Create an application for `k.alialjaffer.com`:
    - Type: **Self-hosted**
-   - Application domain: `kubectl.alialjaffer.com`
+   - Application domain: `k.alialjaffer.com`
    - Policy: require your email (or any identity provider you use)
 
-3. Create a second application for `talos.alialjaffer.com` with the same policy.
-
----
+3. Create a second application for `t.alialjaffer.com` with the same policy.
 
 ## Step 2  -  Open the tunnel on your remote machine
 
@@ -52,18 +146,16 @@ Run these two commands in the background before using `kubectl` or `talosctl`.
 ```bash
 # kubectl tunnel (port 6443)
 cloudflared access tcp \
-  --hostname kubectl.alialjaffer.com \
+  --hostname k.alialjaffer.com \
   --url localhost:6443 &
 
 # talosctl tunnel (port 50000)
 cloudflared access tcp \
-  --hostname talos.alialjaffer.com \
+  --hostname t.alialjaffer.com \
   --url localhost:50000 &
 ```
 
 The first time you run either command, a browser window opens for Cloudflare Access authentication. After you authenticate, the token is cached locally and future connections are automatic until the token expires (typically 24 hours).
-
----
 
 ## Step 3  -  Use kubectl over the tunnel
 
@@ -90,8 +182,6 @@ kubectl config set-context homelab-talos-remote \
 kubectl config use-context homelab-talos-remote
 ```
 
----
-
 ## Step 4  -  Use talosctl over the tunnel
 
 ```bash
@@ -109,8 +199,6 @@ talosctl config node localhost
 
 > [!NOTE]
 > Switch the endpoint back to `192.168.8.99` when you are on the home network.
-
----
 
 ## Disconnecting
 

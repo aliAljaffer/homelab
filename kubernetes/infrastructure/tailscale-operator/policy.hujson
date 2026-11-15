@@ -1,0 +1,32 @@
+// Tailnet policy. Apply with:
+//   curl -fsS -X POST -H "Authorization: Bearer $KEY" --data-binary @policy.hujson \
+//     "https://api.tailscale.com/api/v2/tailnet/$TAILNET/acl"
+// Validate first against .../acl/validate.
+// Tagged devices (operator, proxies, connector) deliberately cannot initiate to
+// user devices. Widen src before adding users: every member currently maps to
+// system:masters on the API server proxy.
+{
+  "tagOwners": {
+    "tag:k8s-operator": ["autogroup:admin"],
+    "tag:k8s": ["tag:k8s-operator"]
+  },
+  "autoApprovers": {
+    "routes": {
+      "192.168.8.0/24": ["tag:k8s-operator", "tag:k8s"]
+    }
+  },
+  "grants": [
+    {"src": ["autogroup:member"], "dst": ["autogroup:member"], "ip": ["*"]},
+    {"src": ["autogroup:member"], "dst": ["tag:k8s", "192.168.8.0/24"], "ip": ["*"]},
+    {
+      "src": ["autogroup:member"],
+      "dst": ["tag:k8s-operator"],
+      "ip": ["tcp:443"],
+      "app": {
+        "tailscale.com/cap/kubernetes": [
+          {"impersonate": {"groups": ["system:masters"]}}
+        ]
+      }
+    }
+  ]
+}

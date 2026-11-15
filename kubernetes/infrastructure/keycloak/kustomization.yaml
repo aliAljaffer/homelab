@@ -10,7 +10,9 @@ resources:
   - keycloak-oidc-client-grooszy.yaml
   - harbor-oidc-secret.sealed.yaml
   - harbor-client-setup.yaml
+  - tailscale-client-setup.yaml
   - grooszy-oidc-secret.sealed.yaml
   - keycloak-smtp-secret.sealed.yaml
   - keycloak-oauth2-proxy-secret.sealed.yaml
+  - tailscale-oidc-secret.sealed.yaml
   - networkpolicy.yaml

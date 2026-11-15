@@ -1,0 +1,15 @@
+apiVersion: tailscale.com/v1alpha1
+kind: Connector
+metadata:
+  name: lan
+  annotations:
+    # The Connector CRD ships in the same ArgoCD sync as this resource.
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  hostnamePrefix: homelab-lan
+  replicas: 1
+  tags:
+    - tag:k8s
+  subnetRouter:
+    advertiseRoutes:
+      - 192.168.8.0/24

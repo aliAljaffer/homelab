@@ -30,3 +30,6 @@ these bullets capture the _why_ behind that ordering.
   See `kubernetes/infrastructure/smtp-relay/README.md`.
 - `thanos.yaml`: this app is store-gateway/compactor/querier only. The sidecar
   itself runs inside Prometheus, configured in `monitoring/values.yaml`.
+- `tailscale-operator.yaml`: mounts the precreated `operator-oauth` Secret from
+  `sealed-secrets` (wave -5). The Connector CRD ships in the same sync, hence
+  `SkipDryRunOnMissingResource` on the Connector.

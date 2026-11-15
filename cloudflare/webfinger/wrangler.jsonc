@@ -1,0 +1,12 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "tailscale-webfinger",
+  "main": "src/index.js",
+  "compatibility_date": "2026-11-15",
+  "routes": [
+    {
+      "pattern": "alialjaffer.com/.well-known/webfinger",
+      "zone_name": "alialjaffer.com"
+    }
+  ]
+}

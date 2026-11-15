@@ -1,0 +1,35 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tailscale-operator
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infrastructure
+  sources:
+  - repoURL: https://pkgs.tailscale.com/helmcharts
+    chart: tailscale-operator
+    targetRevision: 1.104.7
+    helm:
+      valueFiles:
+      - $values/kubernetes/infrastructure/tailscale-operator/values.yaml
+  - repoURL: git@github.com:aliAljaffer/homelab.git
+    targetRevision: main
+    ref: values
+  - repoURL: git@github.com:aliAljaffer/homelab.git
+    targetRevision: main
+    path: kubernetes/infrastructure/tailscale-operator
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: tailscale
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - ServerSideApply=true

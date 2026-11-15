@@ -1,0 +1,95 @@
+---
+# Tailscale custom-OIDC client. Only useful once the tailnet switches its
+# identity provider; see docs/remote-access.md. Uses the admin REST API because
+# KeycloakOIDCClient is broken on operator 26.7.1.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: tailscale-client-setup
+  namespace: keycloak
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 20
+  activeDeadlineSeconds: 1800
+  template:
+    metadata:
+      labels:
+        app: tailscale-client-setup
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: setup
+          image: alpine:3.21
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+              apk add --no-cache curl jq >/dev/null
+
+              KC=http://keycloak-service:8080
+              until TOKEN=$(curl -fsS -X POST "$KC/realms/master/protocol/openid-connect/token" \
+                  -d grant_type=password -d client_id=admin-cli \
+                  -d username="$ADMIN_USER" \
+                  --data-urlencode "password=$ADMIN_PASS" | jq -r '.access_token // empty') \
+                  && [ -n "$TOKEN" ]; do
+                echo "waiting for keycloak..."
+                sleep 5
+              done
+
+              AUTH="Authorization: Bearer $TOKEN"
+              H="$KC/admin/realms/homelab"
+
+              CID=$(curl -fsS -H "$AUTH" "$H/clients?clientId=tailscale" | jq -r '.[0].id // empty')
+              if [ -z "$CID" ]; then
+                jq -n --arg secret "$CLIENT_SECRET" '{
+                  clientId: "tailscale",
+                  name: "Tailscale",
+                  enabled: true,
+                  protocol: "openid-connect",
+                  publicClient: false,
+                  standardFlowEnabled: true,
+                  implicitFlowEnabled: false,
+                  directAccessGrantsEnabled: false,
+                  serviceAccountsEnabled: false,
+                  secret: $secret,
+                  redirectUris: ["https://login.tailscale.com/a/oauth_response"],
+                  webOrigins: ["https://login.tailscale.com"]
+                }' > /tmp/client.json
+                curl -fsS -H "$AUTH" -H 'Content-Type: application/json' \
+                  -X POST --data @/tmp/client.json "$H/clients" >/dev/null
+              else
+                # Keep the stored secret in step with the sealed one on rotation.
+                curl -fsS -H "$AUTH" -H 'Content-Type: application/json' \
+                  -X PUT --data "$(jq -n --arg secret "$CLIENT_SECRET" '{secret: $secret}')" \
+                  "$H/clients/$CID" >/dev/null
+              fi
+
+              echo "tailscale oidc client is ready"
+          env:
+            - name: ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-initial-admin
+                  key: username
+            - name: ADMIN_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-initial-admin
+                  key: password
+            - name: CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: tailscale-oidc-secret
+                  key: CLIENT_SECRET
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
