@@ -43,8 +43,10 @@ spec:
         secret: "${OAUTH2_PROXY_CLIENT_SECRET}"
         redirectUris:
           - "https://ntfy.alialjaffer.com/oauth2/callback"
+          - "https://excalidraw.alialjaffer.com/oauth2/callback"
         webOrigins:
           - "https://ntfy.alialjaffer.com"
+          - "https://excalidraw.alialjaffer.com"
         attributes:
           pkce.code.challenge.method: S256
       - clientId: fai

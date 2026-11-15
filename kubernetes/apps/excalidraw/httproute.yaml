@@ -14,6 +14,8 @@ spec:
   hostnames:
     - excalidraw.alialjaffer.com
   rules:
+    # Public. Gateway API picks the longest matching prefix, so these win over
+    # the catch-all below whatever the order.
     - matches:
         - path:
             type: PathPrefix
@@ -24,10 +26,22 @@ spec:
     - matches:
         - path:
             type: PathPrefix
-            value: /api/v2/scenes
+            value: /api/v2
       backendRefs:
         - name: excalidraw-scenes
           port: 8080
+    # The only private entry point: the editor at the root. Everything a guest
+    # needs is under /s/ and must stay reachable without a login.
+    - matches:
+        - path:
+            type: Exact
+            value: /
+        - path:
+            type: PathPrefix
+            value: /oauth2/
+      backendRefs:
+        - name: oauth2-proxy
+          port: 80
     - backendRefs:
         - name: excalidraw
           port: 80

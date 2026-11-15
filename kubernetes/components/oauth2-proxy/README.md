@@ -30,7 +30,7 @@ The OIDC client is declared in the `homelab` realm
 `oauth2-proxy`, secret from the `keycloak-oauth2-proxy-secret` SealedSecret.
 Keycloak matches redirect URIs **exactly** (wildcards in the host are not
 supported), so each app registers its own
-`https://<app>.alialjaffer.com/oauth2/callback` — currently only `ntfy`. All
+`https://<app>.alialjaffer.com/oauth2/callback` — currently `ntfy` and `excalidraw`. All
 instances share the client, so every app gets SSO off the same session cookie.
 
 > **Re-import caveat.** A `KeycloakRealmImport` only creates a realm that does

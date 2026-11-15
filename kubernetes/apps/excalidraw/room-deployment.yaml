@@ -16,16 +16,23 @@ spec:
       labels:
         app: excalidraw-room
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
       containers:
         - name: room
-          image: excalidraw/excalidraw-room:latest@sha256:2fe999f9be4379e3ee282fc45d75d84a691a6383dde33544514cc395287c7a70
+          image: harbor.alialjaffer.com/mirror/excalidraw-room@sha256:55ff25593ce76bd17c40352bf8391161d9944eb69bea11da6b3e637a2f4ee406
+          imagePullPolicy: IfNotPresent
           env:
             - name: CORS_ORIGIN
               value: https://excalidraw.alialjaffer.com
+            - name: MAX_CLIENTS_PER_ROOM
+              value: "20"
             - name: NODE_ENV
               value: production
           ports:
-            - containerPort: 80
+            - containerPort: 8080
               name: http
           resources:
             requests:
@@ -36,12 +43,12 @@ spec:
           readinessProbe:
             httpGet:
               path: /
-              port: 80
+              port: 8080
             initialDelaySeconds: 2
             periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /
-              port: 80
+              port: 8080
             initialDelaySeconds: 10
             periodSeconds: 20

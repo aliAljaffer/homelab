@@ -16,6 +16,14 @@ spec:
         - ports:
             - port: "80"
               protocol: TCP
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": excalidraw
+            app.kubernetes.io/name: oauth2-proxy
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
     - fromEntities:
         - host
       toPorts:
@@ -38,13 +46,13 @@ spec:
             "k8s:io.kubernetes.pod.namespace": cloudflare-tunnel-system
       toPorts:
         - ports:
-            - port: "80"
+            - port: "8080"
               protocol: TCP
     - fromEntities:
         - host
       toPorts:
         - ports:
-            - port: "80"
+            - port: "8080"
               protocol: TCP
 ---
 apiVersion: cilium.io/v2
@@ -90,4 +98,56 @@ spec:
       toPorts:
         - ports:
             - port: "5432"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: excalidraw-oauth2-proxy
+  namespace: excalidraw
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: oauth2-proxy
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": cloudflare-tunnel-system
+      toPorts:
+        - ports:
+            - port: "4180"
+              protocol: TCP
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "4180"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": excalidraw
+            app: excalidraw
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+    - toFQDNs:
+        - matchName: "kc.alialjaffer.com"
+      toPorts:
+        - ports:
+            - port: "443"
               protocol: TCP
