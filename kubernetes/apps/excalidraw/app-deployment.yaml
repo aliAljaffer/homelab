@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: harbor.alialjaffer.com/mirror/excalidraw@sha256:b118ce8428bb6b46c6e3a325f2c4ff970a75ca57f25868b61f0519524e9623e1
+          image: harbor.alialjaffer.com/mirror/excalidraw@sha256:e7cafef5b01f4e950ee2fa0e28d83c71b179ca1b434e6441f1b126e4a04c037e
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
