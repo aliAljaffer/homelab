@@ -28,7 +28,9 @@ Both query the `Umami` Grafana datasource, which connects as `grafana_ro`.
   `networkpolicy.yaml`, restricted to the Grafana pod.
 - The Grafana datasource itself is in
   `kubernetes/infrastructure/monitoring/values.yaml`, and its password is
-  `grafana-umami-db.sealed.yaml` in the same directory.
+  `grafana-umami-db.sealed.yaml` in the same directory. The password reaches
+  Grafana as an environment variable, so after rotating it run
+  `kubectl -n monitoring rollout restart deploy/monitoring-grafana`.
 
 ## Changing a dashboard
 
