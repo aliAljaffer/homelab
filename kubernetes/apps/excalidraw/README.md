@@ -42,6 +42,10 @@ under `room/` and rebuilt on Node 24. It accepts a comma-separated
 `CORS_ORIGIN`, rejects room ids outside `[A-Za-z0-9_-]{1,64}`, caps clients per
 room (`MAX_CLIENTS_PER_ROOM`), and speaks websocket only.
 
+The room Service port declares `appProtocol: kubernetes.io/ws`. Without it the
+tunnel gateway forwards the upgrade as plain HTTP and every socket gets a 502.
+That one field is the difference between a working room and a silent failure.
+
 The app image carries `nginx.conf` from the fork root: CSP, `no-referrer`,
 `nosniff`, HSTS, the `/s/` SPA fallback, and long-lived `/assets` and `/fonts`
 caching.
