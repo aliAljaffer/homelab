@@ -12,6 +12,7 @@ One public hostname, four backends:
 | `/` (exact) | `oauth2-proxy` | the editor, behind a login |
 | `/b/` | `oauth2-proxy` | one board open in the editor |
 | `/api/boards` | `oauth2-proxy` then `excalidraw` then `excalidraw-scenes` | the board gallery and its scenes |
+| `/libraries/` | `oauth2-proxy` then `excalidraw` | icon libraries for the library panel |
 | everything else | `excalidraw` | the static app |
 
 ## Access model
@@ -57,6 +58,26 @@ image entrypoint so the gallery resolver comes from the pod's own
 fallback, long-lived `/assets` and `/fonts` caching, and the `/boards` proxy to
 `excalidraw-scenes`. That proxy resolves per request: a missing gallery upstream
 must never stop nginx, or share links would go down with it.
+
+## Icons
+
+The editor ships five icon libraries for the library panel: AWS, Google Cloud,
+Kubernetes, Alibaba Cloud, and DevOps tooling (CNCF artwork plus the devicons
+set). They are generated at image build time by the fork's
+`scripts/build-icon-libraries.mjs`, which downloads the vendor SVGs into
+`public/libraries/` as one `.excalidrawlib` per system plus a
+`libraries.json` manifest. Nothing is stored in this repository.
+
+The app fetches the manifest from `/libraries/` on load and merges the items
+into the browser's library once per manifest version, then keeps them in
+IndexedDB. Re-seeding replaces the previous icon items because the build gives
+them deterministic ids. The path sits behind the login like the editor, so the
+vendor art is never served to a guest.
+
+`excalidraw` in the fork is patched so a library item can carry the binary
+files its image elements reference: import, export, preview render and insert
+all keep them. Upstream drops them, which is why its own icon libraries are
+hand-drawn shapes.
 
 ## Storage
 

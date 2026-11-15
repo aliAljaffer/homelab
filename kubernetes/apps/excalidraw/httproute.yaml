@@ -31,7 +31,8 @@ spec:
         - name: excalidraw-scenes
           port: 8080
     # The private entry points: the editor at the root, a single board at /b/,
-    # and the boards API. Everything a guest needs is under /s/ and must stay
+    # the boards API, and the icon libraries the editor merges into the
+    # library panel. Everything a guest needs is under /s/ and must stay
     # reachable without a login.
     - matches:
         - path:
@@ -43,6 +44,9 @@ spec:
         - path:
             type: PathPrefix
             value: /api/boards
+        - path:
+            type: PathPrefix
+            value: /libraries/
         - path:
             type: PathPrefix
             value: /oauth2/
