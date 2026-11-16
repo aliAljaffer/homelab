@@ -26,6 +26,6 @@ Tailscale Kubernetes operator plus one Connector that advertises the LAN.
 - Chart version equals the operator and proxy image version. Do not set
   `proxyConfig.image.tag`; bumping `targetRevision` moves them together.
 - API server proxy runs in auth mode. It needs HTTPS certificates enabled for
-  the tailnet (admin console, DNS page). Tailnet DNS settings are otherwise left
-  alone: public Cloudflare records already resolve LAN hostnames to
-  `192.168.8.129`, and the subnet router makes that address reachable.
+  the tailnet (admin console, DNS page), which is on. Tailnet DNS settings are
+  otherwise left alone: public Cloudflare records already resolve LAN hostnames
+  to `192.168.8.129`, and the subnet router makes that address reachable.

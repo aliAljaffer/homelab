@@ -40,12 +40,13 @@ subnets**. Without it, only `100.x` addresses work off-LAN.
 
 ## kubectl
 
-Auth mode requires HTTPS certificates enabled for the tailnet: admin console,
-**DNS** page, **HTTPS Certificates**, Enable. Without it the proxy has no
-certificate and `kubectl` cannot connect.
+Auth mode needs HTTPS certificates enabled for the tailnet (admin console,
+**DNS** page, **HTTPS Certificates**), which is on. The proxy hostname carries a
+Let's Encrypt certificate for `tailscale-operator.<tailnet>.ts.net`.
 
 ```bash
 tailscale configure kubeconfig tailscale-operator
+kubectl auth whoami    # Username aliAljaffer@github, Groups [system:masters ...]
 kubectl get nodes
 ```
 
