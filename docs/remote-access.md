@@ -68,6 +68,27 @@ kubectl get nodes
 `talosctl` and the VIPs do need it, so they stay unreachable until the client
 leaves the overlapping network or the two subnets differ.
 
+## Web UIs without the subnet route
+
+LAN-only UIs are reachable off-LAN by name over the tailnet, so an overlapping
+subnet no longer blocks the browser. `kubernetes/infrastructure/tailnet-access/`
+publishes them with a `ProxyGroup` and one `Ingress` per app, which proxies to
+the same ClusterIP the LAN route uses:
+
+```bash
+for h in argocd pihole stremio minio nexotv; do
+  curl -s -o /dev/null -w "$h %{http_code}\n" "https://$h.<tailnet>.ts.net"
+done
+```
+
+TLS terminates at the Tailscale proxy with a Let's Encrypt certificate, then
+plain HTTP reaches the Service. Only URL-agnostic apps belong here. An app that
+pins its own origin in an env var (`oauth2-proxy`, `excalidraw`, `grooszy`,
+`chat`, `catus-locatus` backend) breaks under the new hostname.
+
+See the README in that directory for the two policy entries the Service mode
+needs.
+
 ## kubectl
 
 Auth mode needs HTTPS certificates enabled for the tailnet (admin console,
