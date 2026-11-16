@@ -1,0 +1,23 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pihole-tailnet
+  namespace: pihole
+  annotations:
+    tailscale.com/proxy-group: tailnet-ingress
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - pihole
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: pihole-web
+                port:
+                  number: 80
