@@ -23,9 +23,14 @@ the wildcard `*.alialjaffer.com` certificate. Over the tailnet, the subnet route
 makes that address work. Public hostnames keep going through Cloudflare.
 
 ```bash
-tailscale status                                   # homelab-lan shows 192.168.8.0/24
-curl -sI https://argocd.alialjaffer.com | head -1  # off-LAN, direct over Tailscale
+tailscale status | grep homelab-lan-0
+tailscale status --json | jq -r '.Peer[] | select(.HostName=="homelab-lan-0") | .PrimaryRoutes'
+curl -sI https://argocd.alialjaffer.com | head -1
 ```
+
+The connector device is `homelab-lan-0`. The CR sets `hostnamePrefix: homelab-lan`
+and the operator appends the replica index. The plain `tailscale status` output
+does not list routes, so read `PrimaryRoutes` from the JSON.
 
 ## Accept the subnet route on each client
 
@@ -37,6 +42,31 @@ tailscale set --accept-routes
 
 On the macOS and Windows apps, the equivalent setting is **Use Tailscale
 subnets**. Without it, only `100.x` addresses work off-LAN.
+
+## Overlapping local subnet
+
+Accepting the route is not enough when the client sits on a network that also
+uses `192.168.8.0/24`. The local link wins and the tailnet route is never used.
+The symptom is a hostname that resolves to `192.168.8.129` and then refuses
+connections:
+
+```bash
+route -n get 192.168.8.129
+# interface: en0   <- local link, the tailnet route is bypassed
+```
+
+Check the client address too. A DHCP lease in that range is the cause, and a
+lease on `192.168.8.99` also collides with cp0.
+
+The API server proxy needs no LAN routing, so `kubectl` keeps working:
+
+```bash
+tailscale configure kubeconfig tailscale-operator
+kubectl get nodes
+```
+
+`talosctl` and the VIPs do need it, so they stay unreachable until the client
+leaves the overlapping network or the two subnets differ.
 
 ## kubectl
 
@@ -56,18 +86,27 @@ tailnet; narrow it before adding users.
 
 ## talosctl
 
-Plain subnet routing, no proxy involved:
+Plain subnet routing, no proxy involved. It needs the accepted route and a
+talosconfig context that holds the client certificate:
 
 ```bash
-talosctl --endpoints 192.168.8.99 --nodes 192.168.8.99 get nodes
+talosctl config info
+talosctl --talosconfig ~/.talos/config --endpoints 192.168.8.99 --nodes 192.168.8.99 get nodes
 ```
+
+`--endpoints` and `--nodes` are not enough on their own. With an empty
+`~/.talos/config` (`context: ""`, `contexts: {}`) talosctl stops at
+`talos config file is empty` before it touches the network.
 
 ## Verify
 
 ```bash
-tailscale status                     # 3 nodes: 2 laptops, homelab-lan
-tailscale ping homelab-lan
+tailscale status
+tailscale ping homelab-lan-0
 ```
+
+`tailscale status` lists every device in the tailnet, not only the cluster ones.
+A pong `via DERP(...)` means the route works but the path is relayed, not direct.
 
 ---
 
