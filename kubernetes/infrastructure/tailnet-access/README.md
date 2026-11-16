@@ -37,11 +37,21 @@ Add an `Ingress` with `ingressClassName: tailscale`, the
 
 ## Gotchas
 
-- The OAuth client behind `operator-oauth` needs the `Services` write scope for
-  `ProxyGroup` mode. Without it the group reports a provisioning error in the
-  operator log and the Ingress `ADDRESS` stays empty. Remove the
-  `tailscale.com/proxy-group` annotation as a fallback: the operator then creates
-  a standalone proxy pod per Ingress, which needs no Services scope.
+- ProxyGroup mode advertises each name as a Tailscale Service. Two tailnet policy
+  entries are required, and `policy.hujson` now carries both:
+  `autoApprovers.services` (or approve the hosts by hand under **Services** in the
+  admin console) and a `grant` whose `dst` names the `svc:` entries. The device
+  grant for `tag:k8s` alone is not enough; a Service needs its own grant.
+  Until both land, the hostnames resolve but connections time out, and the Ingress
+  `ADDRESS` stays empty with `tls: failed to find any PEM data` in the operator log.
+- Auto-approvers do not retroactively approve an advertisement that is already
+  pending. After applying the policy, delete and recreate the `ProxyGroup` pods
+  (`kubectl -n tailscale rollout restart statefulset/tailnet-ingress`) or approve
+  the five hosts in the console.
+- The OAuth client behind `operator-oauth` needs the `Services` write scope. If the
+  group reports a provisioning error instead, remove the
+  `tailscale.com/proxy-group` annotation as a fallback: the operator then creates a
+  standalone proxy pod per Ingress, which needs no Services scope.
 - `tls.hosts` takes a DNS label, not a FQDN. The tailnet suffix comes from the
   tailnet itself.
 - A second hostname only works for apps that build URLs from the request. The five
