@@ -36,10 +36,51 @@ cp0 took the API down even though etcd had quorum. It is now fronted by a
 
 ## Client config
 
-- `~/.kube/config` (context `admin@k8s-homelab`) server =
-  `https://api.alialjaffer.com:6443`.
-- `~/.talos/config` (context `k8s-homelab`) endpoints =
-  `192.168.8.99, 192.168.8.101, 192.168.8.102` so `talosctl` fails over too.
+### kubectl
+
+The homelab kubeconfig is `~/.kube/homelab-talos` and it talks to the VIP
+directly, so it needs no DNS:
+
+```bash
+export KUBECONFIG=~/.kube/homelab-talos
+kubectl config view --minify \
+  -o jsonpath='{.contexts[0].name} {.clusters[0].cluster.server}{"\n"}'
+# admin@k8s-homelab https://192.168.8.250:6443
+```
+
+`~/.kube/config` is **not** this cluster. It holds one unrelated work context,
+so `kubectl` with no `KUBECONFIG` does not reach the homelab.
+
+Off-LAN, use the API server proxy, which needs no subnet route:
+
+```bash
+tailscale configure kubeconfig tailscale-operator   # writes ~/.kube/homelab-ts
+KUBECONFIG=~/.kube/homelab-ts kubectl get nodes
+```
+
+`~/.kube/homelab-ts` points at `https://tailscale-operator.tail6c5083.ts.net`.
+
+### talosctl
+
+`talosctl` needs a talosconfig that holds a client certificate. If
+`~/.talos/config` is empty (`context: ""`, `contexts: {}`), every command stops
+at `talos config file is empty` before it touches the network. A working copy
+lives on `ssh.alialjaffer.com`:
+
+```bash
+scp ssh.alialjaffer.com:~/.talos/config ~/.talos/config
+talosctl config endpoint 192.168.8.99 192.168.8.101 192.168.8.102
+talosctl config info
+```
+
+Expect `Current context: k8s-homelab`, `Roles: os:admin`, and a certificate
+valid until 2027-07-28.
+
+Endpoints are the three control planes (`cp0`, `wrk0`, `wrk1`), not the VIP.
+Port 50000 is served per node, and the VIP only carries the API on 6443.
+
+The repo holds no Talos secrets bundle (`talsecret.yaml`), so the talosconfig
+cannot be regenerated from git. Keep a copy outside the repo.
 
 ## Operational notes
 
