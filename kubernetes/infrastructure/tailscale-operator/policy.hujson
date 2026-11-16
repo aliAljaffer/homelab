@@ -13,11 +13,23 @@
   "autoApprovers": {
     "routes": {
       "192.168.8.0/24": ["tag:k8s-operator", "tag:k8s"]
+    },
+    "services": {
+      "svc:argocd": ["tag:k8s"],
+      "svc:minio": ["tag:k8s"],
+      "svc:nexotv": ["tag:k8s"],
+      "svc:pihole": ["tag:k8s"],
+      "svc:stremio": ["tag:k8s"]
     }
   },
   "grants": [
     {"src": ["autogroup:member"], "dst": ["autogroup:member"], "ip": ["*"]},
     {"src": ["autogroup:member"], "dst": ["tag:k8s", "192.168.8.0/24"], "ip": ["*"]},
+    {
+      "src": ["autogroup:member"],
+      "dst": ["svc:argocd", "svc:minio", "svc:nexotv", "svc:pihole", "svc:stremio"],
+      "ip": ["*"]
+    },
     {
       "src": ["autogroup:member"],
       "dst": ["tag:k8s-operator"],
