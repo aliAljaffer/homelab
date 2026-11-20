@@ -8,7 +8,8 @@ spec:
   image:
     repository: harbor.alialjaffer.com/mirror/stubbi/hermes-agent
     tag: "v0.16.0"
-    pullPolicy: IfNotPresent
+    digest: sha256:9cdf83f00462bf263f06fd8b290bfb112cee16f0bb630b80746677bacd303185
+    pullPolicy: Always
   config:
     configMapRef:
       name: hermes-config
