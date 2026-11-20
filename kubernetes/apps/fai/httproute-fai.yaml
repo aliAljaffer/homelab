@@ -21,6 +21,13 @@ spec:
       backendRefs:
         - name: fai-backend
           port: 8080
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /mcp
+      backendRefs:
+        - name: fai-backend
+          port: 8080
     - backendRefs:
         - name: fai-frontend
           port: 80

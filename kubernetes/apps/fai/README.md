@@ -51,6 +51,13 @@ the deployment wiring differs.
   configured transcription path. `TELEGRAM_TZ_OFFSET=180` makes relative dates
   in Telegram voice notes resolve in Riyadh time.
 
+## Agent endpoint
+
+`/mcp` is routed straight to the backend by the same HTTPRoute as `/api`. It does
+not use OIDC: an agent authenticates with a key created in Settings > Agents (or
+`FAI_AGENT_TOKENS`), so no browser login is involved and no extra reverse-proxy
+rule is needed. Keys live in Postgres and can be revoked from the UI.
+
 ## Calendar feed
 
 `GET /api/calendar.ics?token=<ICS_TOKEN>` is deliberately outside the OIDC middleware:
