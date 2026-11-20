@@ -6,6 +6,5 @@ resources:
   - configmap.yaml
   - hermes-providers.sealed.yaml
   - hermes-fai.sealed.yaml
-  - hermes-tailscale.sealed.yaml
   - ingress-tailnet.yaml
   - hermesinstance.yaml

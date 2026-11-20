@@ -6,7 +6,9 @@ metadata:
   namespace: hermes
 data:
   config.yaml: |
-    model: claude-sonnet-5
+    model:
+      provider: anthropic
+      default: claude-sonnet-5
     providers: {}
     fallback_providers:
       - provider: opencode-go
@@ -70,7 +72,7 @@ data:
       bot_mode_protocol: true
       environment_hint: ""
       coding_context: auto
-      coding_instructions: ""
+      coding_instructions: '["Follow the ali-conventions skill: no em-dashes, no AI or model attribution in commits or PRs, commits one line and imperative, no Conventional Commits prefixes.","A comment is allowed only for a workaround, an ordering or external-dependency constraint, version-specific behavior, or a trade-off. Never restate code, explain a design decision, or cite provenance. If comment-guard lists a comment you added, remove it or justify it in your next reply.","Performance gate: for any change to a data read, write, external call, or list render, state the hot paths, the per-request queries and calls, the concurrency limit, and the benchmark before coding. Never claim a performance result without a measurement.","Keep module boundaries clean. If the request only fits as a bolt-on, say a refactor is the honest path before writing code."]'
       verify_guidance: true
       max_verify_nudges: 3
       verify_on_stop: false
@@ -763,7 +765,9 @@ data:
             model: anthropic/claude-opus-4.8
           enabled: true
     skills:
-      external_dirs: []
+      external_dirs:
+        - ~/.agents/skills
+        - ~/agents/skills
       create_dir: ""
       project_discovery: true
       trusted_project_dirs: []
@@ -891,6 +895,7 @@ data:
         launcher: []
       enabled:
         - advanced-delegation
+        - comment-guard
         - quota
         - superpowers
         - tokenjuice

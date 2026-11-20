@@ -8,12 +8,13 @@ ApplicationSet; the operator itself is `kubernetes/argocd/apps/infrastructure/he
 
 - `hermesinstance.yaml` — one `HermesInstance` named `hermes`: StatefulSet, Service on 8443
   (gateway + OpenAI-compatible API server), 100Gi Longhorn PVC on `/opt/data`.
-- `configmap.yaml` — the full `config.yaml` Hermes runs with. Edit this, then push; Argo rolls the pod.
+- `configmap.yaml` — the full `config.yaml` Hermes runs with. It is `hermes-agent-config`, not
+  `hermes-config`: the operator owns `<instance>-config` and adds its own keys there.
 - `hermes-providers.sealed.yaml` — `OPENCODE_GO_API_KEY`, `COMMANDCODE_API_KEY` (injected via
   `spec.envFrom`).
 - `hermes-fai.sealed.yaml` — the Fai MCP agent key, injected as `FAI_AGENT_KEY` and referenced from
   `config.yaml` as `Bearer ${FAI_AGENT_KEY}`.
-- `hermes-tailscale.sealed.yaml` — reusable + ephemeral Tailscale auth key for the Serve sidecar.
+- `ingress-tailnet.yaml` — the tailnet route (see below).
 
 ## Providers
 
@@ -23,13 +24,17 @@ ApplicationSet; the operator itself is `kubernetes/argocd/apps/infrastructure/he
 | `opencode-go` | `OPENCODE_GO_API_KEY` | fallbacks and `Fast-C` delegation |
 | `commandcode` | `COMMANDCODE_API_KEY` | `Fast-A`/`Fast-B` delegation, planner |
 
+`config.yaml` sets `model.provider: anthropic` explicitly. A bare `model: claude-sonnet-5` has no
+provider attached, and Hermes then routes the request to whichever provider holds a key, which was
+`opencode-go` and produced a wrong-relay request.
+
 Anthropic OAuth is a Hermes-owned credential stored in `/opt/data/auth.json` on the PVC, so it
 survives restarts. It needs Claude Max with extra usage credits. Do not mount a copy of your
 laptop's `~/.claude/.credentials.json`: those refresh tokens are single-use and rotate, so sharing
 one family with the CLI breaks whichever side refreshes second. That is why
 `auth.adopt_external_logins` is `false` here.
 
-Authorize once the pod is up:
+Authorize once:
 
 ```sh
 kubectl -n hermes exec -it hermes-0 -- hermes auth add anthropic --type oauth
@@ -37,38 +42,43 @@ kubectl -n hermes exec -it hermes-0 -- hermes auth status anthropic
 ```
 
 The flow prints an authorize URL and waits for you to paste the code back, so it works over plain
-`kubectl exec` with no tunnel.
+`kubectl exec` with no tunnel. Until it is done, every turn fails on the main model and falls back
+to `opencode-go`.
 
 ## Tailnet access
 
-`spec.tailscale.enabled` adds the Tailscale Serve sidecar: MagicDNS hostname `hermes`, TLS cert
-issued by Tailscale, proxied to the gateway on localhost. Nothing is exposed on the LAN.
+`ingress-tailnet.yaml` publishes the gateway through the cluster's `tailscale` IngressClass and the
+shared `tailnet-ingress` proxy group, the same way argocd, minio, nexotv, pihole and stremio are
+published. MagicDNS name `hermes`, certificate issued by the Tailscale operator.
 
 ```sh
 open https://hermes.tail6c5083.ts.net
 ```
 
-The auth key must be **reusable and ephemeral** (restart re-registers the same hostname, stopped pod
-removes the device). Rotate it by resealing `hermes-tailscale.sealed.yaml`.
+`spec.tailscale` is deliberately off. The operator's Serve sidecar cannot start in-cluster:
+its ServiceAccount sets `automountServiceAccountToken: false`, so `containerboot` fails at kube
+client init (`open /var/run/secrets/kubernetes.io/serviceaccount/namespace: no such file`). With a
+token injected by hand it then fails on the `tailscale` state Secret, and with that Secret and RBAC
+in place it fails on state reset. Revisit when upstream ships a fix.
 
 ## Fai
 
-Fai's MCP endpoint (`https://fai.alialjaffer.com/mcp`) is already wired in `config.yaml` under
-`mcp_servers.fai`, authenticated with `FAI_AGENT_KEY`. Confirm from inside the pod:
+Fai's MCP endpoint (`https://fai.alialjaffer.com/mcp`) is wired under `mcp_servers.fai`, authenticated
+with `FAI_AGENT_KEY`. Verified from inside the pod:
 
 ```sh
-kubectl -n hermes exec -it hermes-0 -- hermes mcp test fai
+kubectl -n hermes exec hermes-0 -- hermes mcp test fai
 ```
 
 ## Notes
 
-- The image is pinned to `ghcr.io/stubbi/hermes-agent:v0.16.0`, the newest tag the project
-  publishes. `config.yaml` was migrated from a slightly newer local install, so Hermes may log
-  warnings about keys it does not know; they are inert. Bump the tag (or switch to
-  `spec.image.digest`) when upstream publishes a newer release.
+- The image comes from the Harbor `mirror` project by digest. The `ghcr.io` pull-through cache
+  truncates the 3.7 GB agent image, so the image is copied into `mirror` and pinned instead. To bump
+  it: `crane copy --platform linux/amd64 ghcr.io/stubbi/hermes-agent:<tag>
+  harbor.alialjaffer.com/mirror/stubbi/hermes-agent:<tag>`, then update `spec.image.digest`.
 - NetworkPolicy is operator-managed: default-deny, DNS, TCP 443 egress, ingress only from the same
-  namespace, plus the UDP rules the Tailscale sidecar needs. Model APIs, Tailscale, and Fai all
-  work over 443. Adding a self-hosted provider on another port means adding an egress rule through
-  `spec.security.networkPolicy.additionalEgress`.
-- `platforms.telegram.enabled` is off. Turning a messaging gateway on needs its bot token sealed
-  and wired the same way as the provider keys.
+  namespace. The tailnet proxy group reaches the Service from outside the namespace, so keep
+  `additionalEgress` in mind if a self-hosted provider listens on another port.
+- `platforms.telegram` is off. Turning a gateway on needs its bot token sealed and wired like the
+  provider keys.
+- Metrics and S3 backups are not enabled.
