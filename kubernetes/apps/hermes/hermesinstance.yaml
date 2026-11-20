@@ -21,6 +21,38 @@ spec:
         secretKeyRef:
           name: hermes-fai
           key: agent-key
+    # Last one wins: Hermes reads and writes $HERMES_HOME/config.yaml, and the
+    # operator's copy on /opt/data is a read-only ConfigMap mount.
+    - name: HERMES_HOME
+      value: /opt/data/hermes
+  # Seeds the writable config from the GitOps baseline once, then leaves it alone
+  # so /model and `hermes config set` persist.
+  initContainers:
+    - name: seed-live-config
+      image: busybox:1.36
+      command:
+        - sh
+        - -c
+        - |
+          set -eu
+          mkdir -p /opt/data/hermes
+          if [ ! -f /opt/data/hermes/config.yaml ]; then
+            cp /seed/config.yaml /opt/data/hermes/config.yaml
+            echo "seeded live config from the GitOps baseline"
+          else
+            echo "keeping existing live config"
+          fi
+          chown -R 1000:1000 /opt/data/hermes
+      volumeMounts:
+        - name: data
+          mountPath: /opt/data
+        - name: config-seed
+          mountPath: /seed
+          readOnly: true
+  extraVolumes:
+    - name: config-seed
+      configMap:
+        name: hermes-agent-config
   storage:
     persistence:
       enabled: true
