@@ -24,7 +24,7 @@ spec:
   storage:
     persistence:
       enabled: true
-      size: 10Gi
+      size: 100Gi
   resources:
     requests:
       cpu: 500m

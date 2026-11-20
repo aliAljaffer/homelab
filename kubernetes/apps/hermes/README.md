@@ -7,7 +7,7 @@ ApplicationSet; the operator itself is `kubernetes/argocd/apps/infrastructure/he
 ## Shape
 
 - `hermesinstance.yaml` — one `HermesInstance` named `hermes`: StatefulSet, Service on 8443
-  (gateway + OpenAI-compatible API server), 10Gi Longhorn PVC on `/opt/data`.
+  (gateway + OpenAI-compatible API server), 100Gi Longhorn PVC on `/opt/data`.
 - `configmap.yaml` — the full `config.yaml` Hermes runs with. Edit this, then push; Argo rolls the pod.
 - `hermes-providers.sealed.yaml` — `OPENCODE_GO_API_KEY`, `COMMANDCODE_API_KEY` (injected via
   `spec.envFrom`).
