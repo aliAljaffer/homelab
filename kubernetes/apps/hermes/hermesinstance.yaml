@@ -12,7 +12,7 @@ spec:
     pullPolicy: Always
   config:
     configMapRef:
-      name: hermes-config
+      name: hermes-agent-config
   envFrom:
     - secretRef:
         name: hermes-providers

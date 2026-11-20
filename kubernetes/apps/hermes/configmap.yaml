@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: hermes-config
+  name: hermes-agent-config
   namespace: hermes
 data:
   config.yaml: |
