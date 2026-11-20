@@ -1,0 +1,91 @@
+---
+# restic -> Cloudflare R2. Replaces spec.backup, which the operator builds
+# without a /tmp mount under a read-only rootfs (mktemp fails) and pointed at
+# the pre-/opt/data Hermes home.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hermes-backup
+  namespace: hermes
+spec:
+  schedule: "0 3 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 3600
+      template:
+        spec:
+          restartPolicy: Never
+          securityContext:
+            fsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: restic
+              image: restic/restic:0.16.4
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  set -eu
+                  export TMPDIR=/tmp
+                  if ! restic --no-cache cat config >/dev/null 2>&1; then
+                    echo "initializing repository" >&2
+                    restic --no-cache init
+                  fi
+                  ts=$(date -u +%Y-%m-%dT%H-%M-%SZ)
+                  tar -cf - -C /opt/data . \
+                    | restic --no-cache backup --stdin --stdin-filename "hermes/${ts}.tar" \
+                        --host hermes --tag hermes
+                  restic --no-cache forget --keep-daily 7 --keep-weekly 4 --prune
+              env:
+                - name: RESTIC_REPOSITORY
+                  value: s3:https://881a1bbc837d9267838abe31ea386ef7.r2.cloudflarestorage.com/my-hermes
+                - name: AWS_DEFAULT_REGION
+                  value: auto
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: hermes-backup
+                      key: S3_ACCESS_KEY_ID
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: hermes-backup
+                      key: S3_SECRET_ACCESS_KEY
+                - name: RESTIC_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: hermes-backup
+                      key: RESTIC_PASSWORD
+              securityContext:
+                runAsNonRoot: true
+                runAsUser: 1000
+                runAsGroup: 1000
+                readOnlyRootFilesystem: true
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+              volumeMounts:
+                # RWO volume: the job needs a node that can attach it, which in
+                # practice is the one running hermes-0.
+                - name: data
+                  mountPath: /opt/data
+                  readOnly: true
+                - name: tmp
+                  mountPath: /tmp
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+                limits:
+                  memory: 1Gi
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: hermes-data
+                readOnly: true
+            - name: tmp
+              emptyDir: {}

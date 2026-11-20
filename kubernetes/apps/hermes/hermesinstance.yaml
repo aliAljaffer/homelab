@@ -6,10 +6,9 @@ metadata:
   namespace: hermes
 spec:
   image:
-    repository: harbor.alialjaffer.com/mirror/stubbi/hermes-agent
-    tag: "v0.16.0"
-    digest: sha256:9cdf83f00462bf263f06fd8b290bfb112cee16f0bb630b80746677bacd303185
-    pullPolicy: Always
+    repository: nousresearch/hermes-agent
+    tag: "v0.23.3"
+    pullPolicy: IfNotPresent
   config:
     configMapRef:
       name: hermes-agent-config
@@ -33,18 +32,21 @@ spec:
     limits:
       cpu: "2"
       memory: 4Gi
-  backup:
-    s3:
-      endpoint: https://881a1bbc837d9267838abe31ea386ef7.r2.cloudflarestorage.com
-      bucket: my-hermes
-      region: auto
-      pathPrefix: hermes/
-      credentialsSecretRef:
-        name: hermes-backup
-    schedule: "0 3 * * *"
-    onDelete: true
-    preUpdate: true
-    historyLimit: 14
+  # spec.backup is parked: the 0.2.0 operator renders a restic job with no /tmp
+  # mount under a read-only rootfs and the pre-/opt/data Hermes home. Backups run
+  # from backup-cronjob.yaml instead. Revisit when upstream ships the fix.
+  # backup:
+  #   s3:
+  #     endpoint: https://881a1bbc837d9267838abe31ea386ef7.r2.cloudflarestorage.com
+  #     bucket: my-hermes
+  #     region: auto
+  #     pathPrefix: hermes/
+  #     credentialsSecretRef:
+  #       name: hermes-backup
+  #   schedule: "0 3 * * *"
+  #   onDelete: true
+  #   preUpdate: true
+  #   historyLimit: 14
   # Exposed on the tailnet by ingress-tailnet.yaml instead of spec.tailscale: the
   # operator's Serve sidecar cannot start in-cluster (its ServiceAccount has no
   # token, so containerboot fails at kube-client init).
