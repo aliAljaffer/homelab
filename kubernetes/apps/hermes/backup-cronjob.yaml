@@ -19,6 +19,16 @@ spec:
       template:
         spec:
           restartPolicy: Never
+          # hermes-data is ReadWriteOnce, so the job has to land on the node that
+          # already holds it.
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: hermes-agent
+                      app.kubernetes.io/instance: hermes
+                  topologyKey: kubernetes.io/hostname
           securityContext:
             fsGroup: 1000
             seccompProfile:
@@ -69,8 +79,6 @@ spec:
                 capabilities:
                   drop: ["ALL"]
               volumeMounts:
-                # RWO volume: the job needs a node that can attach it, which in
-                # practice is the one running hermes-0.
                 - name: data
                   mountPath: /opt/data
                   readOnly: true
