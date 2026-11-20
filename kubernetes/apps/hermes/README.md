@@ -82,3 +82,5 @@ kubectl -n hermes exec hermes-0 -- hermes mcp test fai
 - `platforms.telegram` is off. Turning a gateway on needs its bot token sealed and wired like the
   provider keys.
 - Metrics and S3 backups are not enabled.
+- The operator does not roll the pod when the ConfigMap changes, so after editing `configmap.yaml`
+  run `kubectl -n hermes delete pod hermes-0` (Argo recreates it).
