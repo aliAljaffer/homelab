@@ -6,5 +6,6 @@ resources:
   - configmap.yaml
   - hermes-providers.sealed.yaml
   - hermes-fai.sealed.yaml
+  - hermes-backup.sealed.yaml
   - ingress-tailnet.yaml
   - hermesinstance.yaml

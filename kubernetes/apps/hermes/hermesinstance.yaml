@@ -33,6 +33,18 @@ spec:
     limits:
       cpu: "2"
       memory: 4Gi
+  backup:
+    s3:
+      endpoint: https://881a1bbc837d9267838abe31ea386ef7.r2.cloudflarestorage.com
+      bucket: my-hermes
+      region: auto
+      pathPrefix: hermes/
+      credentialsSecretRef:
+        name: hermes-backup
+    schedule: "0 3 * * *"
+    onDelete: true
+    preUpdate: true
+    historyLimit: 14
   # Exposed on the tailnet by ingress-tailnet.yaml instead of spec.tailscale: the
   # operator's Serve sidecar cannot start in-cluster (its ServiceAccount has no
   # token, so containerboot fails at kube-client init).
