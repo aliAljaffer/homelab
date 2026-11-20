@@ -11,9 +11,11 @@ metadata:
 spec:
   project: infrastructure
   source:
-    repoURL: git@github.com:aliAljaffer/homelab.git
-    targetRevision: main
-    path: kubernetes/infrastructure/hermes-operator
+    repoURL: https://github.com/stubbi/hermes-operator
+    targetRevision: v0.2.0
+    path: charts/hermes-operator
+    helm:
+      releaseName: hermes-operator
   destination:
     server: https://kubernetes.default.svc
     namespace: hermes-operator-system
@@ -22,4 +24,5 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
+    - CreateNamespace=true
     - ServerSideApply=true

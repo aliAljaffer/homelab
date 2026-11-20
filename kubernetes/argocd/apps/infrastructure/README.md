@@ -18,10 +18,10 @@ these bullets capture the _why_ behind that ordering.
 - `keycloak-operator.yaml`: must exist before the `keycloak` Application (wave 1).
 - `keycloak.yaml`: needs `cloudnative-pg` (wave -2) and `keycloak-operator`
   (wave -1) healthy first.
-- `hermes-operator.yaml`: controller for `HermesInstance` CRs. Deployed from the
-  vendored v0.2.0 release manifest, not the Helm chart (the published chart stops
-  at 0.1.6 and lacks `spec.tailscale`). See
-  `kubernetes/infrastructure/hermes-operator/README.md`.
+- `hermes-operator.yaml`: controller for `HermesInstance` CRs, chart
+  `charts/hermes-operator` at tag `v0.2.0` from the upstream repo. The published
+  Helm chart in `ghcr.io/stubbi/charts` stops at 0.1.6, and its CRD has no
+  `spec.tailscale`; the git tag is the only packaged 0.2.0.
 - `longhorn.yaml`: first install uses `helm install --no-hooks` during bootstrap
   to avoid a circular dependency on the pre-upgrade hook's service account. See
   `bootstrap/README.md` steps 1 and 7.
