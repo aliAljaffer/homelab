@@ -1,0 +1,42 @@
+---
+apiVersion: hermes.agent/v1
+kind: HermesInstance
+metadata:
+  name: hermes
+  namespace: hermes
+spec:
+  image:
+    repository: ghcr.io/stubbi/hermes-agent
+    tag: "v0.16.0"
+    pullPolicy: IfNotPresent
+  config:
+    configMapRef:
+      name: hermes-config
+  envFrom:
+    - secretRef:
+        name: hermes-providers
+  env:
+    - name: FAI_AGENT_KEY
+      valueFrom:
+        secretKeyRef:
+          name: hermes-fai
+          key: agent-key
+  storage:
+    persistence:
+      enabled: true
+      size: 10Gi
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: "2"
+      memory: 4Gi
+  tailscale:
+    enabled: true
+    mode: serve
+    hostname: hermes
+    authKey:
+      secretRef:
+        name: hermes-tailscale
+        key: authKey

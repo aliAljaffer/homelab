@@ -1,0 +1,13 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: hermes-tailscale
+  namespace: hermes
+spec:
+  encryptedData:
+    authKey: AgDBiW9HXu6JMslrm3ivELrDrt1ft1k4/kngsOE1EVEqxZUFQRfo3xMdq8gI8jRV6AMUdvHrZMQ2E9g9EJDujG6VTbO/O6pDC1tUy75a6+pfXDqoywQ08we3ahRmgtoWZ7d35fydltWW6F+kLwsdml0fFFskrz64mwKjKA7VstIricLR2k5yVyziyTQLS14Rw+YFK1vp0MVvlBgUXUG83qQCy5l8A9yZB/enor98mWaU4X6Fm0kb2gJLzS12jnFABJzRUW2NfCZCzWpjX7BVaxAOPivbNc3ACv5DhXKi88Z6Fqaua/MlTO/eeNgWmlMbgcaJuown9C+h/xIBmCRpoGJZgA5/7noV5sdfllj4QdlG7P5EuOnuTKJv8AMrW1OA2Q7ksj7uwZV6aH3S4sjvnOWcw9jD+F34PbaKcqh/siNS+o4WXdQH9B8mQFDmj7BUylYYXafYm9jwDDIDrryw4KRKFN4uE2bj/zko+9vuh5Kwek7OBgJmiewYOCnfDmOYubI0kk/MMmcOLZNPMcdUzZ777tnPc9OmuEHREX4dOC20teaTg2wSECVyLdaAJFXRgNJAkIPviTow2h6SgAErBUpAG0HO2OpJGPazrpQEaALwuzA1/34GDm4YiUI3oHvcYiEgVnt6ef13x/8PtCg4OWh2Fj0m1tNWIvMur3jq1OL/+L2YhWKZnlvpNy0M6YRNz0TvPz6OKo9qdqTm49TE0K7FOBQWLsjhYLegIXmapreORARsDvP0vSz0sRWWTAmH5jjXtqyz1BfFH2prlts7
+  template:
+    metadata:
+      name: hermes-tailscale
+      namespace: hermes

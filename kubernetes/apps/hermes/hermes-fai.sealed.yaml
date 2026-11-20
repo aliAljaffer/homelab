@@ -1,0 +1,13 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: hermes-fai
+  namespace: hermes
+spec:
+  encryptedData:
+    agent-key: AgBRLGyEhhsj9ns1SZks+f5DA5N41PQ6CqvbBHeAXcC7+kYpKWL8kjXyVeicWynqGH/eafzxuhjsVUbBAsrXm8FZhYrOvItJpbGG/q74548SqdknML9/TnxfQkt3FWEteq8nV02gPb1tV/Bb7wnCA0SW58HTUfGW8yYcSEEJBWBUgWOvUo8Boe021Rs/CaKV1ABRoC9cQfMugRO/+IMbeZqjzDW8xJcByLtprvoupPMJ4adEoN9jQwVx2Vl+qzm91Uff6JDjZ2geVQXeqrrW7loSUPZGZPlHLtwsEKgO9l2jLU2WatSKgzXj6LeLEiHHCZs4RTDVodNocuZkDEDCY/fpIuiMwUVtbIiLF8vwoZJjhKFmbCCoRkrHvyevO1N4iXPpMOJF7B1zxG0xSGv2obTwtfs5s8jrVwXF7K1yjqtEFdUVQYDGRGfKPLNxuHyQkIDzKhUvO2v6QG1Ddxpd8bTuUxVlFGsA7BQJpdLwTv/mfDYudcJakF/Dfx4+j8/daS5gLchem8S5Xs+2Z2c+zKCjCdiP1lmqq/tHG97ozI225Gbzk+ymrtLd0BUxu6Rvht8uEMo2TjLopdsdbclnU22OGxUvVLKr9M2oJj3PjjrtOI4n7P/Y8eYIAykjLlIN7jajViiPWaTeZS33JxqTpGhHY46R+Bdk8WLc8nxhFY4Qq0r/5g7L3EPo27IIY06NUzr0hv5vLr1NWV7xLaCxyt7f2JIgmKZzDhH0jy9xYYMmnfq2qZ71vdCC6sMODJHKnA==
+  template:
+    metadata:
+      name: hermes-fai
+      namespace: hermes
