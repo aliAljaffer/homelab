@@ -15,12 +15,13 @@ ApplicationSet; the operator itself is `kubernetes/argocd/apps/infrastructure/he
 - `hermes-fai.sealed.yaml` — the Fai MCP agent key, injected as `FAI_AGENT_KEY` and referenced from
   `config.yaml` as `Bearer ${FAI_AGENT_KEY}`.
 - `ingress-tailnet.yaml` — the tailnet route (see below).
+- `backup-cronjob.yaml` — nightly restic backup to Cloudflare R2 (see below).
 
 ## Providers
 
 | Provider | Auth | Used for |
 |---|---|---|
-| `anthropic` | `hermes auth add anthropic --type oauth` inside the pod (paste-the-code, no API key) | main model `claude-sonnet-5`, planner subagents |
+| `anthropic` | `ANTHROPIC_TOKEN` from `claude setup-token` (CLI-minted, no API key) | main model `claude-sonnet-5`, planner subagents |
 | `opencode-go` | `OPENCODE_GO_API_KEY` | fallbacks and `Fast-C` delegation |
 | `commandcode` | `COMMANDCODE_API_KEY` | `Fast-A`/`Fast-B` delegation, planner |
 
@@ -28,22 +29,15 @@ ApplicationSet; the operator itself is `kubernetes/argocd/apps/infrastructure/he
 provider attached, and Hermes then routes the request to whichever provider holds a key, which was
 `opencode-go` and produced a wrong-relay request.
 
-Anthropic OAuth is a Hermes-owned credential stored in `/opt/data/auth.json` on the PVC, so it
-survives restarts. It needs Claude Max with extra usage credits. Do not mount a copy of your
-laptop's `~/.claude/.credentials.json`: those refresh tokens are single-use and rotate, so sharing
-one family with the CLI breaks whichever side refreshes second. That is why
-`auth.adopt_external_logins` is `false` here.
+The Anthropic credential is a setup token minted by the Claude Code CLI on the workstation, sealed
+into `hermes-providers` as `ANTHROPIC_TOKEN`, and read by the provider at startup. The image's own
+`hermes auth add anthropic --type oauth` flow does not work from here: the build it shipped in posts
+to an OAuth endpoint Anthropic now answers with 404. Do not mount a copy of your laptop's
+`~/.claude/.credentials.json` either: those refresh tokens are single-use and rotate, so sharing one
+family with the CLI breaks whichever side refreshes second. That is why
+`auth.adopt_external_logins` is `false`.
 
-Authorize once:
-
-```sh
-kubectl -n hermes exec -it hermes-0 -- hermes auth add anthropic --type oauth
-kubectl -n hermes exec -it hermes-0 -- hermes auth status anthropic
-```
-
-The flow prints an authorize URL and waits for you to paste the code back, so it works over plain
-`kubectl exec` with no tunnel. Until it is done, every turn fails on the main model and falls back
-to `opencode-go`.
+Rotate it with `claude setup-token` and reseal `hermes-providers`.
 
 ## Tailnet access
 
@@ -70,17 +64,43 @@ with `FAI_AGENT_KEY`. Verified from inside the pod:
 kubectl -n hermes exec hermes-0 -- hermes mcp test fai
 ```
 
+## Backups
+
+`backup-cronjob.yaml` runs restic nightly at 03:00 against
+`s3:https://<account>.r2.cloudflarestorage.com/my-hermes`, keeping 7 daily and 4 weekly snapshots.
+Credentials live in the sealed `hermes-backup` Secret (`S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`,
+`RESTIC_PASSWORD`). The restic password is the only thing protecting the repository contents, so it
+also belongs in your password manager; without it the snapshots cannot be read.
+
+The job mounts `hermes-data` read-only at `/opt/data` and uses pod affinity to land on the node that
+already holds that ReadWriteOnce volume.
+
+Restore a file or the whole tree:
+
+```sh
+kubectl -n hermes create job --from=cronjob/hermes-backup hermes-restore-manual   # then override args
+# or interactively:
+kubectl -n hermes run restic --rm -it --image=restic/restic:0.16.4 \
+  --overrides='{"spec":{"containers":[{"name":"restic","image":"restic/restic:0.16.4","command":["/bin/sh"],"stdin":true,"tty":true,"envFrom":[{"secretRef":{"name":"hermes-backup"}}],"env":[{"name":"RESTIC_REPOSITORY","value":"s3:https://<account>.r2.cloudflarestorage.com/my-hermes"},{"name":"AWS_DEFAULT_REGION","value":"auto"}]}]}}' -- /bin/sh
+```
+
+`spec.backup` is disabled on purpose. The 0.2.0 operator renders a restic Job with no `/tmp` mount
+under a read-only rootfs (`mktemp: Read-only file system`) and still points at the pre-`/opt/data`
+Hermes home. The block is kept commented in `hermesinstance.yaml`; switch back once upstream ships
+the fix that is already on their `main`.
+
 ## Notes
 
-- The image comes from the Harbor `mirror` project by digest. The `ghcr.io` pull-through cache
-  truncates the 3.7 GB agent image, so the image is copied into `mirror` and pinned instead. To bump
-  it: `crane copy --platform linux/amd64 ghcr.io/stubbi/hermes-agent:<tag>
-  harbor.alialjaffer.com/mirror/stubbi/hermes-agent:<tag>`, then update `spec.image.digest`.
+- The image is the official `nousresearch/hermes-agent`, currently `v0.23.3`. The operator's
+  `ghcr.io/stubbi/hermes-agent` mirror stopped at `v0.16.0` (its `latest` is the same digest), which
+  is five months behind and carries the broken Anthropic OAuth flow. The operator only requires the
+  upstream contract (s6 entrypoint, `gateway run`, `HERMES_HOME=/opt/data`), which the official image
+  keeps.
 - NetworkPolicy is operator-managed: default-deny, DNS, TCP 443 egress, ingress only from the same
   namespace. The tailnet proxy group reaches the Service from outside the namespace, so keep
   `additionalEgress` in mind if a self-hosted provider listens on another port.
 - `platforms.telegram` is off. Turning a gateway on needs its bot token sealed and wired like the
   provider keys.
-- Metrics and S3 backups are not enabled.
+- Metrics are not enabled.
 - The operator does not roll the pod when the ConfigMap changes, so after editing `configmap.yaml`
   run `kubectl -n hermes delete pod hermes-0` (Argo recreates it).
