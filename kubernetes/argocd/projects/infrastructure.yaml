@@ -18,8 +18,6 @@ spec:
   - https://charts.jetstack.io
   - https://openziti.io/helm-charts/
   - ghcr.io/alialjaffer/charts
-  - ghcr.io/stubbi/charts
-  - oci://ghcr.io/stubbi/charts
   - https://metallb.github.io/metallb
   - https://charts.longhorn.io
   - https://kubernetes-sigs.github.io/external-dns/
