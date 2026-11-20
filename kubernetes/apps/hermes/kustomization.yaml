@@ -7,4 +7,5 @@ resources:
   - hermes-providers.sealed.yaml
   - hermes-fai.sealed.yaml
   - hermes-tailscale.sealed.yaml
+  - tailscale-rbac.yaml
   - hermesinstance.yaml

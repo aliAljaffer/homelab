@@ -1,0 +1,33 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: tailscale-sidecar
+  namespace: hermes
+rules:
+  # containerboot stores node state in a Secret named "tailscale" when it detects
+  # Kubernetes, so create is needed before the Secret exists.
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: ["tailscale"]
+    verbs: ["get", "update", "patch", "watch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: tailscale-sidecar
+  namespace: hermes
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: tailscale-sidecar
+subjects:
+  - kind: ServiceAccount
+    name: hermes
+    namespace: hermes
