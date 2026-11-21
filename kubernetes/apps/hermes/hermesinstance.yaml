@@ -60,6 +60,35 @@ spec:
   # Seeds the writable config from the GitOps baseline once, then leaves it alone
   # so /model and `hermes config set` persist.
   initContainers:
+    - name: seed-tailscale-tools
+      image: tailscale/tailscale:v1.86.2
+      command:
+        - sh
+        - -c
+        - |
+          set -eu
+          mkdir -p /opt/data/.local/bin
+          if [ ! -f /opt/data/.local/bin/tailscale ]; then
+            cp /usr/local/bin/tailscale /opt/data/.local/bin/tailscale
+            chmod 755 /opt/data/.local/bin/tailscale
+          fi
+          if [ ! -f /opt/data/.local/bin/ssh ]; then
+            echo 'IyEvYmluL3NoCmV4ZWMgL3Vzci9iaW4vc3NoIFwKICAtbyAiUHJveHlDb21tYW5kPXRhaWxzY2FsZSAtLXNvY2tldD0vdG1wL3RhaWxzY2FsZS1zb2NrL3RhaWxzY2FsZWQuc29jayBuYyAlaCAlcCIgXAogIC1vIFN0cmljdEhvc3RLZXlDaGVja2luZz1ubyBcCiAgLW8gVXNlcktub3duSG9zdHNGaWxlPS9kZXYvbnVsbCBcCiAgLWkgL29wdC9kYXRhL2hlcm1lcy8uc3NoL2lkX3JzYSBcCiAgIiRAIgo=' | base64 -d > /opt/data/.local/bin/ssh
+            chmod +x /opt/data/.local/bin/ssh
+          fi
+          chown -R 1000:1000 /opt/data/.local
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: ["ALL"]
+        runAsNonRoot: true
+        runAsUser: 1000
+        readOnlyRootFilesystem: false
+        seccompProfile:
+          type: RuntimeDefault
+      volumeMounts:
+        - name: data
+          mountPath: /opt/data
     - name: seed-live-config
       image: busybox:1.36
       command:
@@ -88,8 +117,10 @@ spec:
     - name: ssh-key
       secret:
         secretName: hermes-ssh-key
-        defaultMode: 0400
+        defaultMode: 0440
     - name: tailscale-tmp
+      emptyDir: {}
+    - name: tailscale-sock
       emptyDir: {}
   extraVolumeMounts:
     - name: ssh-key
@@ -153,9 +184,9 @@ spec:
         - -c
       args:
         - |
-          tailscaled --tun=userspace-networking --state=mem: --socket=/tmp/tailscaled.sock --socks5-server=127.0.0.1:1080 >/tmp/tsd.log 2>&1 &
+          tailscaled --tun=userspace-networking --state=mem: --socket=/tmp/tailscale-sock/tailscaled.sock >/tmp/tsd.log 2>&1 &
           sleep 5
-          tailscale --socket=/tmp/tailscaled.sock up --auth-key="$TS_AUTHKEY" --hostname=hermes-egress --accept-routes 2>&1 | tail -3
+          tailscale --socket=/tmp/tailscale-sock/tailscaled.sock up --auth-key="$TS_AUTHKEY" --hostname=hermes-egress --accept-routes 2>&1 | tail -3
           tail -f /tmp/tsd.log
       env:
         - name: TS_AUTHKEY
@@ -175,6 +206,8 @@ spec:
       volumeMounts:
         - name: tailscale-tmp
           mountPath: /tmp
+        - name: tailscale-sock
+          mountPath: /tmp/tailscale-sock
   # Exposed on the tailnet by ingress-tailnet.yaml instead of spec.tailscale: the
   # operator's Serve sidecar cannot start in-cluster (its ServiceAccount has no
   # token, so containerboot fails at kube-client init).
