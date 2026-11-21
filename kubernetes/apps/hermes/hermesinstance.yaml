@@ -73,7 +73,7 @@ spec:
             chmod 755 /opt/data/.local/bin/tailscale
           fi
           if [ ! -f /opt/data/.local/bin/ssh ]; then
-            echo 'IyEvYmluL3NoCmV4ZWMgL3Vzci9iaW4vc3NoIFwKICAtbyAiUHJveHlDb21tYW5kPXB5dGhvbjMgL29wdC9kYXRhL2hlcm1lcy9zb2NrczUtcHJveHkucHkgJWggJXAiIFwKICAtbyBTdHJpY3RIb3N0S2V5Q2hlY2tpbmc9bm8gXAogIC1vIFVzZXJLbm93bkhvc3RzRmlsZT0vZGV2L251bGwgXAogIC1pIC9vcHQvZGF0YS9oZXJtZXMvLnNzaC9pZF9yc2EgXAogICIkQCIK' | base64 -d > /opt/data/.local/bin/ssh
+            echo 'IyEvYmluL3NoCmV4ZWMgL3Vzci9iaW4vc3NoIC1vICJQcm94eUNvbW1hbmQ9dGFpbHNjYWxlIC0tc29ja2V0PS90bXAvdGFpbHNjYWxlLXNvY2svdGFpbHNjYWxlZC5zb2NrIG5jICVoICVwIiAtbyBTdHJpY3RIb3N0S2V5Q2hlY2tpbmc9bm8gLW8gVXNlcktub3duSG9zdHNGaWxlPS9kZXYvbnVsbCAtaSAvb3B0L2RhdGEvaGVybWVzLy5zc2gvaWRfcnNhICIkQCIK' | base64 -d > /opt/data/.local/bin/ssh
             chmod +x /opt/data/.local/bin/ssh
           fi
       securityContext:
