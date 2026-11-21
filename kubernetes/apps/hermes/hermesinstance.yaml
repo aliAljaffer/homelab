@@ -113,9 +113,6 @@ spec:
     containerSecurityContext:
       allowPrivilegeEscalation: false
       readOnlyRootFilesystem: false
-      capabilities:
-        add: ["CHOWN", "SETUID", "SETGID", "DAC_OVERRIDE", "FOWNER"]
-        drop: ["ALL"]
     networkPolicy:
       additionalEgress:
         - {}   # outbound ALLOW all
