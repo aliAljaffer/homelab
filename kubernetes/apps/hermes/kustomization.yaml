@@ -9,6 +9,7 @@ resources:
   - backup-cronjob.yaml
   - hermes-backup.sealed.yaml
   - ingress-tailnet.yaml
+  - hermes-ssh-key.sealed.yaml
   - hermes-dashboard.sealed.yaml
   - hermes-telegram.sealed.yaml
   - hermes-discord.sealed.yaml

@@ -85,6 +85,10 @@ spec:
     - name: config-seed
       configMap:
         name: hermes-agent-config
+    - name: ssh-key
+      secret:
+        secretName: hermes-ssh-key
+        defaultMode: 0400
   networking:
     service:
       ports:
@@ -103,6 +107,15 @@ spec:
       botTokenSecretRef:
         name: hermes-discord
         key: token
+  security:
+    networkPolicy:
+      additionalEgress:
+        - to:
+            - ipBlock:
+                cidr: 192.168.8.74/32
+          ports:
+            - protocol: TCP
+              port: 22
   storage:
     persistence:
       enabled: true
