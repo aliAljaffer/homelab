@@ -110,13 +110,9 @@ spec:
         name: hermes-discord
         key: token
   security:
-    containerSecurityContext:
-      allowPrivilegeEscalation: false
-      readOnlyRootFilesystem: false
-      capabilities:
-        drop: ["ALL"]
+    # Root filesystem is writable by default (s6 needs it); only config.yaml is
+    # read-only, edited through the live copy on the PVC.
     networkPolicy:
-      # egressPolicy defaults to Open (443 to any); the catch-all below opens the rest.
       additionalEgress:
         - {}   # outbound ALLOW all (empty rule = all ports, all destinations) (NetworkPolicy with no to/ports = allow all)
   storage:
