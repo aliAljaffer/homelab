@@ -103,7 +103,6 @@ spec:
       botTokenSecretRef:
         name: hermes-discord
         key: token
-  suspended: true
   storage:
     persistence:
       enabled: true
