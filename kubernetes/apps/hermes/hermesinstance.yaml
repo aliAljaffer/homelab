@@ -16,6 +16,18 @@ spec:
     - secretRef:
         name: hermes-providers
   env:
+    # Carried over from the Mac that was serving these bots. Hermes reads the
+    # *_ALLOWED_USERS names, which the CRD's allowedUserIDs does not emit.
+    - name: TELEGRAM_ALLOWED_USERS
+      valueFrom:
+        secretKeyRef:
+          name: hermes-telegram
+          key: allowed_users
+    - name: DISCORD_ALLOWED_USERS
+      valueFrom:
+        secretKeyRef:
+          name: hermes-discord
+          key: allowed_users
     - name: FAI_AGENT_KEY
       valueFrom:
         secretKeyRef:
@@ -80,6 +92,17 @@ spec:
           port: 8443
         - name: dashboard
           port: 9119
+  gateways:
+    telegram:
+      enabled: true
+      botTokenSecretRef:
+        name: hermes-telegram
+        key: token
+    discord:
+      enabled: true
+      botTokenSecretRef:
+        name: hermes-discord
+        key: token
   storage:
     persistence:
       enabled: true

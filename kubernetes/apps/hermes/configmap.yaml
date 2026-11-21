@@ -1267,5 +1267,7 @@ data:
         enabled: true
     platforms:
       telegram:
-        enabled: false
+        enabled: true
+      discord:
+        enabled: true
     model_context_length: 0
