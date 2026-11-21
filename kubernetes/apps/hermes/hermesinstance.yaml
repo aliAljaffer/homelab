@@ -73,7 +73,7 @@ spec:
             chmod 755 /opt/data/.local/bin/tailscale
           fi
           if [ ! -f /opt/data/.local/bin/ssh ]; then
-            echo 'IyEvYmluL3NoCmV4ZWMgL3Vzci9iaW4vc3NoIFwKICAtbyAiUHJveHlDb21tYW5kPXRhaWxzY2FsZSAtLXNvY2tldD0vdG1wL3RhaWxzY2FsZS1zb2NrL3RhaWxzY2FsZWQuc29jayBuYyAlaCAlcCIgXAogIC1vIFN0cmljdEhvc3RLZXlDaGVja2luZz1ubyBcCiAgLW8gVXNlcktub3duSG9zdHNGaWxlPS9kZXYvbnVsbCBcCiAgLWkgL29wdC9kYXRhL2hlcm1lcy8uc3NoL2lkX3JzYSBcCiAgIiRAIgo=' | base64 -d > /opt/data/.local/bin/ssh
+            echo 'IyEvYmluL3NoCmV4ZWMgL3Vzci9iaW4vc3NoIFwKICAtbyAiUHJveHlDb21tYW5kPXB5dGhvbjMgL29wdC9kYXRhL2hlcm1lcy9zb2NrczUtcHJveHkucHkgJWggJXAiIFwKICAtbyBTdHJpY3RIb3N0S2V5Q2hlY2tpbmc9bm8gXAogIC1vIFVzZXJLbm93bkhvc3RzRmlsZT0vZGV2L251bGwgXAogIC1pIC9vcHQvZGF0YS9oZXJtZXMvLnNzaC9pZF9yc2EgXAogICIkQCIK' | base64 -d > /opt/data/.local/bin/ssh
             chmod +x /opt/data/.local/bin/ssh
           fi
       securityContext:
@@ -185,7 +185,7 @@ spec:
         - -c
       args:
         - |
-          tailscaled --tun=userspace-networking --state=mem: --socket=/tmp/tailscale-sock/tailscaled.sock >/tmp/tsd.log 2>&1 &
+          tailscaled --tun=userspace-networking --state=mem: --socket=/tmp/tailscale-sock/tailscaled.sock --socks5-server=127.0.0.1:1080 >/tmp/tsd.log 2>&1 &
           sleep 5
           tailscale --socket=/tmp/tailscale-sock/tailscaled.sock up --auth-key="$TS_AUTHKEY" --hostname=hermes-egress --accept-routes 2>&1 | tail -3
           tail -f /tmp/tsd.log
