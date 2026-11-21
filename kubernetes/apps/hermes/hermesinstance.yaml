@@ -28,7 +28,7 @@ spec:
         secretKeyRef:
           name: hermes-discord
           key: allowed_users
-    - name: FAI_AGENT_KEY
+    - name: MCP_FAI_API_KEY
       valueFrom:
         secretKeyRef:
           name: hermes-fai

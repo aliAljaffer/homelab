@@ -1263,7 +1263,7 @@ data:
       fai:
         url: https://fai.alialjaffer.com/mcp
         headers:
-          Authorization: Bearer ${FAI_AGENT_KEY}
+          Authorization: Bearer ${MCP_FAI_API_KEY}
         enabled: true
     platforms:
       telegram:
