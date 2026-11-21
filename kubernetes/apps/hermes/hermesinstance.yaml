@@ -110,12 +110,15 @@ spec:
         name: hermes-discord
         key: token
   security:
-    # Root filesystem stays writable (operator default); only config.yaml is
-    # read-only, edited through the live copy on the PVC. Do not drop caps here:
-    # s6 needs SETUID/SETGID/CHOWN to remap to uid 1000.
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: false
+      capabilities:
+        add: ["CHOWN", "SETUID", "SETGID", "DAC_OVERRIDE", "FOWNER"]
+        drop: ["ALL"]
     networkPolicy:
       additionalEgress:
-        - {}   # outbound ALLOW all (empty rule = all ports, all destinations) (NetworkPolicy with no to/ports = allow all)
+        - {}   # outbound ALLOW all
   storage:
     persistence:
       enabled: true
