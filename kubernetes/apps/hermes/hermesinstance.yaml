@@ -25,6 +25,26 @@ spec:
     # operator's copy on /opt/data is a read-only ConfigMap mount.
     - name: HERMES_HOME
       value: /opt/data/hermes
+    # Desktop's remote backend: a dashboard process serving /api/status and /api/ws.
+    - name: HERMES_DASHBOARD
+      value: "1"
+    - name: HERMES_DASHBOARD_PORT
+      value: "9119"
+    - name: HERMES_DASHBOARD_BASIC_AUTH_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: hermes-dashboard
+          key: username
+    - name: HERMES_DASHBOARD_BASIC_AUTH_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: hermes-dashboard
+          key: password
+    - name: HERMES_DASHBOARD_BASIC_AUTH_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: hermes-dashboard
+          key: secret
   # Seeds the writable config from the GitOps baseline once, then leaves it alone
   # so /model and `hermes config set` persist.
   initContainers:
@@ -53,6 +73,13 @@ spec:
     - name: config-seed
       configMap:
         name: hermes-agent-config
+  networking:
+    service:
+      ports:
+        - name: gateway
+          port: 8443
+        - name: dashboard
+          port: 9119
   storage:
     persistence:
       enabled: true

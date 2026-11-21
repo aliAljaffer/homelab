@@ -531,7 +531,7 @@ data:
       drain_auth:
         scope: drain
         min_secret_chars: 43
-      public_url: ""
+      public_url: "https://hermes.tail6c5083.ts.net"
     privacy:
       redact_pii: false
     tts:

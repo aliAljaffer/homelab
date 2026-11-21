@@ -20,4 +20,4 @@ spec:
               service:
                 name: hermes
                 port:
-                  number: 8443
+                  number: 9119
