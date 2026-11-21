@@ -89,6 +89,8 @@ spec:
       secret:
         secretName: hermes-ssh-key
         defaultMode: 0400
+    - name: tailscale-tmp
+      emptyDir: {}
   networking:
     service:
       ports:
@@ -108,14 +110,15 @@ spec:
         name: hermes-discord
         key: token
   security:
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: false
+      capabilities:
+        drop: ["ALL"]
     networkPolicy:
+      # egressPolicy defaults to Open (443 to any); the catch-all below opens the rest.
       additionalEgress:
-        - to:
-            - ipBlock:
-                cidr: 192.168.8.74/32
-          ports:
-            - protocol: TCP
-              port: 22
+        - {}   # outbound ALLOW all (empty rule = all ports, all destinations) (NetworkPolicy with no to/ports = allow all)
   storage:
     persistence:
       enabled: true
@@ -142,6 +145,36 @@ spec:
   #   onDelete: true
   #   preUpdate: true
   #   historyLimit: 14
+  sidecars:
+    - name: tailscale
+      image: tailscale/tailscale:v1.86.2
+      command:
+        - /bin/sh
+        - -c
+      args:
+        - |
+          tailscaled --tun=userspace-networking --state=mem: --socket=/tmp/tailscaled.sock --socks5-server=127.0.0.1:1080 >/tmp/tsd.log 2>&1 &
+          sleep 5
+          tailscale --socket=/tmp/tailscaled.sock up --auth-key="$TS_AUTHKEY" --hostname=hermes-egress --accept-routes 2>&1 | tail -3
+          tail -f /tmp/tsd.log
+      env:
+        - name: TS_AUTHKEY
+          valueFrom:
+            secretKeyRef:
+              name: hermes-tailscale
+              key: authKey
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: ["ALL"]
+        runAsNonRoot: true
+        runAsUser: 1000
+        readOnlyRootFilesystem: false
+        seccompProfile:
+          type: RuntimeDefault
+      volumeMounts:
+        - name: tailscale-tmp
+          mountPath: /tmp
   # Exposed on the tailnet by ingress-tailnet.yaml instead of spec.tailscale: the
   # operator's Serve sidecar cannot start in-cluster (its ServiceAccount has no
   # token, so containerboot fails at kube-client init).

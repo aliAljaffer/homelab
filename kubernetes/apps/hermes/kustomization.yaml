@@ -11,6 +11,7 @@ resources:
   - ingress-tailnet.yaml
   - hermes-ssh-key.sealed.yaml
   - hermes-dashboard.sealed.yaml
+  - hermes-tailscale.sealed.yaml
   - hermes-telegram.sealed.yaml
   - hermes-discord.sealed.yaml
   - hermesinstance.yaml
