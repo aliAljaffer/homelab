@@ -91,6 +91,10 @@ spec:
         defaultMode: 0400
     - name: tailscale-tmp
       emptyDir: {}
+  extraVolumeMounts:
+    - name: ssh-key
+      mountPath: /opt/data/hermes/.ssh
+      readOnly: true
   networking:
     service:
       ports:
