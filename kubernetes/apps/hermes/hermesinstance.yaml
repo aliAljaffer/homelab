@@ -110,11 +110,8 @@ spec:
         name: hermes-discord
         key: token
   security:
-    containerSecurityContext:
-      allowPrivilegeEscalation: false
-      readOnlyRootFilesystem: false
-      capabilities:
-        add: ["CHOWN", "SETUID", "SETGID", "DAC_OVERRIDE", "FOWNER"]
+    # s6 needs the runtime's default capabilities (SETUID/SETGID/CHOWN/etc.).
+    # Do not set capabilities here: drop:ALL removes them and s6 crashes.
     networkPolicy:
       additionalEgress:
         - {}   # outbound ALLOW all
