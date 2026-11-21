@@ -76,7 +76,6 @@ spec:
             echo 'IyEvYmluL3NoCmV4ZWMgL3Vzci9iaW4vc3NoIFwKICAtbyAiUHJveHlDb21tYW5kPXRhaWxzY2FsZSAtLXNvY2tldD0vdG1wL3RhaWxzY2FsZS1zb2NrL3RhaWxzY2FsZWQuc29jayBuYyAlaCAlcCIgXAogIC1vIFN0cmljdEhvc3RLZXlDaGVja2luZz1ubyBcCiAgLW8gVXNlcktub3duSG9zdHNGaWxlPS9kZXYvbnVsbCBcCiAgLWkgL29wdC9kYXRhL2hlcm1lcy8uc3NoL2lkX3JzYSBcCiAgIiRAIgo=' | base64 -d > /opt/data/.local/bin/ssh
             chmod +x /opt/data/.local/bin/ssh
           fi
-          chown -R 1000:1000 /opt/data/.local 2>/dev/null || true
       securityContext:
         allowPrivilegeEscalation: false
         capabilities:
