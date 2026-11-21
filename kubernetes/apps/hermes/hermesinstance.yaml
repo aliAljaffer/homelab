@@ -80,7 +80,7 @@ spec:
       securityContext:
         allowPrivilegeEscalation: false
         capabilities:
-          drop: ["ALL"]
+          add: ["CHOWN", "DAC_OVERRIDE", "FOWNER"]
         runAsNonRoot: false
         runAsUser: 0
         readOnlyRootFilesystem: false
