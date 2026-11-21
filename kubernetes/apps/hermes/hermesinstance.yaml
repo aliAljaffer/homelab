@@ -125,6 +125,8 @@ spec:
     - name: ssh-key
       mountPath: /opt/data/hermes/.ssh
       readOnly: true
+    - name: tailscale-sock
+      mountPath: /tmp/tailscale-sock
   networking:
     service:
       ports:
