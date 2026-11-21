@@ -84,7 +84,7 @@ spec:
         runAsUser: 0
         readOnlyRootFilesystem: false
         seccompProfile:
-          type: RuntimeDefault
+          type: Unconfined
       volumeMounts:
         - name: data
           mountPath: /opt/data
