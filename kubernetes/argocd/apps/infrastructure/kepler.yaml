@@ -1,38 +1,41 @@
 ---
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: kepler
-  namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "10"
-  finalizers:
-  - resources-finalizer.argocd.argoproj.io
-spec:
-  project: infrastructure
-  sources:
-  # No oci:// prefix: ArgoCD appends "chart" to the repoURL, which must match sourceRepos.
-  - repoURL: quay.io/sustainable_computing_io/charts
-    chart: kepler
-    targetRevision: 0.11.4
-    helm:
-      valueFiles:
-      - $values/kubernetes/infrastructure/kepler/values.yaml
-  - repoURL: git@github.com:aliAljaffer/homelab.git
-    targetRevision: main
-    ref: values
-  - repoURL: git@github.com:aliAljaffer/homelab.git
-    targetRevision: main
-    path: kubernetes/infrastructure/kepler
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: kepler
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-    - CreateNamespace=true
-    - ServerSideApply=true
-    - RespectIgnoreDifferences=true
-    - ServerSideDiff=true
+# Disabled: the kubelet pod informer times out on 3 of 5 nodes (10s client
+# deadline on /pods, while the same request answers in milliseconds from a
+# test pod), so the daemonset crashloops. Restore by uncommenting.
+# apiVersion: argoproj.io/v1alpha1
+# kind: Application
+# metadata:
+#   name: kepler
+#   namespace: argocd
+#   annotations:
+#     argocd.argoproj.io/sync-wave: "10"
+#   finalizers:
+#   - resources-finalizer.argocd.argoproj.io
+# spec:
+#   project: infrastructure
+#   sources:
+#   # No oci:// prefix: ArgoCD appends "chart" to the repoURL, which must match sourceRepos.
+#   - repoURL: quay.io/sustainable_computing_io/charts
+#     chart: kepler
+#     targetRevision: 0.11.4
+#     helm:
+#       valueFiles:
+#       - $values/kubernetes/infrastructure/kepler/values.yaml
+#   - repoURL: git@github.com:aliAljaffer/homelab.git
+#     targetRevision: main
+#     ref: values
+#   - repoURL: git@github.com:aliAljaffer/homelab.git
+#     targetRevision: main
+#     path: kubernetes/infrastructure/kepler
+#   destination:
+#     server: https://kubernetes.default.svc
+#     namespace: kepler
+#   syncPolicy:
+#     automated:
+#       prune: true
+#       selfHeal: true
+#     syncOptions:
+#     - CreateNamespace=true
+#     - ServerSideApply=true
+#     - RespectIgnoreDifferences=true
+#     - ServerSideDiff=true
