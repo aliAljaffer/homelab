@@ -1,6 +1,6 @@
 ---
 clusterName: k8s-homelab
-talosVersion: v1.13.7
+talosVersion: v1.14.6
 kubernetesVersion: v1.36.2
 endpoint: https://api.alialjaffer.com:6443
 additionalApiServerCertSans:
@@ -70,7 +70,10 @@ nodes:
 
 controlPlane:
   extensions:
-  - image: ghcr.io/siderolabs/intel-ucode:20250211
+  - image: ghcr.io/siderolabs/intel-ucode:20260812
+  - image: ghcr.io/siderolabs/iscsi-tools:v0.2.0
+  - image: ghcr.io/siderolabs/util-linux-tools:2.42.2
+  - image: ghcr.io/siderolabs/tailscale:1.104.5
   patches:
   - |-
     cluster:
@@ -79,6 +82,9 @@ controlPlane:
           name: none
       proxy:
         disabled: true
+      etcd:
+        advertisedSubnets:
+          - 192.168.8.0/24
       # Talos defaults this to 1536MiB, too low for the ~1GB live heap here;
       # the API server then GC-thrashes and burns CPU. 4GiB leaves headroom.
       apiServer:
@@ -95,6 +101,12 @@ controlPlane:
       kubelet:
         extraArgs:
           rotate-server-certificates: "true"
+        # Control planes keep the kubelet field rather than a KubeNodeConfig document:
+        # their stored config already sets machine.nodeLabels, and Talos rejects the
+        # document form with "nodeLabels is already set in v1alpha1 config".
+        nodeIP:
+          validSubnets:
+            - 192.168.8.0/24
         # /sys must not be mounted: rshared back-propagates and corrupts the host cgroup2 mount.
         extraMounts:
           - destination: /proc
@@ -106,6 +118,12 @@ controlPlane:
               - rprivate
 
 worker:
+  extensions:
+  - image: ghcr.io/siderolabs/intel-ucode:20260812
+  - image: ghcr.io/siderolabs/iscsi-tools:v0.2.0
+  - image: ghcr.io/siderolabs/util-linux-tools:2.42.2
+  - image: ghcr.io/siderolabs/i915:20261019-v1.14.6
+  - image: ghcr.io/siderolabs/tailscale:1.104.5
   patches:
   - |-
     cluster:
@@ -124,3 +142,9 @@ worker:
               - bind
               - ro
               - rprivate
+  - |-
+    apiVersion: v1alpha1
+    kind: KubeNodeConfig
+    nodeIP:
+      validSubnets:
+        - 192.168.8.0/24
