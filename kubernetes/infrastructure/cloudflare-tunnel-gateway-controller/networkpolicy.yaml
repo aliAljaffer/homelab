@@ -36,6 +36,8 @@ spec:
     - ports:
       - port: "7844"
         protocol: UDP
+      - port: "7844"
+        protocol: TCP
   - toEndpoints:
     - matchLabels:
         "k8s:io.kubernetes.pod.namespace": argocd
