@@ -1,11 +1,15 @@
 ---
+# Classic per-ingress proxy mode (no tailscale.com/proxy-group annotation):
+# the operator runs a dedicated ts-hermes-tailnet proxy with a stable
+# identity and manages the hermes DNS record itself. The proxy-group variant
+# served only on stale legacy tailnet IPs and refused its own current ones
+# (tailscale/k8s-operator v1.104.7), leaving DNS pointing at whatever replica
+# had inherited the oldest address.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: hermes-tailnet
   namespace: hermes
-  annotations:
-    tailscale.com/proxy-group: tailnet-ingress
 spec:
   ingressClassName: tailscale
   tls:

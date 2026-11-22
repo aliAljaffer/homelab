@@ -41,13 +41,19 @@ Rotate it with `claude setup-token` and reseal `hermes-providers`.
 
 ## Tailnet access
 
-`ingress-tailnet.yaml` publishes the gateway through the cluster's `tailscale` IngressClass and the
-shared `tailnet-ingress` proxy group, the same way argocd, minio, nexotv, pihole and stremio are
-published. MagicDNS name `hermes`, certificate issued by the Tailscale operator.
+`ingress-tailnet.yaml` publishes the gateway through the cluster's `tailscale` IngressClass in the
+operator's classic per-ingress mode (a dedicated `ts-hermes-tailnet` proxy). MagicDNS name `hermes`,
+certificate issued by the Tailscale operator.
 
 ```sh
 open https://hermes.tail6c5083.ts.net
 ```
+
+Deliberately NOT on the shared `tailnet-ingress` proxy group (unlike argocd, minio, nexotv, pihole
+and stremio): on operator v1.104.7 the proxy-group pods serve TLS only on stale legacy tailnet IPs
+and refuse their own current addresses, and its DNS record never followed the live replicas —
+which is what made hermes crawl from home. If the classic proxy ever misbehaves the same way,
+check the operator version first.
 
 `spec.tailscale` is deliberately off. The operator's Serve sidecar cannot start in-cluster:
 its ServiceAccount sets `automountServiceAccountToken: false`, so `containerboot` fails at kube
