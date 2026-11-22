@@ -72,8 +72,8 @@ spec:
             cp /usr/local/bin/tailscale /opt/data/.local/bin/tailscale
             chmod 755 /opt/data/.local/bin/tailscale
           fi
-          if [ ! -f /opt/data/.local/bin/ssh ] || ! grep -q IdentitiesOnly /opt/data/.local/bin/ssh; then
-            echo 'IyEvYmluL3NoCmV4ZWMgL3Vzci9iaW4vc3NoIC1vICJQcm94eUNvbW1hbmQ9dGFpbHNjYWxlIC0tc29ja2V0PS90bXAvdGFpbHNjYWxlLXNvY2svdGFpbHNjYWxlZC5zb2NrIG5jICVoICVwIiAtbyBJZGVudGl0aWVzT25seT15ZXMgLW8gU3RyaWN0SG9zdEtleUNoZWNraW5nPW5vIC1vIFVzZXJLbm93bkhvc3RzRmlsZT0vZGV2L251bGwgLWkgL29wdC9kYXRhL2hlcm1lcy8uc3NoL2lkX3JzYSAiJEAiCg==' | base64 -d > /opt/data/.local/bin/ssh
+          if [ ! -f /opt/data/.local/bin/ssh ] || ! grep -q 'hermes-ssh-id' /opt/data/.local/bin/ssh; then
+            echo 'IyEvYmluL3NoCiMgU2VjcmV0IHZvbHVtZXMgZ2V0IGdyb3VwLXJlYWQgYWRkZWQgYnkgdGhlIHBvZCdzIGZzR3JvdXAsIHdoaWNoIG1ha2VzIHNzaAojIHJlamVjdCB0aGUga2V5IGFzIHRvbyBvcGVuLiBDb3B5IGl0IHRvIGEgMDYwMCBmaWxlIG91dHNpZGUgdGhlIG1vdW50LgpLRVk9L3RtcC8uaGVybWVzLXNzaC1pZAp1bWFzayAwNzcKY3AgL29wdC9kYXRhL2hlcm1lcy8uc3NoL2lkX3JzYSAiJEtFWSIgMj4vZGV2L251bGwgJiYgY2htb2QgNjAwICIkS0VZIgpleGVjIC91c3IvYmluL3NzaCAtbyAiUHJveHlDb21tYW5kPXRhaWxzY2FsZSAtLXNvY2tldD0vdG1wL3RhaWxzY2FsZS1zb2NrL3RhaWxzY2FsZWQuc29jayBuYyAlaCAlcCIgLW8gSWRlbnRpdGllc09ubHk9eWVzIC1vIFN0cmljdEhvc3RLZXlDaGVja2luZz1ubyAtbyBVc2VyS25vd25Ib3N0c0ZpbGU9L2Rldi9udWxsIC1pICIkS0VZIiAiJEAiCg==' | base64 -d > /opt/data/.local/bin/ssh
             chmod +x /opt/data/.local/bin/ssh
           fi
       securityContext:
