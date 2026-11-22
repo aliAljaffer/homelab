@@ -27,6 +27,7 @@
   "grants": [
     {"src": ["autogroup:member"], "dst": ["autogroup:member"], "ip": ["*"]},
     {"src": ["autogroup:member"], "dst": ["tag:k8s", "192.168.8.0/24"], "ip": ["*"]},
+    {"src": ["tag:k8s"], "dst": ["autogroup:member"], "ip": ["tcp:22"]},
     {
       "src": ["autogroup:member"],
       "dst": ["svc:argocd", "svc:minio", "svc:nexotv", "svc:pihole", "svc:stremio"],
