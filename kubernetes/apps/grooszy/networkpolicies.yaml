@@ -13,6 +13,8 @@ spec:
         - matchLabels:
             "k8s:io.kubernetes.pod.namespace": kube-system
             app.kubernetes.io/name: cilium-gateway-controller
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": cloudflare-tunnel-system
       toPorts:
         - ports:
             - port: "3000"
