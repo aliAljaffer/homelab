@@ -122,7 +122,7 @@ grafana:
     database:
       wal: true
     smtp:
-      enabled: true
+      enabled: false
       host: smtp-relay.mail.svc.cluster.local:587
       from_address: homelab@alialjaffer.com
       from_name: Grafana
