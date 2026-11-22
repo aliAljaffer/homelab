@@ -3,12 +3,7 @@ kubeProxyReplacement: true
 k8sServiceHost: 192.168.8.250
 k8sServicePort: 6443
 
-policyAuditMode: false
-
-# CIDR rules (allow and deny) must also match node-owned IPs: without this,
-# a CIDR deny is scoped to world identities and pods can still reach the
-# node's own tailscale addresses (100.100.100.100 MagicDNS, node tailscale IP).
-policyCIDRMatchMode: nodes
+policyAuditMode: true
 
 ipam:
   mode: kubernetes
