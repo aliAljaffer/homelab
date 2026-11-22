@@ -23,13 +23,20 @@ spec:
             - tunnel
             - --config
             - /etc/cloudflared/config/config.yaml
+            - --protocol
+            - http2
             - run
+          startupProbe:
+            httpGet:
+              path: /ready
+              port: 2000
+            failureThreshold: 36
+            periodSeconds: 5
           livenessProbe:
             httpGet:
               path: /ready
               port: 2000
-            failureThreshold: 1
-            initialDelaySeconds: 10
+            failureThreshold: 3
             periodSeconds: 10
           resources:
             requests:

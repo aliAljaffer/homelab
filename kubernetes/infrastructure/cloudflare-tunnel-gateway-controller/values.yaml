@@ -8,6 +8,8 @@ gatewayClassConfig:
 proxy:
   tunnelTokenSecretRef:
     name: cloudflare-tunnel-token
+  tunnel:
+    protocol: http2
   networkPolicy:
     ingress:
       from:
