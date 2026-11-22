@@ -121,6 +121,8 @@ spec:
     - ports:
       - port: "80"
         protocol: TCP
+      - port: "3000"
+        protocol: TCP
   - toEndpoints:
     - matchLabels:
         "k8s:io.kubernetes.pod.namespace": chat
