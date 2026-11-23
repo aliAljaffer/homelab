@@ -3,11 +3,10 @@ kubeProxyReplacement: true
 k8sServiceHost: 192.168.8.250
 k8sServicePort: 6443
 
-# Auto-detection can pick tailscale0 (1280) at boot, and pods inherit whatever
-# this is set to. 1450 is eno1's 1500 minus the 50-byte VXLAN header, so the
-# outer packet still fits the wire and the Tailscale proxy can send 1312-byte
-# WireGuard packets.
-MTU: 1450
+# Auto-detection can pick tailscale0 (1280) at boot, which caps pods at 1280 and
+# breaks the Tailscale proxy's 1312-byte WireGuard packets. This is the underlying
+# MTU only: Cilium subtracts the 50-byte VXLAN overhead in the pod route MTU.
+MTU: 1500
 
 policyAuditMode: true
 
