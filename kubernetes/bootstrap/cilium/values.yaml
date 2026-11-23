@@ -3,6 +3,10 @@ kubeProxyReplacement: true
 k8sServiceHost: 192.168.8.250
 k8sServicePort: 6443
 
+# Auto-detection can pick tailscale0 (1280) at boot. Pin the LAN MTU so pods
+# get 1450 and the Tailscale userspace proxy can send 1312-byte WireGuard packets.
+MTU: 1500
+
 policyAuditMode: true
 
 ipam:
