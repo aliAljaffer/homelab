@@ -81,11 +81,6 @@ notifications:
       memory: 88Mi
     limits:
       memory: 176Mi
-  notifiers:
-    service.email: |
-      host: smtp-relay.mail.svc.cluster.local
-      port: 587
-      from: homelab@alialjaffer.com
   templates:
     template.app-sync-failed: |
       email:
@@ -112,12 +107,6 @@ notifications:
       - description: Application has degraded
         send: [app-health-degraded]
         when: app.status.health.status == 'Degraded'
-  subscriptions:
-    - recipients:
-        - email:ahjfr@icloud.com
-      triggers:
-        - on-sync-failed
-        - on-health-degraded
   secret:
     create: false
     name: argocd-notifications-secret

@@ -213,16 +213,9 @@ grafana:
       apiVersion: 1
       contactPoints:
         - orgId: 1
-          name: Discord + Email
+          name: Remediator
           receivers:
-            - uid: ff3iaps1ewgzkb
-              type: discord
-              settings:
-                message: '{{ "{{" }} template "discord.default.message" . {{ "}}" }}'
-                url: "${DISCORD_WEBHOOK_URL}"
-                use_discord_username: false
-              disableResolveMessage: false
-            - uid: homelab-remediator-01
+            - uid: remediator-webhook-01
               type: webhook
               settings:
                 url: http://remediator.remediator.svc.cluster.local/grafana
@@ -234,7 +227,7 @@ grafana:
       apiVersion: 1
       policies:
         - orgId: 1
-          receiver: Discord + Email
+          receiver: Remediator
           group_by:
             - grafana_folder
             - alertname
@@ -282,7 +275,7 @@ grafana:
               execErrState: Error
               for: 10m
               notification_settings:
-                receiver: Discord + Email
+                receiver: Remediator
 
             - uid: cf3ib3yooms5ca
               title: High Temperature > 80°C
@@ -315,7 +308,7 @@ grafana:
               execErrState: Error
               for: 10m
               notification_settings:
-                receiver: Discord + Email
+                receiver: Remediator
 
             - uid: ff3ib9gnzeubkc
               title: High Memory Usage > 85%
@@ -348,7 +341,7 @@ grafana:
               execErrState: Error
               for: 10m
               notification_settings:
-                receiver: Discord + Email
+                receiver: Remediator
 
             - uid: vgfo0a3aomfu7l
               title: High Node Temperature (any sensor) > 90°C
@@ -381,7 +374,7 @@ grafana:
               execErrState: Error
               for: 10m
               notification_settings:
-                receiver: Discord + Email
+                receiver: Remediator
 
             - uid: lg7a0af1byfaa
               title: Loki Logs Being Dropped (Alloy)
@@ -414,7 +407,7 @@ grafana:
               execErrState: Error
               for: 10m
               notification_settings:
-                receiver: Discord + Email
+                receiver: Remediator
 
             - uid: lg7a0af1byfbb
               title: Loki Ingest Stalled
@@ -447,7 +440,7 @@ grafana:
               execErrState: Error
               for: 10m
               notification_settings:
-                receiver: Discord + Email
+                receiver: Remediator
 
             - uid: lg7a0af1byfcc
               title: Loki Canary Missing Entries
@@ -480,7 +473,7 @@ grafana:
               execErrState: Error
               for: 5m
               notification_settings:
-                receiver: Discord + Email
+                receiver: Remediator
 
             - uid: lg7a0af1byfdd
               title: Loki Canary Query Failures
@@ -513,7 +506,7 @@ grafana:
               execErrState: Error
               for: 5m
               notification_settings:
-                receiver: Discord + Email
+                receiver: Remediator
 
 kubelet:
   serviceMonitor:

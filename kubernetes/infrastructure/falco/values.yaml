@@ -53,10 +53,4 @@ falcosidekick:
         falcosidekick:
           namespace: monitoring
           folder: Falco
-  config:
-    smtp:
-      hostport: "smtp-relay.mail.svc.cluster.local:587"
-      tls: false
-      from: "homelab@alialjaffer.com"
-      to: "ahjfr@icloud.com"
-      minimumpriority: "warning"
+  config: {}
