@@ -14,6 +14,7 @@ spec:
   - https://openziti.io/helm-charts/
   - oci://ghcr.io/actions/actions-runner-controller-charts
   - ghcr.io/actions/actions-runner-controller-charts
+  - ghcr.io/vectorize-io/charts
   destinations:
   - server: https://kubernetes.default.svc
     namespace: "*"

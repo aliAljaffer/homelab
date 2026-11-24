@@ -1,0 +1,43 @@
+---
+# Classic per-ingress proxy mode for the same reason as hermes-tailnet (see apps/hermes).
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hindsight-tailnet
+  namespace: hindsight
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - hindsight
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: hindsight-api
+                port:
+                  number: 8888
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hindsight-ui-tailnet
+  namespace: hindsight
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - hindsight-ui
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: hindsight-control-plane
+                port:
+                  number: 3000

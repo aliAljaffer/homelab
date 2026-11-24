@@ -1,0 +1,43 @@
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: hindsight-api-ingress
+  namespace: hindsight
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: hindsight
+      app.kubernetes.io/component: api
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": hermes
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": tailscale
+        - matchLabels:
+            app.kubernetes.io/name: hindsight
+            app.kubernetes.io/component: control-plane
+      toPorts:
+        - ports:
+            - port: "8888"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: hindsight-control-plane-ingress
+  namespace: hindsight
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: hindsight
+      app.kubernetes.io/component: control-plane
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": tailscale
+      toPorts:
+        - ports:
+            - port: "3000"
+              protocol: TCP

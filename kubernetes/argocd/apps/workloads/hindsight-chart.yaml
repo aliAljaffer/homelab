@@ -1,0 +1,57 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hindsight-chart
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: workloads
+  source:
+    repoURL: ghcr.io/vectorize-io/charts
+    chart: hindsight
+    targetRevision: 1.3.0
+    helm:
+      releaseName: hindsight
+      valuesObject:
+        version: 1.3.0
+        existingSecret: hindsight-env
+        postgresql:
+          enabled: false
+          external:
+            host: hindsight-db-rw
+            port: 5432
+            database: hindsight
+            username: hindsight
+        api:
+          replicaCount: 1
+          env:
+            HINDSIGHT_API_LLM_PROVIDER: claude-code
+            HINDSIGHT_API_LLM_MODEL: claude-haiku-5-5
+            HINDSIGHT_API_TENANT_EXTENSION: hindsight_api.extensions.builtin.tenant:ApiKeyTenantExtension
+          resources:
+            requests:
+              cpu: 250m
+              memory: 1536Mi
+            limits:
+              memory: 3Gi
+        worker:
+          enabled: false
+        controlPlane:
+          enabled: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              memory: 1Gi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: hindsight
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
