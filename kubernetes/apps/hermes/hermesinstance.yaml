@@ -201,8 +201,13 @@ spec:
   #   preUpdate: true
   #   historyLimit: 14
   sidecars:
+    # The hermes image only maps uid 1000 in its entrypoint, and ssh refuses a uid
+    # with no passwd entry. Ubuntu noble ships uid 1000 (ubuntu) out of the box.
     - name: skills-sync
-      image: nousresearch/hermes-agent:v0.23.3
+      image: buildpack-deps:noble-scm
+      env:
+        - name: HOME
+          value: /tmp
       command:
         - /bin/sh
         - -c
