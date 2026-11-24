@@ -74,8 +74,8 @@ spec:
             cp /usr/local/bin/tailscale /opt/data/.local/bin/tailscale
             chmod 755 /opt/data/.local/bin/tailscale
           fi
-          if [ ! -f /opt/data/.local/bin/ssh ] || ! grep -q 'hermes-ssh-id' /opt/data/.local/bin/ssh; then
-            echo 'IyEvYmluL3NoCiMgU2VjcmV0IHZvbHVtZXMgZ2V0IGdyb3VwLXJlYWQgYWRkZWQgYnkgdGhlIHBvZCdzIGZzR3JvdXAsIHdoaWNoIG1ha2VzIHNzaAojIHJlamVjdCB0aGUga2V5IGFzIHRvbyBvcGVuLiBDb3B5IGl0IHRvIGEgMDYwMCBmaWxlIG91dHNpZGUgdGhlIG1vdW50LgpLRVk9L3RtcC8uaGVybWVzLXNzaC1pZAp1bWFzayAwNzcKY3AgL29wdC9kYXRhL2hlcm1lcy8uc3NoL2lkX3JzYSAiJEtFWSIgMj4vZGV2L251bGwgJiYgY2htb2QgNjAwICIkS0VZIgpleGVjIC91c3IvYmluL3NzaCAtbyAiUHJveHlDb21tYW5kPXRhaWxzY2FsZSAtLXNvY2tldD0vdG1wL3RhaWxzY2FsZS1zb2NrL3RhaWxzY2FsZWQuc29jayBuYyAlaCAlcCIgLW8gSWRlbnRpdGllc09ubHk9eWVzIC1vIFN0cmljdEhvc3RLZXlDaGVja2luZz1ubyAtbyBVc2VyS25vd25Ib3N0c0ZpbGU9L2Rldi9udWxsIC1pICIkS0VZIiAiJEAiCg==' | base64 -d > /opt/data/.local/bin/ssh
+          if [ ! -f /opt/data/.local/bin/ssh ] || ! grep -q 'k8s-prsnl' /opt/data/.local/bin/ssh; then
+            echo 'IyEvYmluL3NoCiMgU2VjcmV0IHZvbHVtZXMgZ2V0IGdyb3VwLXJlYWQgYWRkZWQgYnkgdGhlIHBvZCdzIGZzR3JvdXAsIHdoaWNoIG1ha2VzIHNzaAojIHJlamVjdCBrZXlzIGFzIHRvbyBvcGVuLiBDb3B5IHRoZW0gdG8gMDYwMCBmaWxlcyBvdXRzaWRlIHRoZSBtb3VudC4KRElSPS90bXAvLmhlcm1lcy1zc2gKbWtkaXIgLXAgIiRESVIiCnVtYXNrIDA3Nwpmb3IgZiBpbiBpZF9yc2EgY29uZmlnIGs4cy1wcnNubCB1YnVudHUgd29yazsgZG8KICBbIC1mICIvb3B0L2RhdGEvaGVybWVzLy5zc2gvJGYiIF0gJiYgY3AgIi9vcHQvZGF0YS9oZXJtZXMvLnNzaC8kZiIgIiRESVIvJGYiICYmIGNobW9kIDYwMCAiJERJUi8kZiIKZG9uZQpleGVjIC91c3IvYmluL3NzaCAtRiAiJERJUi9jb25maWciIC1vICJQcm94eUNvbW1hbmQ9dGFpbHNjYWxlIC0tc29ja2V0PS90bXAvdGFpbHNjYWxlLXNvY2svdGFpbHNjYWxlZC5zb2NrIG5jICVoICVwIiAtbyBJZGVudGl0aWVzT25seT15ZXMgLW8gU3RyaWN0SG9zdEtleUNoZWNraW5nPW5vIC1vIFVzZXJLbm93bkhvc3RzRmlsZT0vZGV2L251bGwgLWkgIiRESVIvaWRfcnNhIiAiJEAiCg==' | base64 -d > /opt/data/.local/bin/ssh
             chmod +x /opt/data/.local/bin/ssh
           fi
       securityContext:
