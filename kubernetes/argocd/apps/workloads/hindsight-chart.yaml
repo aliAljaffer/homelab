@@ -26,6 +26,9 @@ spec:
             username: hindsight
         api:
           replicaCount: 1
+          # ghcr cuts single downloads at about 10 minutes, too short for this image's 1.1 GB layer.
+          image:
+            repository: harbor.alialjaffer.com/mirror/hindsight-api
           env:
             HINDSIGHT_API_LLM_PROVIDER: claude-code
             HINDSIGHT_API_LLM_MODEL: claude-haiku-5-5
