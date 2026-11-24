@@ -32,6 +32,8 @@ spec:
           env:
             HINDSIGHT_API_LLM_PROVIDER: claude-code
             HINDSIGHT_API_LLM_MODEL: claude-haiku-5-5
+            # claude-code spawns one claude CLI process per call; the default of 32 OOMs the pod on a bulk retain.
+            HINDSIGHT_API_LLM_MAX_CONCURRENT: "4"
             HINDSIGHT_API_TENANT_EXTENSION: hindsight_api.extensions.builtin.tenant:ApiKeyTenantExtension
             HINDSIGHT_API_RETAIN_EXTRACTION_MODE: custom
             HINDSIGHT_API_RETAIN_CUSTOM_INSTRUCTIONS: |
