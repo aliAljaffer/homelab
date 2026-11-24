@@ -33,6 +33,35 @@ spec:
             HINDSIGHT_API_LLM_PROVIDER: claude-code
             HINDSIGHT_API_LLM_MODEL: claude-haiku-5-5
             HINDSIGHT_API_TENANT_EXTENSION: hindsight_api.extensions.builtin.tenant:ApiKeyTenantExtension
+            HINDSIGHT_API_RETAIN_EXTRACTION_MODE: custom
+            HINDSIGHT_API_RETAIN_CUSTOM_INSTRUCTIONS: |
+              Store a fact only if a future session, on a different task, would act differently because of it.
+              Most turns contain nothing worth storing. Return no facts when nothing qualifies.
+              Test each candidate: is it a lesson, fact, quirk, or workaround likely to come up again,
+              or a process the user is likely to repeat? If not, drop it.
+
+              STORE:
+              - A preference, rule, or correction the user states about how to work, write, or build.
+              - A durable fact about the user: role, accounts, machines, tools they use, naming conventions.
+              - A niche project or infrastructure fact that is hard to rediscover: a hostname, port, bank ID,
+                version pin, file location, dependency, or the reason a design was chosen.
+              - The fix for a problem: the symptom, the root cause, and the change that solved it.
+              - A workaround for an unsolved issue, with the condition that triggers it.
+              - A decision the user made that later work must respect, and its reason.
+              - A gotcha: a tool, API, or version that behaves differently from what its docs or common sense suggest.
+              - A repeatable process: the ordered steps the user follows for a recurring task.
+
+              NEVER STORE:
+              - What an agent or subagent did, how long it ran, how many calls it made, or its exit status.
+              - A complaint that output was incomplete, unverified, or missing (no SHA, no test output, "Done").
+              - Progress narration, task status, plans, todo items, or "next I will" statements.
+              - Restatements of the current request, or a summary of the conversation.
+              - Transient state: a pod name, a run ID, a temporary path, a failing check that was then fixed.
+              - Anything already in the repo, its README, or git history, unless the reason behind it is missing there.
+              - Secrets, tokens, passwords, or keys.
+
+              Write each fact so it stands alone: name the system, the condition, and the action.
+              Prefer "In Hermes, X requires Y because Z" over "The agent found that X failed".
           resources:
             requests:
               cpu: 250m

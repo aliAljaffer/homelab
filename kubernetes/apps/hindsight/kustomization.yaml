@@ -9,3 +9,10 @@ resources:
   - scheduled-backup.yaml
   - networkpolicy.yaml
   - ingress-tailnet.yaml
+  - memory-store-deploy-key.sealed.yaml
+  - memory-store-sync-cronjob.yaml
+configMapGenerator:
+  - name: memory-store-sync
+    namespace: hindsight
+    files:
+      - memory-store-sync.py

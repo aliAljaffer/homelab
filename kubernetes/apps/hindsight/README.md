@@ -16,6 +16,15 @@ workstation CLI. All of them write to one memory bank.
   `hindsight-db-rw` as the `hindsight` owner. The `vector` extension is created at bootstrap.
 - LLM: the `claude-code` provider, which authenticates with a `claude setup-token` token.
   The model is `claude-haiku-5-5`, because extraction runs on every turn.
+- Retain policy: `HINDSIGHT_API_RETAIN_EXTRACTION_MODE=custom`. `HINDSIGHT_API_RETAIN_CUSTOM_INSTRUCTIONS`
+  in the chart values is the allow and deny list for what becomes a memory. Edit it there.
+  A bank-level override in the API takes precedence over it. The `ali` bank overrides only
+  `retain_strategies`.
+- memory-store sync: the `memory-store-sync` CronJob runs daily at 03:00 UTC. It clones
+  `Azm-Tech/azm-sre-memory-store` with the `memory-store-deploy-key` deploy key. It retains each entry
+  as the document `memory-store/<path>`, tagged `source:memory-store`. It uses the `memory-store`
+  retain strategy (verbatim), which it sets on the bank on every run, so the strict policy does not
+  drop them. It resends only files whose sha256 changed, and deletes documents whose file is gone.
 - Embeddings and reranking run locally inside the `hindsight-api` image. No embedding API is needed.
 
 ## Auth

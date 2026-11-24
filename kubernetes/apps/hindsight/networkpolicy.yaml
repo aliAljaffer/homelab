@@ -18,6 +18,8 @@ spec:
         - matchLabels:
             app.kubernetes.io/name: hindsight
             app.kubernetes.io/component: control-plane
+        - matchLabels:
+            app.kubernetes.io/name: memory-store-sync
       toPorts:
         - ports:
             - port: "8888"

@@ -1,0 +1,80 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: memory-store-sync
+  namespace: hindsight
+spec:
+  schedule: "0 3 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      ttlSecondsAfterFinished: 3600
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: memory-store-sync
+        spec:
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            fsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            # ssh refuses a uid with no passwd entry. Ubuntu noble ships uid 1000 (ubuntu).
+            - name: sync
+              image: buildpack-deps:noble-scm
+              env:
+                - name: HOME
+                  value: /tmp
+                - name: HINDSIGHT_API_URL
+                  value: http://hindsight-api:8888
+                - name: HINDSIGHT_BANK_ID
+                  value: ali
+                - name: HINDSIGHT_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: hindsight-env
+                      key: HINDSIGHT_API_TENANT_API_KEY
+              command:
+                - /bin/sh
+                - -c
+              args:
+                - |
+                  set -eu
+                  # Secret volumes get group-read from fsGroup, which ssh rejects as too open.
+                  (umask 077; cp /keys/id_ed25519 /tmp/key)
+                  export GIT_SSH_COMMAND="ssh -i /tmp/key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/tmp/known_hosts"
+                  git clone -q --depth 1 git@github.com:Azm-Tech/azm-sre-memory-store.git /tmp/repo
+                  python3 /scripts/memory-store-sync.py /tmp/repo
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 64Mi
+                limits:
+                  memory: 256Mi
+              volumeMounts:
+                - name: key
+                  mountPath: /keys
+                  readOnly: true
+                - name: script
+                  mountPath: /scripts
+                  readOnly: true
+          volumes:
+            - name: key
+              secret:
+                secretName: memory-store-deploy-key
+                defaultMode: 0440
+            - name: script
+              configMap:
+                name: memory-store-sync
