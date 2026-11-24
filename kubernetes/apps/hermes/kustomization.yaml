@@ -10,6 +10,7 @@ resources:
   - hermes-backup.sealed.yaml
   - ingress-tailnet.yaml
   - hermes-ssh-key.sealed.yaml
+  - hermes-agents-deploy-key.sealed.yaml
   - hermes-dashboard.sealed.yaml
   - hermes-tailscale.sealed.yaml
   - hermes-telegram.sealed.yaml

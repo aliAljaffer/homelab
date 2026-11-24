@@ -16,6 +16,24 @@ ApplicationSet; the operator itself is `kubernetes/argocd/apps/infrastructure/he
   `config.yaml` as `Bearer ${FAI_AGENT_KEY}`.
 - `ingress-tailnet.yaml` — the tailnet route (see below).
 - `backup-cronjob.yaml` — nightly restic backup to Cloudflare R2 (see below).
+- `hermes-agents-deploy-key.sealed.yaml` — a read-write deploy key on `aliAljaffer/agents`, used by
+  the `skills-sync` sidecar.
+
+## Shared memory and skills
+
+Every Hermes host (this pod, both MacBooks, Windows, and WSL) uses the same memory and skills.
+
+- Memory: `memory.provider: hindsight`. The Hindsight server is `kubernetes/apps/hindsight`.
+  Each profile's `.env` (`/opt/data/hermes/.env`, `/opt/data/hermes/profiles/<name>/.env`) holds
+  `HINDSIGHT_MODE`, `HINDSIGHT_API_URL`, `HINDSIGHT_API_KEY` and `HINDSIGHT_BANK_ID=ali`. The
+  gateway multiplexes profiles, so the plugin reads only the profile `.env`, not the pod env.
+- Plugin dependency: the docker-managed image cannot install plugin Python dependencies at runtime.
+  The `seed-plugin-deps` init container installs `hindsight-client` into
+  `/opt/data/.local/lib/hermes-extra`, and `PYTHONPATH` points there.
+- Skills: `skills.create_dir: ~/agents/skills`. HOME is `/opt/data`, so new skills land in the
+  `/opt/data/agents` clone. The `skills-sync` sidecar runs `scripts/sync-skills.sh` every five minutes.
+- The live config is seeded only once. After you change these keys in `configmap.yaml`, also run
+  `hermes -p <profile> config set` in the pod for each profile.
 
 ## Providers
 

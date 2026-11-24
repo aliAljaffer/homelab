@@ -682,7 +682,7 @@ data:
       memory_char_limit: 2200
       user_char_limit: 1375
       nudge_interval: 10
-      provider: ""
+      provider: hindsight
     delegation:
       backend: model_map
       backends:
@@ -767,8 +767,7 @@ data:
     skills:
       external_dirs:
         - ~/.agents/skills
-        - ~/agents/skills
-      create_dir: ""
+      create_dir: ~/agents/skills
       project_discovery: true
       trusted_project_dirs: []
       auto_load: []
