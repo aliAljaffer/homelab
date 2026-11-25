@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: runner
-          image: harbor.alialjaffer.com/mirror/runner-toolchain@sha256:57ae2b21f74d1a6fc39ded28d9b8c97fc1ed209af35b64eb7c86671171499553
+          image: harbor.alialjaffer.com/mirror/runner-toolchain@sha256:7e9ec3de48cddc5ad2985ecfd7db6269d872dac8b03a7dfe0f46b8df122cecf7
           command: ["sleep", "infinity"]
           resources:
             requests:
