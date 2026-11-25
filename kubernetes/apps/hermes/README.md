@@ -115,7 +115,7 @@ the fix that is already on their `main`.
 
 ## Notes
 
-- The image is the official `nousresearch/hermes-agent`, currently `v0.23.3`. The operator's
+- The image is the Harbor mirror of the official `nousresearch/hermes-agent`, currently `v0.23.4`. The operator's
   `ghcr.io/stubbi/hermes-agent` mirror stopped at `v0.16.0` (its `latest` is the same digest), which
   is five months behind and carries the broken Anthropic OAuth flow. The operator only requires the
   upstream contract (s6 entrypoint, `gateway run`, `HERMES_HOME=/opt/data`), which the official image

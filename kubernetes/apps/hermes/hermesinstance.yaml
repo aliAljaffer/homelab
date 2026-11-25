@@ -6,8 +6,8 @@ metadata:
   namespace: hermes
 spec:
   image:
-    repository: nousresearch/hermes-agent
-    tag: "v0.23.3"
+    repository: harbor.alialjaffer.com/mirror/hermes-agent
+    tag: "v0.23.4"
     pullPolicy: IfNotPresent
   config:
     configMapRef:
