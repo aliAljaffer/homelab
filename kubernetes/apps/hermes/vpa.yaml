@@ -1,0 +1,16 @@
+---
+# Recommender only. updateMode Off writes .status.recommendation and nothing
+# else: no eviction, no in-place resize, so hermes-0 is never restarted by this
+# object. Read it with:
+#   kubectl -n hermes get vpa hermes -o jsonpath="{.status.recommendation}"
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: hermes
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet
+    name: hermes
+  updatePolicy:
+    updateMode: "Off"

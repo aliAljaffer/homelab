@@ -16,3 +16,4 @@ resources:
   - hermes-telegram.sealed.yaml
   - hermes-discord.sealed.yaml
   - hermesinstance.yaml
+  - vpa.yaml
