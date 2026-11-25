@@ -33,6 +33,7 @@ spec:
   - https://falcosecurity.github.io/charts
   - https://helm.goharbor.io
   - https://pkgs.tailscale.com/helmcharts
+  - https://github.com/kubernetes/autoscaler
   destinations:
   - server: https://kubernetes.default.svc
     namespace: "*"

@@ -1,0 +1,34 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vpa
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-3"
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infrastructure
+  sources:
+  # Chart lives in-tree upstream, no chart repo needed; tags of the form
+  # vertical-pod-autoscaler-chart-<x.y.z> pin chart releases.
+  - repoURL: https://github.com/kubernetes/autoscaler
+    targetRevision: vertical-pod-autoscaler-chart-0.14.0
+    path: vertical-pod-autoscaler/charts/vertical-pod-autoscaler
+    helm:
+      valueFiles:
+      - $values/kubernetes/infrastructure/vpa/values.yaml
+  - repoURL: https://github.com/aliAljaffer/homelab.git
+    targetRevision: main
+    ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: vpa
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - ServerSideApply=true

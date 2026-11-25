@@ -1,0 +1,28 @@
+---
+# Recommender only: no updater, no admission controller. Nothing in this chart
+# evicts or patches a running pod, so the VPA objects it serves (see
+# kubernetes/apps/hermes/vpa.yaml, updateMode Off) are read-only advice.
+fullnameOverride: vpa
+
+crds:
+  enabled: true
+  keep: true
+
+recommender:
+  enabled: true
+  replicas: 1
+  resources:
+    requests:
+      cpu: 20m
+      memory: 96Mi
+    limits:
+      memory: 256Mi
+  # One replica with minAvailable: 1 would block every node drain.
+  podDisruptionBudget:
+    enabled: false
+
+updater:
+  enabled: false
+
+admissionController:
+  enabled: false
