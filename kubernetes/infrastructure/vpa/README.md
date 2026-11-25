@@ -1,22 +1,24 @@
 # vpa
 
-Upstream chart `vertical-pod-autoscaler/charts/vertical-pod-autoscaler` from
-kubernetes/autoscaler, installed recommender-only (`values.yaml` turns off the
-updater and the admission controller). `fullnameOverride: vpa` names the
-deployment `vpa-recommender`.
+Vertical Pod Autoscaler, recommender only. Chart `vpa` from
+charts.fairwinds.com (5.2.0, VPA 1.7.1); `values.yaml` turns off the updater and
+the admission controller, so nothing here evicts, patches or restarts a
+workload. `fullnameOverride: vpa` names the deployment `vpa-recommender`.
 
-Nothing here evicts, patches or restarts a workload. VPA objects are read as
-advice: `kubectl -n <ns> describe vpa <name>` prints the recommendation, and
-`kubectl -n <ns> get vpa <name> -o jsonpath="{.status.recommendation}"` prints
-it raw. Changing `updatePolicy.updateMode` to `Auto` would evict and recreate
-pods, and `InPlaceOrRecreate` resizes them without restarting (the cluster runs
-Kubernetes 1.36, in-place resize is GA and containers default to
-`resizePolicy: NotRequired`).
+VPA objects are read as advice:
 
-The recommender needs a few days of samples before its recommendations mean
-anything.
+    kubectl -n hermes describe vpa hermes
+    kubectl -n hermes get vpa hermes -o jsonpath={.status.recommendation}
 
-## Requirements
+The recommender wants a few days of samples before the numbers mean anything.
 
-Kubernetes 1.32+ for the CRDs the chart ships (it uses `status.subresource` and
-per-container recommendation policies). The cluster runs 1.36.
+Raising `updatePolicy.updateMode` would change that: `Auto` evicts and recreates
+pods, `InPlaceOrRecreate` resizes them where the kubelet allows it. The cluster
+runs Kubernetes 1.36, where in-place resize is GA and containers default to
+`resizePolicy: NotRequired` for CPU and memory, so `InPlaceOrRecreate` would not
+restart `hermes-0` containers.
+
+The upstream in-tree chart (`kubernetes/autoscaler`, path
+`vertical-pod-autoscaler/charts/vertical-pod-autoscaler`) was the first choice,
+but ArgoCD clones the whole autoscaler repo and times out generating the
+manifest, hence the Fairwinds chart.

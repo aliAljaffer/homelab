@@ -11,11 +11,12 @@ metadata:
 spec:
   project: infrastructure
   sources:
-  # Chart lives in-tree upstream, no chart repo needed; tags of the form
-  # vertical-pod-autoscaler-chart-<x.y.z> pin chart releases.
-  - repoURL: https://github.com/kubernetes/autoscaler
-    targetRevision: vertical-pod-autoscaler-chart-0.14.0
-    path: vertical-pod-autoscaler/charts/vertical-pod-autoscaler
+  # Fairwinds packages the upstream kubernetes/autoscaler components as a chart.
+  # The upstream in-tree chart is not used: ArgoCD clones the whole autoscaler
+  # repo, which times out generating the manifest.
+  - repoURL: https://charts.fairwinds.com/stable
+    chart: vpa
+    targetRevision: 5.2.0
     helm:
       valueFiles:
       - $values/kubernetes/infrastructure/vpa/values.yaml
