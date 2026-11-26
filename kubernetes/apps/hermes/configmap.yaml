@@ -415,7 +415,10 @@ data:
         api_key: ""
         timeout: 900
         extra_body: {}
+    # Deliberately quiet: the per-tool feed, inline diffs, turn summary and the
+    # seven-segment status bar drowned the answer. Relax a key if it gets too silent.
     display:
+      tool_progress: new
       compact: false
       personality: ""
       resume_display: full
@@ -438,7 +441,7 @@ data:
       show_reasoning: true
       reasoning_full: false
       memory_notifications: on
-      background_process_notifications: concise
+      background_process_notifications: error
       streaming: true
       timestamps: false
       timestamp_format: '%H:%M'
@@ -447,7 +450,7 @@ data:
       persistent_output_max_lines: 200
       cli_rebuild_scrollback_on_redraw: false
       persist_prompts: true
-      inline_diffs: true
+      inline_diffs: false
       inline_images: auto
       file_mutation_verifier: true
       credits_notices: true
@@ -470,8 +473,8 @@ data:
       tool_progress_command: false
       tool_preview_length: 0
       friendly_tool_labels: true
-      turn_summary: true
-      spinner_token_flow: true
+      turn_summary: false
+      spinner_token_flow: false
       tool_progress_grouping: accumulate
       status_phrases: {}
       reasoning_style: code
@@ -492,7 +495,9 @@ data:
           - context_pct
           - cwd
       status_bar:
-        fields: []
+        fields:
+          - model
+          - context_pct
       pet:
         enabled: false
         slug: ""
