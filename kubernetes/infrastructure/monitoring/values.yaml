@@ -58,7 +58,6 @@ grafana:
 
   # The chart ignores "extraEnvFrom"; this is the supported key.
   envFromSecrets:
-    - name: grafana-discord-webhook
     - name: grafana-github-token
     - name: grafana-remediator-token
     - name: grafana-umami-db
@@ -580,8 +579,6 @@ alertmanager:
         memory: 56Mi
       limits:
         memory: 112Mi
-    secrets:
-      - grafana-discord-webhook
     # Without this the operator falls back to a null route and drops every alert.
     configSecret: alertmanager-kube-prometheus-alertmanager
   config:
@@ -615,20 +612,8 @@ alertmanager:
       group_wait: 30s
       group_interval: 5m
       repeat_interval: 12h
-      receiver: 'discord'
-      routes:
-        - receiver: 'null'
-          matchers:
-            - alertname =~ "InfoInhibitor|Watchdog"
-        - receiver: 'discord'
-          matchers:
-            - alertname =~ ".+"
+      receiver: 'null'
     receivers:
-      - name: 'discord'
-        discord_configs:
-          - webhook_url_file: /etc/alertmanager/secrets/grafana-discord-webhook/DISCORD_WEBHOOK_URL
-            title: '{{ .GroupLabels.alertname }} {{ if eq .Status "firing" }}[FIRING]{{ else }}[RESOLVED]{{ end }}'
-            message: '{{ range .Alerts }}{{ .Annotations.summary }} (severity={{ .Labels.severity }}){{ end }}'
       - name: 'null'
 
 # Cilium replaces kube-proxy, so the chart's KubeProxyDown rule would never resolve.

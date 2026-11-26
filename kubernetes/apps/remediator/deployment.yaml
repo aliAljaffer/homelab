@@ -114,11 +114,6 @@ spec:
                 secretKeyRef:
                   name: remediator-receiver
                   key: token
-            - name: DISCORD_WEBHOOK_URL
-              valueFrom:
-                secretKeyRef:
-                  name: remediator-receiver
-                  key: discord-webhook-url
             - name: GITHUB_APP_ID
               value: "5511128"
             - name: GITHUB_APP_KEY_FILE

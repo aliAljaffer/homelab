@@ -552,12 +552,6 @@ spec:
       - port: "443"
         protocol: TCP
   - toFQDNs:
-    - matchName: "discord.com"
-    toPorts:
-    - ports:
-      - port: "443"
-        protocol: TCP
-  - toFQDNs:
     - matchName: "raw.githubusercontent.com"
     - matchName: "grafana.com"
     - matchName: "dl.grafana.com"
@@ -892,12 +886,6 @@ spec:
       rules:
         dns:
         - matchPattern: "*"
-  - toFQDNs:
-    - matchName: "discord.com"
-    toPorts:
-    - ports:
-      - port: "443"
-        protocol: TCP
   - toEndpoints:
     - matchLabels:
         "k8s:io.kubernetes.pod.namespace": mail

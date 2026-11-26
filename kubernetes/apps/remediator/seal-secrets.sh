@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Usage: DISCORD_WEBHOOK_URL=... GITHUB_APP_KEY_FILE=... [RECEIVER_TOKEN=...] [OPENCODE_API_KEY=...] seal-secrets.sh
+# Usage: GITHUB_APP_KEY_FILE=... [RECEIVER_TOKEN=...] [OPENCODE_API_KEY=...] seal-secrets.sh
 set -euo pipefail
 dir="$(cd "$(dirname "$0")" && pwd)"
 token="${RECEIVER_TOKEN:-$(openssl rand -hex 32)}"
@@ -7,7 +7,6 @@ key="${OPENCODE_API_KEY:-$(jq -r '.["opencode-go"].key // empty' "${HOME}/.local
 seal() { kubeseal --controller-namespace kube-system --controller-name sealed-secrets-controller -o yaml; }
 kubectl create secret generic remediator-receiver -n remediator \
   --from-literal=token="$token" \
-  --from-literal=discord-webhook-url="${DISCORD_WEBHOOK_URL:?set DISCORD_WEBHOOK_URL}" \
   --dry-run=client -o yaml | seal > "$dir/remediator-receiver.sealed.yaml"
 kubectl create secret generic remediator-provider -n remediator \
   --from-literal=api-key="${key:?set OPENCODE_API_KEY}" \
