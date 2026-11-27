@@ -1,0 +1,14 @@
+---
+# SQLite lives here. ReadWriteOnce by design: exactly one pod may write.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: omniroute-data
+  namespace: omniroute
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 10Gi

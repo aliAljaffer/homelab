@@ -86,6 +86,7 @@ AMD Ryzen 7 7800X3D, 32GB RAM, RTX 4070 Ti Super, 3x 2TB NVMe, dual-boots Fedora
 - **livesync** - CouchDB for Obsidian LiveSync, with plugin-side end-to-end encryption
 - **ntfy** - cluster-wide push notification server, oauth2-proxy in front; `fai` is the first consumer
 - **chat** - one private chat API for every app: each app wraps its own UI and calls the API with a per-app key. Runs OpenCode as a text-only agent. See [kubernetes/apps/chat](kubernetes/apps/chat/README.md) and [aliAljaffer/chat-gateway](https://github.com/aliAljaffer/chat-gateway).
+- **omniroute** - self-hosted AI gateway: one OpenAI-compatible endpoint in front of many providers, SQLite on Longhorn, tailnet-only dashboard
 - **cloudflared** - Cloudflare Tunnel for public traffic
 - **arc** - GitHub Actions self-hosted runners for `chat-gateway`, `grooszy`, `excalidraw` and `fai`'s build CI (fai release stays hosted; toolchain image built in CI and served through Harbor)
 - **longhorn-backup** - scheduled PV backups to GCS (Longhorn RecurringJob)

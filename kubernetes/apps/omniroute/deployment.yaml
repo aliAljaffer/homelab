@@ -1,0 +1,94 @@
+---
+# One replica, Recreate. OmniRoute is a single Node process writing one SQLite
+# file; two pods on the same volume corrupt it. Scale out with separate
+# releases, never replicas: 2.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: omniroute
+  namespace: omniroute
+  labels:
+    app: omniroute
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: omniroute
+  template:
+    metadata:
+      labels:
+        app: omniroute
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      # Draining SSE takes ~30s; the WAL checkpoint that follows has no
+      # timeout. A SIGKILL mid-checkpoint carries a fat WAL into the next boot.
+      terminationGracePeriodSeconds: 300
+      containers:
+        - name: omniroute
+          image: harbor.alialjaffer.com/mirror/omniroute:3.8.54@sha256:2be638c210c7a559643e8f68bdcac2167e4eacfef370fdd9eabb825eebe56d32
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 20128
+            - name: live-ws
+              containerPort: 20132
+          envFrom:
+            - configMapRef:
+                name: omniroute-config
+            - secretRef:
+                name: omniroute-secrets
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 15"]
+          # Cold start replays the WAL, runs migrations and rebuilds the
+          # database, which can take minutes on Longhorn.
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 120
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 6
+          # TCP, not HTTP: better-sqlite3 is synchronous and a checkpoint blocks
+          # the event loop. An HTTP liveness would kill the pod mid-write.
+          livenessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 20
+            failureThreshold: 6
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "2"
+              memory: 4Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: omniroute-data
