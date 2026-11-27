@@ -20,15 +20,16 @@ workstation CLI. All of them write to one memory bank.
   because Hindsight already runs one pod and the router only sees Hindsight's
   requests.
 - Free model list: `free-models-sync` runs every two days at 06:00 UTC. It reads
-  the Go and OpenCode catalogs at `https://opencode.ai/inference/.../v1/models`,
-  keeps only chat models whose input and output prices are zero, and probes each
-  with a small JSON request. The survivors are written to the
-  `hindsight-free-models` ConfigMap; the router reloads it without a restart.
-  Models listed as free but not callable from outside OpenCode are dropped by the
-  probe. `deepseek-v4.1-flash` on Go is not used: it is included in the Go
-  subscription but draws down the monthly allowance. The free
-  `deepseek-v4.1-flash-free` is probed and used if it becomes callable; today it
-  returns `FreeUsageLimitError` from the API.
+  the Go and OpenCode catalogs at `https://opencode.ai/inference/.../v1/models`
+  and treats every zero-priced chat model as a candidate. It validates the
+  response shape and each candidate's fields, then probes each with a small JSON
+  request. Only candidates that pass the probe are written to the
+  `hindsight-free-models` ConfigMap; the router reloads it without a restart. The
+  current working models (`hungerg-free`, `beam-free`, `hy4-flash-free`) go first,
+  and other valid free models follow. `deepseek-v4.1-flash` on Go is not used: it
+  is included in the Go subscription but draws down the monthly allowance. The
+  free `deepseek-v4.1-flash-free` is probed; today it returns
+  `FreeUsageLimitError`, so it is left out until that changes.
 - The router sends `x-opencode-session`, which OpenCode Go requires. Hindsight
   does not need to know about the header because its base URL is local.
 - Vision support is mixed across the free set (`beam-free` is text-only), so
@@ -76,9 +77,9 @@ kubectl -n hindsight get configmap hindsight-free-models \
 The router reads the ConfigMap through the Kubernetes API, so it picks up a ConfigMap that did not
 exist when the pod started and later CronJob updates without a restart. The `hindsight`
 ServiceAccount can get only this ConfigMap. The router falls back to its built-in list when the
-ConfigMap or the API is unavailable, so a fresh install works before the first CronJob run. If no
-model passes the probe, the CronJob leaves the ConfigMap alone and the router keeps using the last
-good list. Force a refresh with:
+ConfigMap or the API is unavailable, so a fresh install works before the first CronJob run. If the
+catalogs return no free chat models, or none pass the probe, the CronJob leaves the ConfigMap alone
+and the router keeps the last validated list. Force a refresh with:
 
 ```
 kubectl -n hindsight create job --from=cronjob/free-models-sync free-models-sync-manual

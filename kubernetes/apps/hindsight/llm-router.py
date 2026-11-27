@@ -32,7 +32,6 @@ ATTEMPT_TIMEOUT = float(os.environ.get("ROUTER_ATTEMPT_TIMEOUT_SECONDS", "60"))
 CACHE_SECONDS = 300
 RETRY_SECONDS = 30
 GO_BASE = "https://opencode.ai/inference/go/openai/v1"
-OPENCODE_BASE = "https://opencode.ai/inference/openai/v1"
 SA_DIR = "/var/run/secrets/kubernetes.io/serviceaccount"
 
 # Used until the CronJob writes the ConfigMap. Keep this to models that are
@@ -41,10 +40,6 @@ DEFAULT_MODELS = [
     {"id": "hungerg-free", "base_url": GO_BASE},
     {"id": "beam-free", "base_url": GO_BASE},
     {"id": "hy4-flash-free", "base_url": GO_BASE},
-    # Free in the OpenCode catalog. It is listed here last because free-tier
-    # chat models are not guaranteed to be callable from outside OpenCode; the
-    # sync CronJob removes it whenever a probe fails.
-    {"id": "deepseek-v4.1-flash-free", "base_url": OPENCODE_BASE},
 ]
 
 log = logging.getLogger("llm-router")

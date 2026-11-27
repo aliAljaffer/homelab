@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Refresh Hindsight's free-model list from OpenCode's public catalogs.
 
-The router sidecar reads the ConfigMap this writes. Only models that are free
-in the catalog and answer a small JSON probe are kept, so a model that is
-listed but not callable (region blocks, free-tier limits, missing Go access)
-is dropped instead of becoming a dead first hop in Hindsight.
+The router sidecar reads the ConfigMap this writes. Every free chat model is a
+candidate, but only models that answer a small JSON probe are written, so the
+list cannot contain a model that is listed but not callable (region blocks,
+free-tier limits, missing Go access). The current working models are ordered
+first; other valid models follow.
 """
 
 import json
@@ -24,7 +25,6 @@ CATALOGS = (
     "https://opencode.ai/inference/v1/models",
 )
 MIN_OUTPUT_TOKENS = int(os.environ.get("MIN_OUTPUT_TOKENS", "32000"))
-MAX_MODELS = int(os.environ.get("MAX_MODELS", "6"))
 DRY_RUN = os.environ.get("DRY_RUN") == "1"
 PREFERRED = (
     "deepseek-v4.1-flash-free",
@@ -49,12 +49,18 @@ def fetch(url):
         },
     )
     with urllib.request.urlopen(request, timeout=30) as response:
-        return json.load(response)
+        payload = json.load(response)
+    if not isinstance(payload, dict) or not isinstance(payload.get("data"), list):
+        raise ValueError("unexpected model list shape")
+    return payload
 
 
 def free_chat_models(payload):
     for model in payload.get("data") or []:
-        if model.get("type") != "chat":
+        if not isinstance(model, dict) or model.get("type") != "chat":
+            continue
+        model_id = model.get("id")
+        if not isinstance(model_id, str) or not model_id.strip():
             continue
         cost = (model.get("cost") or {}).get("text") or {}
         source = (cost.get("input") or {}).get("price")
@@ -63,12 +69,12 @@ def free_chat_models(payload):
             continue
         api = (model.get("api") or {}).get("chat-completions") or {}
         base_url = api.get("base_url")
-        if not base_url:
+        if not isinstance(base_url, str) or not base_url.startswith(("http://", "https://")):
             continue
         limit = (model.get("limit") or {}).get("output")
-        if limit is not None and limit < MIN_OUTPUT_TOKENS:
+        if not isinstance(limit, int) or limit < MIN_OUTPUT_TOKENS:
             continue
-        yield {"id": model["id"], "base_url": base_url.rstrip("/")}
+        yield {"id": model_id, "base_url": base_url.rstrip("/")}
 
 
 def candidates():
@@ -227,9 +233,7 @@ def main():
             chosen.append(model)
             log(f"keep {model['id']}")
         else:
-            log(f"drop {model['id']}: {reason}")
-        if len(chosen) >= MAX_MODELS:
-            break
+            log(f"skip {model['id']}: {reason}")
 
     if not chosen:
         raise SystemExit("no free model passed the probe; leaving the ConfigMap unchanged")
