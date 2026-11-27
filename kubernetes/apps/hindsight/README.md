@@ -14,8 +14,32 @@ workstation CLI. All of them write to one memory bank.
   The API runs the background worker in-process. The dedicated worker StatefulSet is off.
 - `cnpg-cluster.yaml` is a single-instance `hindsight-db` on Longhorn. Hindsight connects to
   `hindsight-db-rw` as the `hindsight` owner. The `vector` extension is created at bootstrap.
-- LLM: the `claude-code` provider, which authenticates with a `claude setup-token` token.
-  The model is `claude-haiku-5-5`, because extraction runs on every turn.
+- LLM: Hindsight sends every call to `http://127.0.0.1:8899/v1`, a sidecar running
+  `llm-router.py`. The router replaces the fixed model name `free` with the first
+  free OpenCode model that answers and fails over on errors. It is a sidecar
+  because Hindsight already runs one pod and the router only sees Hindsight's
+  requests.
+- Free model list: `free-models-sync` runs every two days at 06:00 UTC. It reads
+  the Go and OpenCode catalogs at `https://opencode.ai/inference/.../v1/models`,
+  keeps only chat models whose input and output prices are zero, and probes each
+  with a small JSON request. The survivors are written to the
+  `hindsight-free-models` ConfigMap; the router reloads it without a restart.
+  Models listed as free but not callable from outside OpenCode are dropped by the
+  probe. `deepseek-v4.1-flash` on Go is not used: it is included in the Go
+  subscription but draws down the monthly allowance. The free
+  `deepseek-v4.1-flash-free` is probed and used if it becomes callable; today it
+  returns `FreeUsageLimitError` from the API.
+- The router sends `x-opencode-session`, which OpenCode Go requires. Hindsight
+  does not need to know about the header because its base URL is local.
+- Vision support is mixed across the free set (`beam-free` is text-only), so
+  `HINDSIGHT_API_LLM_VISION=false` refuses image attachments rather than risking
+  a text-only model.
+- `HINDSIGHT_API_RETAIN_MAX_COMPLETION_TOKENS=32000`: the free catalog includes
+  models with a 32k output cap, and a retain asks for the configured budget, so
+  32k avoids a 64k request against a 32k model. It is still well above the default
+  3000-token chunk.
+- The sidecar uses the same `hindsight-api` image as the API container. Bump both
+  image tags together when the chart version changes.
 - Retain policy: `HINDSIGHT_API_RETAIN_EXTRACTION_MODE=custom`. `HINDSIGHT_API_RETAIN_CUSTOM_INSTRUCTIONS`
   in the chart values is the allow and deny list for what becomes a memory. Edit it there.
   A bank-level override in the API takes precedence over it. The `ali` bank overrides only
@@ -37,6 +61,31 @@ The UI is on the tailnet as `hindsight-ui`. Log in with `HINDSIGHT_CP_ACCESS_KEY
 API with `HINDSIGHT_CP_DATAPLANE_API_KEY`, which has the same value as the tenant key.
 
 The source values for every secret are in `~/docs/hindsight/secrets.json` on the personal laptop.
+
+## Free model list
+
+The router reads `/models/models.json`, mounted from the `hindsight-free-models` ConfigMap. The
+ConfigMap is not in Git: the `free-models-sync` CronJob owns it, so an Argo sync cannot revert the
+last probe result. Inspect it with:
+
+```
+kubectl -n hindsight get configmap hindsight-free-models \
+  -o jsonpath='{.data.models\.json}' | jq
+```
+
+The router reads the ConfigMap through the Kubernetes API, so it picks up a ConfigMap that did not
+exist when the pod started and later CronJob updates without a restart. The `hindsight`
+ServiceAccount can get only this ConfigMap. The router falls back to its built-in list when the
+ConfigMap or the API is unavailable, so a fresh install works before the first CronJob run. If no
+model passes the probe, the CronJob leaves the ConfigMap alone and the router keeps using the last
+good list. Force a refresh with:
+
+```
+kubectl -n hindsight create job --from=cronjob/free-models-sync free-models-sync-manual
+```
+
+The CronJob reads `HINDSIGHT_API_LLM_API_KEY` from `hindsight-env`. Its ServiceAccount can create
+ConfigMaps in `hindsight` and get or patch only `hindsight-free-models`.
 
 ## Required Secrets
 
@@ -61,12 +110,13 @@ kubectl create secret generic hindsight-postgres \
 The chart injects every key in this secret as an environment variable. It also reads
 `postgres-password` to build the database URL.
 
-Run `claude setup-token` to mint a dedicated token for Hindsight. Do not reuse the `hermes` token.
+Mint a dedicated OpenCode Console API key for Hindsight. Do not reuse the `hermes` token. The API
+container, the router sidecar and the `free-models-sync` CronJob all read it from this secret.
 
 ```
 kubectl create secret generic hindsight-env \
   --from-literal=postgres-password=GENERATED_PASSWORD \
-  --from-literal=HINDSIGHT_API_LLM_API_KEY=SETUP_TOKEN \
+  --from-literal=HINDSIGHT_API_LLM_API_KEY=OPENCODE_API_KEY \
   --from-literal=HINDSIGHT_API_TENANT_API_KEY=TENANT_KEY \
   --from-literal=HINDSIGHT_CP_DATAPLANE_API_KEY=TENANT_KEY \
   --from-literal=HINDSIGHT_CP_ACCESS_KEY=UI_ACCESS_KEY \

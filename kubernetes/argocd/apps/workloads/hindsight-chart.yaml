@@ -30,9 +30,18 @@ spec:
           image:
             repository: harbor.alialjaffer.com/mirror/hindsight-api
           env:
-            HINDSIGHT_API_LLM_PROVIDER: claude-code
-            HINDSIGHT_API_LLM_MODEL: claude-haiku-5-5
-            # claude-code spawns one claude CLI process per call; the default of 32 OOMs the pod on a bulk retain.
+            HINDSIGHT_API_LLM_PROVIDER: openai
+            HINDSIGHT_API_LLM_BASE_URL: http://127.0.0.1:8899/v1
+            HINDSIGHT_API_LLM_MODEL: free
+            HINDSIGHT_API_LLM_VISION: "false"
+            HINDSIGHT_API_LLM_MAX_RETRIES: "1"
+            HINDSIGHT_API_LLM_TIMEOUT: "180"
+            # The free OpenCode catalog includes models with a 32k output cap;
+            # the default 64k is rejected when one of those serves a call.
+            HINDSIGHT_API_RETAIN_MAX_COMPLETION_TOKENS: "32000"
+            HINDSIGHT_API_RETAIN_BATCH_ENABLED: "false"
+            # Four concurrent calls keeps retain moving without piling up on
+            # the shared free-model rate limits.
             HINDSIGHT_API_LLM_MAX_CONCURRENT: "4"
             HINDSIGHT_API_TENANT_EXTENSION: hindsight_api.extensions.builtin.tenant:ApiKeyTenantExtension
             HINDSIGHT_API_RETAIN_EXTRACTION_MODE: custom
@@ -64,6 +73,66 @@ spec:
 
               Write each fact so it stands alone: name the system, the condition, and the action.
               Prefer "In Hermes, X requires Y because Z" over "The agent found that X failed".
+          extraContainers:
+            - name: free-models
+              image: harbor.alialjaffer.com/mirror/hindsight-api:1.3.0
+              imagePullPolicy: IfNotPresent
+              command:
+                - /app/api/.venv/bin/python
+                - /router/llm-router.py
+              env:
+                - name: HINDSIGHT_API_LLM_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: hindsight-env
+                      key: HINDSIGHT_API_LLM_API_KEY
+                - name: POD_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.namespace
+                - name: PORT
+                  value: "8899"
+                - name: LOG_LEVEL
+                  value: INFO
+                - name: PYTHONDONTWRITEBYTECODE
+                  value: "1"
+              ports:
+                - name: router
+                  containerPort: 8899
+              livenessProbe:
+                httpGet:
+                  path: /healthz
+                  port: router
+                periodSeconds: 20
+                failureThreshold: 3
+              readinessProbe:
+                httpGet:
+                  path: /healthz
+                  port: router
+                periodSeconds: 10
+                failureThreshold: 2
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 64Mi
+                limits:
+                  memory: 256Mi
+              securityContext:
+                runAsNonRoot: true
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+                seccompProfile:
+                  type: RuntimeDefault
+              volumeMounts:
+                - name: llm-router
+                  mountPath: /router
+                  readOnly: true
+          extraVolumes:
+            - name: llm-router
+              configMap:
+                name: hindsight-llm-router
           resources:
             requests:
               cpu: 250m

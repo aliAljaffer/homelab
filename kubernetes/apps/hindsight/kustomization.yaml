@@ -11,8 +11,19 @@ resources:
   - ingress-tailnet.yaml
   - memory-store-deploy-key.sealed.yaml
   - memory-store-sync-cronjob.yaml
+  - free-models-sync.yaml
 configMapGenerator:
   - name: memory-store-sync
     namespace: hindsight
     files:
       - memory-store-sync.py
+  - name: free-models-sync
+    namespace: hindsight
+    files:
+      - free-models-sync.py
+  - name: hindsight-llm-router
+    namespace: hindsight
+    files:
+      - llm-router.py
+    options:
+      disableNameSuffixHash: true
