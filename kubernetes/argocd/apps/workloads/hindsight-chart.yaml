@@ -40,6 +40,10 @@ spec:
             # the default 64k is rejected when one of those serves a call.
             HINDSIGHT_API_RETAIN_MAX_COMPLETION_TOKENS: "32000"
             HINDSIGHT_API_RETAIN_BATCH_ENABLED: "false"
+            # 8-memory consolidation calls time out on the free models; 4 is
+            # the size their own split path already finishes successfully.
+            HINDSIGHT_API_CONSOLIDATION_LLM_BATCH_SIZE: "4"
+            HINDSIGHT_API_WORKER_ID: hindsight-api
             # Four concurrent calls keeps retain moving without piling up on
             # the shared free-model rate limits.
             HINDSIGHT_API_LLM_MAX_CONCURRENT: "4"
