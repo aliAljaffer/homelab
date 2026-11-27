@@ -174,6 +174,30 @@ spec:
     networkPolicy:
       additionalEgress:
         - {}   # outbound ALLOW all
+  # Work around operator liveness defaults that kill this image mid-init and
+  # during >6s event-loop stalls: startup gates the 3 min s6 boot.
+  probes:
+    startup:
+      httpGet:
+        path: /health
+        port: gateway
+      periodSeconds: 5
+      timeoutSeconds: 5
+      failureThreshold: 36
+    liveness:
+      httpGet:
+        path: /health
+        port: gateway
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 4
+    readiness:
+      httpGet:
+        path: /health
+        port: gateway
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6
   storage:
     persistence:
       enabled: true
