@@ -29,6 +29,8 @@ spec:
             "k8s:io.kubernetes.pod.namespace": grooszy-dev
         - matchLabels:
             "k8s:io.kubernetes.pod.namespace": grooszy
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": oci-capacity-watcher
       toPorts:
         - ports:
             - port: "587"

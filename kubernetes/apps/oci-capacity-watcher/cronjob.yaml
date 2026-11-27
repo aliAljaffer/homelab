@@ -1,0 +1,100 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: oci-capacity-watcher
+  namespace: oci-capacity-watcher
+spec:
+  schedule: "* * * * *"
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 30
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      activeDeadlineSeconds: 180
+      ttlSecondsAfterFinished: 300
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: oci-capacity-watcher
+        spec:
+          restartPolicy: Never
+          serviceAccountName: oci-capacity-watcher
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            fsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: watcher
+              image: harbor.alialjaffer.com/mirror/oci-capacity-watcher@sha256:3a42fb9a075d5eaf1a5a2b6dea9f81e1599010dc068a4621bc29a353f0d63a4e
+              imagePullPolicy: IfNotPresent
+              command: ["python3", "/scripts/oci_retry.py"]
+              envFrom:
+                - configMapRef:
+                    name: oci-capacity-watcher-config
+              env:
+                - name: OCI_CONFIG_FILE
+                  value: /oci/config
+                - name: OCI_COMPARTMENT_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: oci-capacity-watcher
+                      key: compartment-id
+                - name: OCI_SSH_PUBLIC_KEY
+                  value: /keys/oci-machine.pub
+                - name: POD_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.namespace
+                - name: HOME
+                  value: /tmp
+                - name: PYTHONUNBUFFERED
+                  value: "1"
+                - name: PYTHONDONTWRITEBYTECODE
+                  value: "1"
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+                limits:
+                  memory: 256Mi
+              volumeMounts:
+                - name: oci
+                  mountPath: /oci
+                  readOnly: true
+                - name: script
+                  mountPath: /scripts
+                  readOnly: true
+                - name: ssh-key
+                  mountPath: /keys
+                  readOnly: true
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: oci
+              secret:
+                secretName: oci-capacity-watcher
+                defaultMode: 0440
+                items:
+                  - key: config
+                    path: config
+                  - key: oci_api_key.pem
+                    path: oci_api_key.pem
+            - name: script
+              configMap:
+                name: oci-capacity-watcher-script
+            - name: ssh-key
+              configMap:
+                name: oci-capacity-watcher-ssh-key
+            - name: tmp
+              emptyDir: {}

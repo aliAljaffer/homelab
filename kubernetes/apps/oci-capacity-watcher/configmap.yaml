@@ -1,0 +1,24 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oci-capacity-watcher-config
+  namespace: oci-capacity-watcher
+data:
+  OCI_REGION: me-riyadh-1
+  OCI_DISPLAY_NAME: a1-free-retry
+  OCI_OCPUS: "2"
+  OCI_MEMORY_GBS: "12"
+  OCI_BOOT_VOLUME_GBS: "100"
+  OCI_VCN_NAME: my-vcn
+  OCI_SUBNET_NAME: pub-subnet
+  OCI_AD: AD-1
+  OCI_SSH_USER: ubuntu
+  NOTIFY_TO: ahjfr@icloud.com
+  NOTIFY_FROM: homelab@alialjaffer.com
+  SMTP_HOST: smtp-relay.mail.svc.cluster.local
+  SMTP_PORT: "587"
+  OCI_PUBLIC_IP_WAIT_SECONDS: "90"
+  OCI_EXISTING_IP_WAIT_SECONDS: "15"
+  SELF_SUSPEND: "true"
+  CRONJOB_NAME: oci-capacity-watcher

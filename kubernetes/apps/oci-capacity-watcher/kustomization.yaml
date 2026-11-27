@@ -1,0 +1,18 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - rbac.yaml
+  - oci-capacity-watcher.sealed.yaml
+  - cronjob.yaml
+configMapGenerator:
+  - name: oci-capacity-watcher-script
+    namespace: oci-capacity-watcher
+    files:
+      - oci_retry.py
+  - name: oci-capacity-watcher-ssh-key
+    namespace: oci-capacity-watcher
+    files:
+      - oci-machine.pub

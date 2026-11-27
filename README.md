@@ -76,6 +76,7 @@ AMD Ryzen 7 7800X3D, 32GB RAM, RTX 4070 Ti Super, 3x 2TB NVMe, dual-boots Fedora
 - **vaultwarden** - self-hosted Bitwarden-compatible password manager (SQLite on Longhorn)
 - **pihole** - DNS + ad-blocking for the home network (Longhorn-persisted, Prometheus metrics via exporter sidecar)
 - **tuwaiq-tracker** - CronJob hitting an external API every 12 hours
+- **oci-capacity-watcher** - CronJob retrying the Always Free A1.Flex launch every minute, then emailing through the `mail` relay
 - **stremio** - self-hosted Stremio, GPU-transcoded. I'm running the `nightly` image because I needed a WASM build my LG TV's old webOS browser could actually run, and even then I ended up sideloading it onto the TV as a native app instead, the browser route just never worked out (see [docs/lg-tv-sideload.md](docs/lg-tv-sideload.md))
 - **nexotv** - Stremio addon I use for an IPTV catalog over Xtream Codes. ArgoCD-managed through a hand-written Application (it is excluded from the `workloads` ApplicationSet) and deployed into the `stremio` namespace
 - **umami** - self-hosted analytics (CNPG-backed Postgres)

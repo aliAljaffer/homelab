@@ -69,6 +69,7 @@ to `smtp-relay.mail.svc.cluster.local:587` (no credentials):
 | ArgoCD Notifications | `kubernetes/bootstrap/argocd/values.yaml` |
 | Keycloak | `kubernetes/infrastructure/keycloak/keycloak-realm-*.yaml` |
 | Vaultwarden | `kubernetes/apps/vaultwarden/vaultwarden-deployment.yaml` |
+| oci-capacity-watcher | `kubernetes/apps/oci-capacity-watcher/cronjob.yaml` |
 
 The senders' per-app `*-smtp-secret` SealedSecrets are now unused and can be
 pruned once this has been in place for a while.
