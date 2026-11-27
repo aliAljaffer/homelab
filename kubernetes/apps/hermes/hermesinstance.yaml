@@ -63,6 +63,11 @@ spec:
         secretKeyRef:
           name: hermes-dashboard
           key: secret
+    - name: HERMES_DASHBOARD_SESSION_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: hermes-dashboard
+          key: session_token
   # Seeds the writable config from the GitOps baseline once, then leaves it alone
   # so /model and `hermes config set` persist.
   initContainers:
