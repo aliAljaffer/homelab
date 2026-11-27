@@ -1,0 +1,21 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hermes-webapp
+  namespace: hermes
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - hermes-webapp
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: hermes
+                port:
+                  number: 5555

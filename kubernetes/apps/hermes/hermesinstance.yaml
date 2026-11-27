@@ -166,6 +166,8 @@ spec:
           port: 8443
         - name: dashboard
           port: 9119
+        - name: webapp
+          port: 5555
   gateways:
     telegram:
       enabled: true
