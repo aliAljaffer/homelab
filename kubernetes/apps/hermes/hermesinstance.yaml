@@ -39,6 +39,10 @@ spec:
       value: /opt/data/hermes
     - name: PYTHONPATH
       value: /opt/data/.local/lib/hermes-extra
+    # The SSH terminal backends write on the laptops; the pod's default /opt/data
+    # fence blocks write_file and patch there.
+    - name: HERMES_WRITE_SAFE_ROOT
+      value: "/opt/data:/Users/h:/Users/alialjaffer"
     # Desktop's remote backend: a dashboard process serving /api/status and /api/ws.
     - name: HERMES_DASHBOARD
       value: "1"
