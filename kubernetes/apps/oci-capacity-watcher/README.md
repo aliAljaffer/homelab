@@ -1,6 +1,6 @@
 # oci-capacity-watcher
 
-A one-minute CronJob that keeps trying to launch the Oracle Always Free
+A two-minute CronJob that keeps trying to launch the Oracle Always Free
 `VM.Standard.A1.Flex` instance in Riyadh AD-1 until capacity appears, then
 emails once through the `mail` namespace SMTP relay.
 
@@ -88,5 +88,10 @@ The `smtp-relay` CiliumNetworkPolicy allows ingress from this namespace on port
 587. The relay itself is in the `mail` namespace and needs no credentials from
 inside the cluster.
 
-The job logs and exits quietly when OCI returns `Out of host capacity`; it does
-not send failure email, so a long wait produces no inbox noise.
+OCI throttles `LaunchInstance` to roughly one request every two minutes per
+tenant, so the schedule is deliberately `*/2`. A `429 TooManyRequests` is logged
+and retried on the next tick.
+
+The job logs and exits quietly when OCI returns `Out of host capacity` or a
+throttle; it does not send failure email, so a long wait produces no inbox
+noise.

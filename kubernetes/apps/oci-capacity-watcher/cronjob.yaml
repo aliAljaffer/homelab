@@ -5,7 +5,7 @@ metadata:
   name: oci-capacity-watcher
   namespace: oci-capacity-watcher
 spec:
-  schedule: "* * * * *"
+  schedule: "*/2 * * * *"
   concurrencyPolicy: Forbid
   startingDeadlineSeconds: 30
   successfulJobsHistoryLimit: 1
