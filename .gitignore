@@ -35,3 +35,6 @@ homelab.wt/
 # Agent skills installed from upstream repos
 /.agents/
 /skills-lock.json
+
+__pycache__/
+*.pyc
