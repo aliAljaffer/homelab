@@ -28,6 +28,11 @@ spec:
       namespace: argocd
     spec:
       project: workloads
+      ignoreDifferences:
+        - group: batch
+          kind: CronJob
+          jsonPointers:
+            - /spec/suspend
       source:
         repoURL: git@github.com:aliAljaffer/homelab.git
         targetRevision: main

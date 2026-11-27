@@ -35,7 +35,9 @@ email cannot create a second instance.
 
 After the alert is sent, the job patches its own CronJob to `suspend: true`
 using the `oci-capacity-watcher` ServiceAccount. The Role only allows `patch`
-on this one CronJob. To re-arm after terminating the instance:
+on this one CronJob. The `workloads` ApplicationSet ignores
+`CronJob.spec.suspend`, so ArgoCD self-heal does not undo the suspension. To
+re-arm after terminating the instance:
 
 ```bash
 kubectl -n oci-capacity-watcher patch cronjob oci-capacity-watcher \
